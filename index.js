@@ -200,3 +200,148 @@ Maybe.fromValidation = (Va) =>
     }
     return Maybe.fromNullable(Va);
   };
+const Result = {
+  "@@type": "Result",
+  "@@implements": ["of", "map", "ap", "fold", "flatMap", "merge"],
+  of: (b) => Ok(b),
+};
+
+// Result Error/Ok wrapper
+export const Error = (Result.Error = (a) =>
+  Object.assign(
+    {
+      [Symbol.for("validation")]: () => Failure([a]),
+      isOk: () => false,
+      isError: () => true,
+      map: () => Error(a),
+      flatMap: () => Error(a),
+      ap: () => Error(a),
+      fold: () => Error(a),
+      get: () => errorWith("Unable to get from a Result.Error"),
+      merge: () => errorWith("Unable to merge from a Result.Error"),
+      toValidation: () => Failure(a),
+      getOrElse: (defaultValue) => defaultValue,
+      getOrElseThrow: () => {
+        throw new Error(a);
+      },
+      orElseThrow: () => {
+        throw new Error(a);
+      },
+      toString: () => `Result#Error (${a})`,
+      toJSON: () => ({
+        type: "Result#Error",
+        value: a,
+      }),
+    },
+    Result,
+  ));
+export const Ok = (Result.Ok = (b) =>
+  Object.assign(
+    {
+      [Symbol.for("validation")]: () => Success(b),
+      isOk: () => true,
+      isError: () => false,
+      fold: (fn = identity) => fn(b),
+      map: (fn) => Result.fromNullable(fn(b)),
+      flatMap: (fn) => Result.fromNullable(fn(b).merge()),
+      ap: (Eb) =>
+        Eb.isError() ? Eb : isFunction(b)
+          ? Result.of(
+            isFunction(Eb.merge()) ? Eb.merge().call(Eb, b) : b(Eb.merge()),
+          )
+          : Result.of(Eb.merge().call(Eb, b)),
+      get: () => b,
+      getOrElse: (_) => b,
+      getOrElseThrow: () => b,
+      orElseThrow: () => Ok(b),
+      merge: () => b,
+      toValidation: () => Success(b),
+      toString: () => `Result#Ok (${b})`,
+      toJSON: () => ({
+        type: "Result#Ok",
+        value: b,
+      }),
+    },
+    Result,
+  ));
+
+Result.fromNullable = (
+  a,
+  error = "Null argument provided",
+) => (a != null ? Ok(a) : Error(error));
+Result.fromEmpty = (a) =>
+  Result.fromNullable(a).map((x) => (x.length === 0 ? null : x));
+Result.fromValidation = (Va) =>
+  () => {
+    if (Va["@@type"] === "Validation") {
+      if (Va.isSuccess()) {
+        return Ok(Va.merge());
+      }
+      return Error(Va.merge());
+    }
+    return Result.fromNullable(Va);
+  };
+
+// Object functions
+const detectCollision = (...descriptors) =>
+  descriptors
+    .flatMap(Object.keys)
+    .reduce(sortReducer, [])
+    .reduce(collisionReducer, [])
+    .forEach((c) => console.log(`[WARN] Collision found: ${c}`));
+const sortReducer = (accumulator, value) => {
+  const nextIndex = accumulator.findIndex((i) => value < i);
+  const index = nextIndex > -1 ? nextIndex : accumulator.length;
+  accumulator.splice(index, 0, value);
+  return accumulator;
+};
+const collisionReducer = (accumulator, value, index, arr) =>
+  value === arr[index + 1] ? [...accumulator, value] : accumulator;
+const isDescriptor = (obj) => obj && (obj["state"] || obj["methods"]);
+
+// extend Object
+if (typeof Object.impl !== "function") {
+  Object.defineProperty(Object, "impl", {
+    value: (...mixins) =>
+      (target) => {
+        if (!Object.isExtensible(target) || Object.isSealed(target)) {
+          throw new TypeError(
+            "Unable to concatenate mixins into base object. Object is either not extensible or has been sealed",
+          );
+        }
+        Object.assign(target.prototype, ...mixins);
+        return target;
+      },
+    enumerable: false,
+    writable: false,
+    configurable: false,
+  });
+}
+if (typeof Object.mixin !== "function") {
+  Object.defineProperty(Object, "mixin", {
+    value: function concatExtend(descriptor, ...mixins) {
+      let base = Object(descriptor);
+      if (isDescriptor(descriptor)) {
+        base = { ...base.state, ...base.methods, ...base.interop };
+      }
+      detectCollision(base, ...mixins);
+      if (!Object.isExtensible(base) || Object.isSealed(base)) {
+        throw new TypeError(
+          "Unable to concatenate mixins into base object. Object is either not extensible or has been sealed",
+        );
+      }
+      return Object.assign({ ...base }, ...mixins);
+    },
+    enumerable: false,
+    writable: false,
+    configurable: false,
+  });
+}
+export const deepFreeze = (obj) => {
+  if (!Object.isFrozen(obj)) {
+    Object.keys(obj).forEach((name) => deepFreeze(obj[name]));
+    Object.freeze(obj);
+  }
+  return obj;
+};
+Object.deepFreeze = Object.deepFreeze || deepFreeze;
