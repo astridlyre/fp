@@ -65,6 +65,9 @@ export const divide = curry((x, y) => x / y);
 export const divideRight = curry((x, y) => y / x);
 export const every = curry((f, M) => M.every(f));
 export const some = curry((f, M) => M.some(f));
+export const sum = (...args) => args.reduce((x, y) => x + y, 0);
+export const toNPlaces = (n) =>
+  (x) => Math.round(x * (Math.pow(10, n))) / Math.pow(10, n);
 export const range = (start, end, step = start < end ? 1 : -1) => {
   let index = -1;
   let length = Math.max(Math.ceil((end - start) / (step || 1)), 0);
