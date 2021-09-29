@@ -2,6 +2,14 @@
  * My lil functional programming collection
  */
 export const identity = (x) => x;
+const isTypeOf = (a) => (b) => typeof b === a;
+export const isNumber = isTypeOf("number");
+export const isBoolean = isTypeOf("boolean");
+export const isNull = (x) => x === null;
+export const isString = isTypeOf("string");
+export const isObject = isTypeOf("object");
+export const isArray = (a) => Array.isArray(a);
+export const isInstanceOf = (a) => (b) => b instanceof a;
 export const isFunction = (f) =>
   f && typeof f === "function" &&
   Object.prototype.toString.call(f) === "[object Function]";
@@ -14,7 +22,20 @@ export const curry = (fn) =>
       const args = [...args1, ...args2];
       return args.length >= fn.length ? fn(...args) : curry(fn)(...args);
     };
+export const apply = (f) => (x) => f(x);
+export const thrush = (x) => (f) => f(x);
+export const constant = (a) => () => a;
+export const flip = (f) => (a) => (b) => f(b)(a);
+export const arity = (fn, n) => (...args) => fn(...args.slice(0, n));
+export const urnary = (fn) => arity(fn, 1);
+export const binary = (fn) => arity(fn, 2);
+export const ternary = (fn) => arity(fn, 3);
+export const demethodize = Function.prototype.bind.bind(
+  Function.prototype.call,
+);
+export const append = (a, b) => a.concat(b);
 export const not = curry((f, a) => !f(a));
+export const invert = curry((f, a) => -f(a));
 export const flat = (M) => M.flat();
 export const prop = curry((name, a) =>
   a[name] && isFunction(a[name]) ? a[name].call(a) : a[name]
@@ -52,6 +73,33 @@ export const range = (start, end, step = start < end ? 1 : -1) => {
   }
   return result;
 };
+export function once(fn) {
+  let done = false;
+  let result = null;
+  return (...args) => {
+    if (!done) {
+      done = true;
+      result = fn(...args);
+    }
+    return result;
+  };
+}
+export function memoize(fn) {
+  const cache = Object.create(null);
+  const toKey = (key) => JSON.stringify(key);
+  const isPrimitive = (x) =>
+    typeof x === "number" || typeof x === "string" || typeof x === "boolean";
+  if (fn.length === 1) {
+    return (arg) => {
+      const key = isPrimitive(arg) ? arg : toKey(arg);
+      return key in cache ? cache[key] : (cache[key] = fn(arg));
+    };
+  }
+  return (...args) => {
+    const key = toKey(args);
+    return key in cache ? cache[key] : (cache[key] = fn(...args));
+  };
+}
 function isError(e) {
   return e && e.constructor.name.includes("Error");
 }
