@@ -1,7 +1,37 @@
 /*
  * My lil functional programming collection
  */
+
+// identity x returns x
 export const identity = (x) => x;
+
+// constant () => a
+export const constant = (a) => () => a;
+
+// fip order of arguments
+export const flip = (f) => (a) => (b) => f(b)(a);
+export const flip2 = (f) => (a, b) => f(b, a);
+export const flip3 = (f) => (a, b, c) => f(b, c, a);
+
+// arity functions
+export const arity = (fn, n) => (...args) => fn(...args.slice(0, n));
+export const unary = (fn) => arity(fn, 1);
+export const binary = (fn) => arity(fn, 2);
+export const ternary = (fn) => arity(fn, 3);
+
+// append
+export const append = (a, b) => a.concat(b);
+
+// not and invert
+export const not = curry((f, a) => !f(a));
+export const invert = curry((f, a) => -f(a));
+
+// de-methodize
+export const demethodize = Function.prototype.bind.bind(
+  Function.prototype.call,
+);
+
+// typeof functions
 const isTypeOf = (a) => (b) => typeof b === a;
 export const isNumber = isTypeOf("number");
 export const isBoolean = isTypeOf("boolean");
@@ -13,48 +43,80 @@ export const isInstanceOf = (a) => (b) => b instanceof a;
 export const isFunction = (f) =>
   f && typeof f === "function" &&
   Object.prototype.toString.call(f) === "[object Function]";
+export const isSet = (s) => s instanceof Set;
+export const isMap = (m) => m instanceof Map;
+
+// Len gets the length argument a
+export const len = (a) =>
+  isString(a) || isArray(a) || isFunction(a)
+    ? a.length
+    : isSet(a) || isMap(a)
+    ? a.size
+    : isObject(a)
+    ? a.entries().length
+    : null;
+
+// Compose and pipe
 export const compose2 = (f, g) => (...args) => f(g(...args));
 export const compose = (...fns) => fns.reduce(compose2);
 export const pipe = (...fns) => fns.reduceRight(compose2);
+
+// Autocurry
 export const curry = (fn) =>
   (...args1) =>
     args1.length === fn.length ? fn(...args1) : (...args2) => {
       const args = [...args1, ...args2];
       return args.length >= fn.length ? fn(...args) : curry(fn)(...args);
     };
-export const apply = (f) => (x) => f(x);
-export const thrush = (x) => (f) => f(x);
-export const constant = (a) => () => a;
-export const flip = (f) => (a) => (b) => f(b)(a);
-export const flip2 = (f) => (a, b) => f(b, a);
-export const flip3 = (f) => (a, b, c) => f(b, c, a);
-export const arity = (fn, n) => (...args) => fn(...args.slice(0, n));
-export const unary = (fn) => arity(fn, 1);
-export const binary = (fn) => arity(fn, 2);
-export const ternary = (fn) => arity(fn, 3);
-export const demethodize = Function.prototype.bind.bind(
-  Function.prototype.call,
-);
-export const append = (a, b) => a.concat(b);
-export const not = curry((f, a) => !f(a));
-export const invert = curry((f, a) => -f(a));
-export const flat = (M) => M.flat();
+
+// run a side effect with tap
+export const tap = curry((fn, x) => (fn(x), x));
+
+// Logging
+export const tee = tap(console.log.bind(console));
+export const log = (fn, logger = console.log.bind(console)) =>
+  (...args) => {
+    logger(`Entering function ${fn.name}(${args})`);
+    const result = fn(...args);
+    logger(`Exiting function ${fn.name} -> ${result}`);
+    return result;
+  };
+
+// creates a Transducer function
+export const makeReducer = (arr, fns, reducer, initial) =>
+  arr.reduce(compose(...fns)(reducer), initial);
+
+// Transducers
+export const mapTR = (fn) => (reducer) => (acc, val) => reducer(acc, fn(val));
+export const filterTR = (fn) =>
+  (reducer) => (acc, val) => fn(val) ? reducer(acc, val) : acc;
+
+// prop & props get object properties
 export const prop = curry((name, a) =>
   a[name] && isFunction(a[name]) ? a[name].call(a) : a[name]
 );
 export const props = curry((names, a) => names.map((n) => prop(n, a)));
+
+// map, filter, reduce
 export const map = curry((f, M) => M.map(f));
 export const mapRight = curry((f, M) =>
   M.reduceRight((acc, v) => acc.concat(f(v)), [])
 );
+export const filter = curry((p, M) => M.filter(p));
 export const reduce = curry((acc, start, M) => M.reduce(acc, start));
 export const reduceRight = curry((acc, start, M) => M.reduceRight(acc, start));
-export const filter = curry((p, M) => M.filter(p));
+
+// compose monads
 export const composeM2 = (f, g) => (...args) => g(...args).flatMap(f);
 export const composeM = (...Ms) => Ms.reduce(composeM2);
+
+// flat
+export const flat = (M) => M.flat();
 export const flatMap = curry((f, M) => M.flatMap(f));
 export const fold = curry((f, M) => M.fold(f));
 export const getOrElseThrow = curry((e, M) => M.getOrElseThrow(e));
+
+// math functions
 export const add = curry((x, y) => x + y);
 export const addRight = curry((x, y) => y + x);
 export const subtract = curry((x, y) => x - y);
@@ -63,11 +125,16 @@ export const multipy = curry((x, y) => x * y);
 export const multipyRight = curry((x, y) => y * x);
 export const divide = curry((x, y) => x / y);
 export const divideRight = curry((x, y) => y / x);
+export const roundTo = (n) =>
+  (x) => Math.round(x * (Math.pow(10, n))) / Math.pow(10, n);
+
+// array functions
 export const every = curry((f, M) => M.every(f));
 export const some = curry((f, M) => M.some(f));
 export const sum = (...args) => args.reduce((x, y) => x + y, 0);
-export const toNPlaces = (n) =>
-  (x) => Math.round(x * (Math.pow(10, n))) / Math.pow(10, n);
+export const average = (ns) => sum(...ns) / ns.length;
+
+// range
 export const range = (start, end, step = start < end ? 1 : -1) => {
   let index = -1;
   let length = Math.max(Math.ceil((end - start) / (step || 1)), 0);
@@ -78,30 +145,25 @@ export const range = (start, end, step = start < end ? 1 : -1) => {
   }
   return result;
 };
+
+// once only runs a function once, then returns cached result
 export function once(fn) {
   let done = false;
   let result = null;
-  return (...args) => {
-    if (!done) {
-      done = true;
-      result = fn(...args);
-    }
-    return result;
-  };
+  return (...args) =>
+    !done ? (done = true, result = fn(...args), result) : result;
 }
+
+// memoize a function
 export function memoize(fn) {
   const cache = Object.create(null);
   const toKey = (key) => JSON.stringify(key);
   const isPrimitive = (x) =>
     typeof x === "number" || typeof x === "string" || typeof x === "boolean";
-  if (fn.length === 1) {
-    return (arg) => {
-      const key = isPrimitive(arg) ? arg : toKey(arg);
-      return key in cache ? cache[key] : (cache[key] = fn(arg));
-    };
-  }
   return (...args) => {
-    const key = toKey(args);
+    const key = args.length === 1 && isPrimitive(args[0])
+      ? args[0]
+      : toKey(args);
     return key in cache ? cache[key] : (cache[key] = fn(...args));
   };
 }
