@@ -26,8 +26,10 @@ export const apply = (f) => (x) => f(x);
 export const thrush = (x) => (f) => f(x);
 export const constant = (a) => () => a;
 export const flip = (f) => (a) => (b) => f(b)(a);
+export const flip2 = (f) => (a, b) => f(b, a);
+export const flip3 = (f) => (a, b, c) => f(b, c, a);
 export const arity = (fn, n) => (...args) => fn(...args.slice(0, n));
-export const urnary = (fn) => arity(fn, 1);
+export const unary = (fn) => arity(fn, 1);
 export const binary = (fn) => arity(fn, 2);
 export const ternary = (fn) => arity(fn, 3);
 export const demethodize = Function.prototype.bind.bind(

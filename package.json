@@ -1,0 +1,22 @@
+{
+  "name": "fp",
+  "version": "1.0.0",
+  "description": "Just a few functions I don't like re-writing.",
+  "main": "index.js",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/astridlyre/fp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/astridlyre/fp/issues"
+  },
+  "homepage": "https://github.com/astridlyre/fp#readme"
+}
