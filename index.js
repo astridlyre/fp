@@ -95,6 +95,9 @@ export const filterTR = (fn) =>
 export const prop = curry((name, a) =>
   a && (name in a && isFunction(a[name]) ? a[name].call(a) : a[name])
 );
+export const set = curry((name, value, a) =>
+  a && name in a && (a[name] = value)
+);
 export const props = curry((names, a) => names.map((n) => prop(n, a)));
 
 // map, filter, reduce
@@ -244,10 +247,20 @@ if (typeof Object.mixin !== "function") {
   });
 }
 export const deepFreeze = (obj) => {
-  if (!Object.isFrozen(obj)) {
-    Object.keys(obj).forEach((name) => deepFreeze(obj[name]));
+  if (obj && typeof obj === "object" && !Object.isFrozen(obj)) {
+    Object.getOwnPropertyNames(obj).forEach((name) => deepFreeze(obj[name]));
     Object.freeze(obj);
   }
   return obj;
+};
+export const deepCopy = (obj) => {
+  let aux = obj;
+  if (obj && typeof obj === "object") {
+    aux = new obj.constructor();
+    Object.getOwnPropertyNames(obj).forEach(
+      (prop) => (aux[prop] = deepCopy(obj[prop])),
+    );
+  }
+  return aux;
 };
 Object.deepFreeze = Object.deepFreeze || deepFreeze;
