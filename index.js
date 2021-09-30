@@ -139,6 +139,12 @@ export const every = curry((f, M) => M.every(f));
 export const some = curry((f, M) => M.some(f));
 export const sum = (...args) => args.reduce((x, y) => x + y, 0);
 export const average = (ns) => sum(...ns) / ns.length;
+export const partition = (arr, a, b) =>
+  arr.reduce(
+    (acc, cv) =>
+      a(cv) ? (acc[0].push(cv), acc) : b(cv) ? (acc[1].push(cv), acc) : acc,
+    [[], []],
+  );
 
 export const tryCatch = curry((f, g) => {
   try {
