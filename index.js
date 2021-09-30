@@ -22,10 +22,6 @@ export const ternary = (fn) => arity(fn, 3);
 // append
 export const append = (a, b) => a.concat(b);
 
-// not and invert
-export const not = curry((f, a) => !f(a));
-export const invert = curry((f, a) => -f(a));
-
 // de-methodize
 export const demethodize = Function.prototype.bind.bind(
   Function.prototype.call,
@@ -72,13 +68,17 @@ export const curry = (fn) =>
 // run a side effect with tap
 export const tap = curry((fn, x) => (fn(x), x));
 
+// not and invert
+export const not = curry((f, a) => !f(a));
+export const invert = curry((f, a) => -f(a));
+
 // Logging
 export const tee = tap(console.log.bind(console));
 export const log = (fn, logger = console.log.bind(console)) =>
   (...args) => {
-    logger(`Entering function ${fn.name}(${args})`);
+    logger(`Entering function ${fn.name}(${JSON.stringify(args, null, 2)})`);
     const result = fn(...args);
-    logger(`Exiting function ${fn.name} -> ${result}`);
+    logger(`Exiting function ${fn.name} -> ${JSON.stringify(result, null, 2)}`);
     return result;
   };
 
@@ -93,7 +93,7 @@ export const filterTR = (fn) =>
 
 // prop & props get object properties
 export const prop = curry((name, a) =>
-  a[name] && isFunction(a[name]) ? a[name].call(a) : a[name]
+  a && (name in a && isFunction(a[name]) ? a[name].call(a) : a[name])
 );
 export const props = curry((names, a) => names.map((n) => prop(n, a)));
 
@@ -127,12 +127,26 @@ export const divide = curry((x, y) => x / y);
 export const divideRight = curry((x, y) => y / x);
 export const roundTo = (n) =>
   (x) => Math.round(x * (Math.pow(10, n))) / Math.pow(10, n);
+export const pow = (base, power) =>
+  power === 0
+    ? 1
+    : power & 1
+    ? base * pow(base, power - 1)
+    : pow(base * base, power >> 1);
 
 // array functions
 export const every = curry((f, M) => M.every(f));
 export const some = curry((f, M) => M.some(f));
 export const sum = (...args) => args.reduce((x, y) => x + y, 0);
 export const average = (ns) => sum(...ns) / ns.length;
+
+export const tryCatch = curry((f, g) => {
+  try {
+    return f();
+  } catch (e) {
+    return g(e);
+  }
+});
 
 // range
 export const range = (start, end, step = start < end ? 1 : -1) => {
