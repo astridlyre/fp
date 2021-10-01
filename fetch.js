@@ -14,11 +14,13 @@ export function createClient(storageKey, apiEndpoint) {
     throw new TypeError("Response is not JSON");
   }
 
-  async function client(endpoint, method, customConfig = {}) {
+  function client(endpoint, method, customConfig = {}) {
+    const controller = new AbortController();
     const token = localStorage.getItem(storageKey);
     const headers = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
     const config = {
+      signal: controller.signal,
       method,
       ...customConfig,
       headers: {
@@ -26,9 +28,12 @@ export function createClient(storageKey, apiEndpoint) {
         ...customConfig.headers,
       },
     };
-    return await fetch(`${apiEndpoint}/${endpoint}`, config)
-      .then(isError)
-      .then(isJson);
+    return {
+      data: fetch(`${apiEndpoint}/${endpoint}`, config)
+        .then(isError)
+        .then(isJson),
+      abort: controller.abort.bind(controller),
+    };
   }
 
   return {
