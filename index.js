@@ -83,9 +83,9 @@ export const log = (fn, logger = console.log.bind(console)) =>
   };
 
 // creates a Transducer function
-export const makeReducer = (arr, fns, reducer, initial) =>
-  arr.reduce(compose(...fns)(reducer), initial);
-
+export const transduce = curry((arr, fns, reducer, initial) =>
+  arr.reduce(compose(...fns)(reducer), initial)
+);
 // Transducers
 export const mapTR = (fn) => (reducer) => (acc, val) => reducer(acc, fn(val));
 export const filterTR = (fn) =>
@@ -93,10 +93,13 @@ export const filterTR = (fn) =>
 
 // prop & props get object properties
 export const prop = curry((name, a) =>
-  a && (name in a && isFunction(a[name]) ? a[name].call(a) : a[name])
+  a && (name in a ? isFunction(a[name]) ? a[name].call(a) : a[name] : undefined)
 );
-export const set = curry((name, value, a) =>
-  a && name in a && (a[name] = value)
+export const setPropMut = curry((name, value, a) =>
+  a && name in a ? (a[name] = value, a) : a
+);
+export const setProp = curry((name, value, a) =>
+  a && name in a ? { ...a, [name]: value } : { ...a }
 );
 export const props = curry((names, a) => names.map((n) => prop(n, a)));
 
@@ -190,6 +193,40 @@ export function memoize(fn) {
     return key in cache ? cache[key] : (cache[key] = fn(...args));
   };
 }
+
+// Lenses
+class Constant {
+  #value;
+  constructor(v) {
+    this.#value = v;
+    this.map = () => this;
+  }
+  get value() {
+    return this.#value;
+  }
+}
+class Variable {
+  #value;
+  constructor(v) {
+    this.#value = v;
+    this.map = (fn) => new Variable(fn(v));
+  }
+  get value() {
+    return this.#value;
+  }
+}
+export const lens = (getter, setter) =>
+  (fn) => (obj) => fn(getter(obj)).map((value) => setter(value, obj));
+export const view = curry((lensAttr, obj) =>
+  lensAttr((x) => new Constant(x))(obj).value
+);
+export const set = curry((lensAttr, newVal, obj) =>
+  lensAttr(() => new Variable(newVal))(obj).value
+);
+export const over = curry((lensAttr, mapfn, obj) =>
+  lensAttr((x) => new Variable(mapfn(x)))(obj).value
+);
+export const lensProp = (p) => lens(prop(p), setProp(p));
 
 // Object functions
 const detectCollision = (...descriptors) =>
