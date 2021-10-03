@@ -14,17 +14,27 @@ export const flip2 = (f) => (a, b) => f(b, a);
 export const flip3 = (f) => (a, b, c) => f(b, c, a);
 
 // arity functions
-export const arity = (fn, n) => (...args) => fn(...args.slice(0, n));
+export const arity =
+  (fn, n) =>
+  (...args) =>
+    fn(...args.slice(0, n));
 export const unary = (fn) => arity(fn, 1);
 export const binary = (fn) => arity(fn, 2);
 export const ternary = (fn) => arity(fn, 3);
 
-// append
-export const append = (a, b) => a.concat(b);
+// partial application
+export const callFirst =
+  (fn, larg) =>
+  (...args) =>
+    fn(larg, ...args);
+export const callLast =
+  (fn, rarg) =>
+  (...args) =>
+    fn(...args, rarg);
 
 // de-methodize
 export const demethodize = Function.prototype.bind.bind(
-  Function.prototype.call,
+  Function.prototype.call
 );
 
 // typeof functions
@@ -37,7 +47,8 @@ export const isObject = isTypeOf("object");
 export const isArray = (a) => Array.isArray(a);
 export const isInstanceOf = (a) => (b) => b instanceof a;
 export const isFunction = (f) =>
-  f && typeof f === "function" &&
+  f &&
+  typeof f === "function" &&
   Object.prototype.toString.call(f) === "[object Function]";
 export const isSet = (s) => s instanceof Set;
 export const isMap = (m) => m instanceof Map;
@@ -50,20 +61,26 @@ export const len = (a) =>
     ? a.size
     : isObject(a)
     ? a.entries().length
-    : null;
+    : void 0;
 
 // Compose and pipe
-export const compose2 = (f, g) => (...args) => f(g(...args));
+export const compose2 =
+  (f, g) =>
+  (...args) =>
+    f(g(...args));
 export const compose = (...fns) => fns.reduce(compose2);
 export const pipe = (...fns) => fns.reduceRight(compose2);
 
 // Autocurry
-export const curry = (fn) =>
+export const curry =
+  (fn) =>
   (...args1) =>
-    args1.length === fn.length ? fn(...args1) : (...args2) => {
-      const args = [...args1, ...args2];
-      return args.length >= fn.length ? fn(...args) : curry(fn)(...args);
-    };
+    args1.length === fn.length
+      ? fn(...args1)
+      : (...args2) => {
+          const args = [...args1, ...args2];
+          return args.length >= fn.length ? fn(...args) : curry(fn)(...args);
+        };
 
 // run a side effect with tap
 export const tap = curry((fn, x) => (fn(x), x));
@@ -74,7 +91,8 @@ export const invert = curry((f, a) => -f(a));
 
 // Logging
 export const tee = tap(console.log.bind(console));
-export const log = (fn, logger = console.log.bind(console)) =>
+export const log =
+  (fn, logger = console.log.bind(console)) =>
   (...args) => {
     logger(`Entering function ${fn.name}(${JSON.stringify(args, null, 2)})`);
     const result = fn(...args);
@@ -88,15 +106,17 @@ export const transduce = curry((arr, fns, reducer, initial) =>
 );
 // Transducers
 export const mapTR = (fn) => (reducer) => (acc, val) => reducer(acc, fn(val));
-export const filterTR = (fn) =>
-  (reducer) => (acc, val) => fn(val) ? reducer(acc, val) : acc;
+export const filterTR = (fn) => (reducer) => (acc, val) =>
+  fn(val) ? reducer(acc, val) : acc;
 
 // prop & props get object properties
-export const prop = curry((name, a) =>
-  a && (name in a ? isFunction(a[name]) ? a[name].call(a) : a[name] : undefined)
+export const prop = curry(
+  (name, a) =>
+    a &&
+    (name in a ? (isFunction(a[name]) ? a[name].call(a) : a[name]) : void 0)
 );
-export const setPropMut = curry((name, value, a) =>
-  a && name in a ? (a[name] = value, a) : a
+export const setPropM = curry((name, value, a) =>
+  a && name in a ? ((a[name] = value), a) : a
 );
 export const setProp = curry((name, value, a) =>
   a && name in a ? { ...a, [name]: value } : { ...a }
@@ -105,15 +125,15 @@ export const props = curry((names, a) => names.map((n) => prop(n, a)));
 
 // map, filter, reduce
 export const map = curry((f, M) => M.map(f));
-export const mapRight = curry((f, M) =>
-  M.reduceRight((acc, v) => acc.concat(f(v)), [])
-);
 export const filter = curry((p, M) => M.filter(p));
 export const reduce = curry((acc, start, M) => M.reduce(acc, start));
 export const reduceRight = curry((acc, start, M) => M.reduceRight(acc, start));
 
 // compose monads
-export const composeM2 = (f, g) => (...args) => g(...args).flatMap(f);
+export const composeM2 =
+  (f, g) =>
+  (...args) =>
+    g(...args).flatMap(f);
 export const composeM = (...Ms) => Ms.reduce(composeM2);
 
 // flat
@@ -131,8 +151,8 @@ export const multipy = curry((x, y) => x * y);
 export const multipyRight = curry((x, y) => y * x);
 export const divide = curry((x, y) => x / y);
 export const divideRight = curry((x, y) => y / x);
-export const roundTo = (n) =>
-  (x) => Math.round(x * (Math.pow(10, n))) / Math.pow(10, n);
+export const roundTo = (n) => (x) =>
+  Math.round(x * Math.pow(10, n)) / Math.pow(10, n);
 export const pow = (base, power) =>
   power === 0
     ? 1
@@ -149,8 +169,12 @@ export const partition = (arr, a, b) =>
   arr.reduce(
     (acc, cv) =>
       a(cv) ? (acc[0].push(cv), acc) : b(cv) ? (acc[1].push(cv), acc) : acc,
-    [[], []],
+    [[], []]
   );
+export const shift = (arr) => [arr[0], arr.slice(1)];
+export const pop = (arr) => [arr.slice(0, -1), arr[arr.length - 1]];
+export const unshift = curry((arr, v) => [v].concat(arr));
+export const push = curry((arr, v) => arr.concat(v));
 
 export const tryCatch = curry((f, g) => {
   try {
@@ -159,6 +183,11 @@ export const tryCatch = curry((f, g) => {
     return g(e);
   }
 });
+
+export const maybe =
+  (fn) =>
+  (...args) =>
+    args.reduce((acc, cv) => acc && cv != null, true) ? fn(...args) : void 0;
 
 // range
 export const range = (start, end, step = start < end ? 1 : -1) => {
@@ -175,9 +204,9 @@ export const range = (start, end, step = start < end ? 1 : -1) => {
 // once only runs a function once, then returns cached result
 export function once(fn) {
   let done = false;
-  let result = null;
+  let result;
   return (...args) =>
-    !done ? (done = true, result = fn(...args), result) : result;
+    !done ? ((done = true), (result = fn(...args)), result) : result;
 }
 
 // memoize a function
@@ -187,9 +216,8 @@ export function memoize(fn) {
   const isPrimitive = (x) =>
     typeof x === "number" || typeof x === "string" || typeof x === "boolean";
   return (...args) => {
-    const key = args.length === 1 && isPrimitive(args[0])
-      ? args[0]
-      : toKey(args);
+    const key =
+      args.length === 1 && isPrimitive(args[0]) ? args[0] : toKey(args);
     return key in cache ? cache[key] : (cache[key] = fn(...args));
   };
 }
@@ -209,16 +237,15 @@ export const debounce = (delay) => {
 export const accumulate = (delay) => {
   const stack = [];
   let pending = false;
-  return (fn) =>
-    (event) => {
-      if (pending) clearTimeout(pending);
-      stack.push(event);
-      pending = setTimeout(() => {
-        pending = null;
-        fn(stack.slice());
-        stack.length = 0;
-      }, delay);
-    };
+  return (fn) => (event) => {
+    if (pending) clearTimeout(pending);
+    stack.push(event);
+    pending = setTimeout(() => {
+      pending = false;
+      fn(stack.slice());
+      stack.length = 0;
+    }, delay);
+  };
 };
 
 // Object functions
@@ -241,11 +268,12 @@ const isDescriptor = (obj) => obj && (obj["state"] || obj["methods"]);
 // extend Object
 if (typeof Object.impl !== "function") {
   Object.defineProperty(Object, "impl", {
-    value: (...mixins) =>
+    value:
+      (...mixins) =>
       (target) => {
         if (!Object.isExtensible(target) || Object.isSealed(target)) {
           throw new TypeError(
-            "Unable to concatenate mixins into base object. Object is either not extensible or has been sealed",
+            "Unable to concatenate mixins into base object. Object is either not extensible or has been sealed"
           );
         }
         Object.assign(target.prototype, ...mixins);
@@ -266,7 +294,7 @@ if (typeof Object.mixin !== "function") {
       detectCollision(base, ...mixins);
       if (!Object.isExtensible(base) || Object.isSealed(base)) {
         throw new TypeError(
-          "Unable to concatenate mixins into base object. Object is either not extensible or has been sealed",
+          "Unable to concatenate mixins into base object. Object is either not extensible or has been sealed"
         );
       }
       return Object.assign({ ...base }, ...mixins);
@@ -288,7 +316,7 @@ export const deepCopy = (obj) => {
   if (obj && typeof obj === "object") {
     aux = new obj.constructor();
     Object.getOwnPropertyNames(obj).forEach(
-      (prop) => (aux[prop] = deepCopy(obj[prop])),
+      (prop) => (aux[prop] = deepCopy(obj[prop]))
     );
   }
   return aux;
@@ -326,7 +354,7 @@ export class Maybe {
     return v == null ? new Nothing(v) : new Just(v);
   }
   static fromEmpty(v) {
-    return Maybe.fromNullable(v).map((x) => x.length === 0 ? null : x);
+    return Maybe.of(v).map((x) => (x.length === 0 ? null : x));
   }
 }
 
@@ -341,7 +369,7 @@ export class Just extends Maybe {
     return fn(this.value);
   }
   filter(fn = identity) {
-    return (fn(this.value) ? new Just(a) : new Nothing());
+    return fn(this.value) ? new Just(a) : new Nothing();
   }
   map(fn) {
     return Maybe.of(fn(this.value));
@@ -350,12 +378,14 @@ export class Just extends Maybe {
     return Maybe.of(fn(this.value).merge());
   }
   ap(Ma) {
-    return Ma.isNothing() ? Ma : isFunction(this.value)
+    return Ma.isNothing()
+      ? Ma
+      : isFunction(this.value)
       ? Maybe.of(
-        isFunction(Ma.merge())
-          ? Ma.merge().call(Ma, this.value)
-          : this.value(Ma.merge()),
-      )
+          isFunction(Ma.merge())
+            ? Ma.merge().call(Ma, this.value)
+            : this.value(Ma.merge())
+        )
       : Maybe.of(Ma.merge().call(Ma, this.value));
   }
   merge() {
@@ -417,16 +447,16 @@ class Variable {
     return this.#value;
   }
 }
-export const lens = (getter, setter) =>
-  (fn) => (obj) => fn(getter(obj)).map((value) => setter(value, obj));
-export const view = curry((lensAttr, obj) =>
-  lensAttr((x) => new Constant(x))(obj).value
+export const lens = (getter, setter) => (fn) => (obj) =>
+  fn(getter(obj)).map((value) => setter(value, obj));
+export const view = curry(
+  (lensAttr, obj) => lensAttr((x) => new Constant(x))(obj).value
 );
-export const set = curry((lensAttr, newVal, obj) =>
-  lensAttr(() => new Variable(newVal))(obj).value
+export const set = curry(
+  (lensAttr, newVal, obj) => lensAttr(() => new Variable(newVal))(obj).value
 );
-export const over = curry((lensAttr, mapfn, obj) =>
-  lensAttr((x) => new Variable(mapfn(x)))(obj).value
+export const over = curry(
+  (lensAttr, mapfn, obj) => lensAttr((x) => new Variable(mapfn(x)))(obj).value
 );
 export const lensProp = (p) => lens(prop(p), setProp(p));
 
@@ -442,7 +472,7 @@ export class Result {
     return v == null ? new Failure(error) : new Success(v);
   }
   static fromEmpty(a) {
-    return Result.of(a).map((x) => x.length === 0 ? null : x);
+    return Result.of(a).map((x) => (x.length === 0 ? null : x));
   }
 }
 
@@ -496,12 +526,14 @@ export class Success extends Result {
     return Result.of(fn(this.value).merge());
   }
   ap(Rs) {
-    return Rs.isFailure() ? Rs : isFunction(this.value)
+    return Rs.isFailure()
+      ? Rs
+      : isFunction(this.value)
       ? Result.of(
-        isFunction(Rs.merge())
-          ? Rs.merge().call(Rs, this.value)
-          : this.value(Rs.merge()),
-      )
+          isFunction(Rs.merge())
+            ? Rs.merge().call(Rs, this.value)
+            : this.value(Rs.merge())
+        )
       : Result.of(Rs.merge().call(Rs, this.value));
   }
   get() {
