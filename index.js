@@ -1,3 +1,6 @@
+import { Maybe, Just, Nothing } from './maybe.js'
+import { LazyCollection, Stack, Pair } from './lazy.js'
+import { Result, Success, Failure, Try, TryAsync } from './result.js'
 /*
  * My lil functional programming collection
  */
@@ -6,7 +9,7 @@
 export const identity = x => x
 
 // constant () => a
-export const constant = a => () => a
+export const constant = a => b => a
 
 // fip order of arguments
 export const flip = f => a => b => f(b)(a)
@@ -14,23 +17,23 @@ export const flip2 = f => (a, b) => f(b, a)
 export const flip3 = f => (a, b, c) => f(b, c, a)
 
 // arity functions
-export const arity =
-  (fn, n) =>
-  (...args) =>
-    fn(...args.slice(0, n))
+export const arity = (fn, n) =>
+  function arity(...args) {
+    return fn.apply(this, args.slice(0, n))
+  }
 export const unary = fn => arity(fn, 1)
 export const binary = fn => arity(fn, 2)
 export const ternary = fn => arity(fn, 3)
 
 // partial application
-export const callFirst =
-  (fn, larg) =>
-  (...args) =>
-    fn(larg, ...args)
-export const callLast =
-  (fn, rarg) =>
-  (...args) =>
-    fn(...args, rarg)
+export const callFirst = (fn, larg) =>
+  function callFirst(...args) {
+    return fn.call(this, larg, ...args)
+  }
+export const callLast = (fn, rarg) =>
+  function callLast(...args) {
+    return fn.call(this, ...args, rarg)
+  }
 
 // de-methodize
 export const demethodize = Function.prototype.bind.bind(Function.prototype.call)
@@ -44,7 +47,10 @@ export const isString = isTypeOf('string')
 export const isObject = isTypeOf('object')
 export const isArray = a => Array.isArray(a)
 export const isInstanceOf = a => b => b instanceof a
-export const isFunction = f => f && typeof f === 'function' && Object.prototype.toString.call(f) === '[object Function]'
+export const isFunction = f =>
+  f &&
+  typeof f === 'function' &&
+  Object.prototype.toString.call(f) === '[object Function]'
 export const isSet = s => s instanceof Set
 export const isMap = m => m instanceof Map
 
@@ -86,25 +92,33 @@ export const invert = curry((f, a) => -f(a))
 
 // Logging
 export const tee = tap(console.log.bind(console))
-export const log =
-  (fn, logger = console.log.bind(console)) =>
-  (...args) => {
+export const log = (fn, logger = console.log.bind(console)) =>
+  function log(...args) {
     logger(`Entering function ${fn.name}(${JSON.stringify(args, null, 2)})`)
-    const result = fn(...args)
+    const result = fn.apply(this, args)
     logger(`Exiting function ${fn.name} -> ${JSON.stringify(result, null, 2)}`)
     return result
   }
 
 // creates a Transducer function
-export const transduce = curry((arr, fns, reducer, initial) => arr.reduce(compose(...fns)(reducer), initial))
+export const transduce = curry((arr, fns, reducer, initial) =>
+  arr.reduce(compose(...fns)(reducer), initial)
+)
 // Transducers
 export const mapTR = fn => reducer => (acc, val) => reducer(acc, fn(val))
 export const filterTR = fn => reducer => (acc, val) => fn(val) ? reducer(acc, val) : acc
 
 // prop & props get object properties
-export const prop = curry((name, a) => a && (name in a ? (isFunction(a[name]) ? a[name].call(a) : a[name]) : void 0))
-export const setPropM = curry((name, value, a) => (a && name in a ? ((a[name] = value), a) : a))
-export const setProp = curry((name, value, a) => (a && name in a ? { ...a, [name]: value } : { ...a }))
+export const prop = curry(
+  (name, a) =>
+    a && (name in a ? (isFunction(a[name]) ? a[name].call(a) : a[name]) : void 0)
+)
+export const setPropM = curry((name, value, a) =>
+  a && name in a ? ((a[name] = value), a) : a
+)
+export const setProp = curry((name, value, a) =>
+  a && name in a ? { ...a, [name]: value } : { ...a }
+)
 export const props = curry((names, a) => names.map(n => prop(n, a)))
 
 // map, filter, reduce
@@ -112,6 +126,13 @@ export const map = curry((f, M) => M.map(f))
 export const filter = curry((p, M) => M.filter(p))
 export const reduce = curry((acc, start, M) => M.reduce(acc, start))
 export const reduceRight = curry((acc, start, M) => M.reduceRight(acc, start))
+export const pluck = compose(map, prop)
+export const deepMap = fn =>
+  function innerDeepMap(tree) {
+    return Array.prototype.map.call(tree, element =>
+      Array.isArray(element) ? innerDeepMap(element) : fn(element)
+    )
+  }
 
 // compose monads
 export const composeM2 =
@@ -145,7 +166,10 @@ export const some = curry((f, M) => M.some(f))
 export const sum = (...args) => args.reduce((x, y) => x + y, 0)
 export const average = ns => sum(...ns) / ns.length
 export const partition = (arr, a, b) =>
-  arr.reduce((acc, cv) => (a(cv) ? (acc[0].push(cv), acc) : b(cv) ? (acc[1].push(cv), acc) : acc), [[], []])
+  arr.reduce(
+    (acc, cv) => (a(cv) ? (acc[0].push(cv), acc) : b(cv) ? (acc[1].push(cv), acc) : acc),
+    [[], []]
+  )
 export const shift = arr => [arr[0], arr.slice(1)]
 export const pop = arr => [arr.slice(0, -1), arr[arr.length - 1]]
 export const unshift = curry((arr, v) => [v].concat(arr))
@@ -159,10 +183,12 @@ export const tryCatch = curry((f, g) => {
   }
 })
 
-export const maybe =
-  fn =>
-  (...args) =>
-    args.reduce((acc, cv) => acc && cv != null, true) ? fn(...args) : void 0
+export const maybe = fn =>
+  function maybe(...args) {
+    return args.reduce((acc, cv) => acc && cv != null, true)
+      ? fn.apply(this, args)
+      : void 0
+  }
 
 // range
 export const range = (start, end, step = start < end ? 1 : -1) => {
@@ -180,17 +206,20 @@ export const range = (start, end, step = start < end ? 1 : -1) => {
 export function once(fn) {
   let done = false
   let result
-  return (...args) => (!done ? ((done = true), (result = fn(...args)), result) : result)
+  return function once(...args) {
+    return !done ? ((done = true), (result = fn.apply(this, args)), result) : result
+  }
 }
 
 // memoize a function
 export function memoize(fn) {
   const cache = Object.create(null)
   const toKey = key => JSON.stringify(key)
-  const isPrimitive = x => typeof x === 'number' || typeof x === 'string' || typeof x === 'boolean'
-  return (...args) => {
+  const isPrimitive = x =>
+    typeof x === 'number' || typeof x === 'string' || typeof x === 'boolean'
+  return function memoize(...args) {
     const key = args.length === 1 && isPrimitive(args[0]) ? args[0] : toKey(args)
-    return key in cache ? cache[key] : (cache[key] = fn(...args))
+    return key in cache ? cache[key] : (cache[key] = fn.apply(this, args))
   }
 }
 
@@ -293,105 +322,6 @@ export const deepCopy = obj => {
 }
 Object.deepFreeze = Object.deepFreeze || deepFreeze
 
-// Maybe
-function throwError(error) {
-  throw error
-}
-function errorWith(str) {
-  throw new TypeError(str)
-}
-
-export class Maybe {
-  #value;
-  [Symbol.toStringTag] = 'Maybe'
-
-  constructor(v) {
-    this.#value = v
-  }
-  get() {
-    return this.value ?? errorWith('Unable to get from a Maybe#Nothing')
-  }
-  getOrElse(defaultValue) {
-    return this.value ?? defaultValue
-  }
-  getOrElseThrow(error) {
-    return this.value ?? throwError(error)
-  }
-  get value() {
-    return this.#value
-  }
-  static of(v) {
-    return v == null ? new Nothing(v) : new Just(v)
-  }
-  static fromEmpty(v) {
-    return Maybe.of(v).map(x => (x.length === 0 ? null : x))
-  }
-}
-
-export class Just extends Maybe {
-  isJust() {
-    return true
-  }
-  isNothing() {
-    return false
-  }
-  fold(fn = identity) {
-    return fn(this.value)
-  }
-  filter(fn = identity) {
-    return fn(this.value) ? new Just(a) : new Nothing()
-  }
-  map(fn) {
-    return Maybe.of(fn(this.value))
-  }
-  flatMap(fn) {
-    return Maybe.of(fn(this.value).merge())
-  }
-  ap(Ma) {
-    return Ma.isNothing()
-      ? Ma
-      : isFunction(this.value)
-      ? Maybe.of(isFunction(Ma.merge()) ? Ma.merge().call(Ma, this.value) : this.value(Ma.merge()))
-      : Maybe.of(Ma.merge().call(Ma, this.value))
-  }
-  merge() {
-    return this.value
-  }
-  toString() {
-    return `Maybe#Just (${this.value})`
-  }
-  toJSON() {
-    return { type: 'Maybe#Just', value: this.value }
-  }
-}
-
-export class Nothing extends Maybe {
-  isJust() {
-    return false
-  }
-  isNothing() {
-    return true
-  }
-  map() {
-    return this
-  }
-  flatMap() {
-    return this
-  }
-  ap() {
-    return this
-  }
-  fold() {
-    return this
-  }
-  toString() {
-    return `Maybe#Nothing ()`
-  }
-  toJSON() {
-    return { type: 'Maybe#Nothing', value: {} }
-  }
-}
-
 // Lenses
 class Constant {
   #value
@@ -413,127 +343,132 @@ class Variable {
     return this.#value
   }
 }
-export const lens = (getter, setter) => fn => obj => fn(getter(obj)).map(value => setter(value, obj))
+export const lens = (getter, setter) => fn => obj =>
+  fn(getter(obj)).map(value => setter(value, obj))
 export const view = curry((lensAttr, obj) => lensAttr(x => new Constant(x))(obj).value)
-export const set = curry((lensAttr, newVal, obj) => lensAttr(() => new Variable(newVal))(obj).value)
-export const over = curry((lensAttr, mapfn, obj) => lensAttr(x => new Variable(mapfn(x)))(obj).value)
+export const set = curry(
+  (lensAttr, newVal, obj) => lensAttr(() => new Variable(newVal))(obj).value
+)
+export const over = curry(
+  (lensAttr, mapfn, obj) => lensAttr(x => new Variable(mapfn(x)))(obj).value
+)
 export const lensProp = p => lens(prop(p), setProp(p))
 
-export class Result {
-  #value
-  constructor(v) {
-    this.#value = v
-  }
-  get value() {
-    return this.#value
-  }
-  static of(v, error = 'Null argument provided') {
-    return v == null ? new Failure(error) : new Success(v)
-  }
-  static fromEmpty(a) {
-    return Result.of(a).map(x => (x.length === 0 ? null : x))
+// Iterables
+export function* mapWith(fn, iterable) {
+  for (const element of iterable) {
+    yield fn(element)
   }
 }
 
-export class Failure extends Result {
-  isSuccess() {
-    return false
-  }
-  isFailure() {
-    return true
-  }
-  map() {
-    return this
-  }
-  flatMap() {
-    return this
-  }
-  ap() {
-    return this
-  }
-  get() {
-    errorWith('Unable to get from a Result#Failure')
-  }
-  merge() {
-    errorWith('Unable to merge from a Result#Failure')
-  }
-  getOrElse(defaultValue) {
-    return defaultValue
-  }
-  getOrElseThrow() {
-    throw new Error(this.value)
-  }
-  toString() {
-    return `Result#Failure (${this.value})`
-  }
-  toJSON() {
-    return { type: 'Result#Failure', value: this.value }
+export function* mapAllWith(fn, iterable) {
+  for (const element of iterable) {
+    yield* fn(element)
   }
 }
 
-export class Success extends Result {
-  isSuccess() {
-    return true
-  }
-  isFailure() {
-    return false
-  }
-  map(fn) {
-    return Result.of(fn(this.value))
-  }
-  flatMap(fn) {
-    return Result.of(fn(this.value).merge())
-  }
-  ap(Rs) {
-    return Rs.isFailure()
-      ? Rs
-      : isFunction(this.value)
-      ? Result.of(isFunction(Rs.merge()) ? Rs.merge().call(Rs, this.value) : this.value(Rs.merge()))
-      : Result.of(Rs.merge().call(Rs, this.value))
-  }
-  get() {
-    return this.value
-  }
-  getOrElse() {
-    return this.value
-  }
-  getOrElseThrow() {
-    return this.value
-  }
-  merge() {
-    return this.value
-  }
-  toString() {
-    return `Result#Success (${this.value})`
-  }
-  toJSON() {
-    return { type: 'Result#Success', value: this.value }
+export function* filterWith(fn, iterable) {
+  for (const element of iterable) {
+    if (!!fn(element)) yield element
   }
 }
 
-export class Try {
-  constructor(fn, msg) {
-    try {
-      return new Success(fn())
-    } catch (e) {
-      return new Failure(msg || e.message)
+export function* compact(iterable) {
+  for (const element of iterable) {
+    if (element != null) yield element
+  }
+}
+
+export function* untilWith(fn, iterable) {
+  for (const element of iterable) {
+    if (fn(element)) break
+    yield element
+  }
+}
+
+export const first = iterable => iterable[Symbol.iterator]().next().value
+
+export function* rest(iterable) {
+  const iterator = iterable[Symbol.iterator]()
+  iterator.next()
+  yield* iterator
+}
+
+export function* take(numberToTake, iterable) {
+  const iterator = iterable[Symbol.iterator]()
+  for (let i = 0; i < numberToTake; ++i) {
+    const { done, value } = iterator.next()
+    if (!done) yield value
+  }
+}
+
+export function* zip(...iterables) {
+  const iterators = iterables.map(i => i[Symbol.iterator]())
+  while (true) {
+    const pairs = iterators.map(j => j.next())
+    const dones = []
+    const values = []
+    pairs.forEach(p => (dones.push(p.done), values.push(p.value)))
+    if (dones.indexOf(true) >= 0) break
+    yield values
+  }
+}
+
+export function* zipWith(zipper, ...iterables) {
+  const iterators = iterables.map(i => i[Symbol.iterator]())
+  while (true) {
+    const pairs = iterators.map(j => j.next())
+    const dones = []
+    const values = []
+    pairs.forEach(p => (dones.push(p.done), values.push(p.value)))
+    if (dones.indexOf(true) >= 0) break
+    yield zipper(...values)
+  }
+}
+
+export function reduceWith(fn, seed, iterable) {
+  let accumulator = seed
+  for (const element of iterable) {
+    accumulator = fn(accumulator, element)
+  }
+  return accumulator
+}
+
+export function memoizeIter(generator) {
+  const memos = Object.create(null)
+  const iters = Object.create(null)
+
+  return function* memoize(...args) {
+    const key = JSON.stringify(args)
+    let i = 0
+
+    if (memos[key] == null) {
+      memos[key] = []
+      iters[key] = generator(...args)
+    }
+
+    while (true) {
+      if (i < memos[key].length) {
+        yield memos[key][i++]
+      } else {
+        const { done, value } = iters[key].next()
+        if (done) return
+        else yield (memos[key][i++] = value)
+      }
     }
   }
-  static of(fn, msg) {
-    return new Try(fn, msg)
-  }
 }
 
-export class TryAsync {
-  constructor() {
-    throw new Error('Must use static method of')
-  }
-  static async of(fn, msg) {
-    try {
-      const result = await fn()
-      return new Success(result)
-    } catch (e) {
-      return new Failure(msg || e.message)
-    }
-  }
+export {
+  Maybe,
+  Just,
+  Nothing,
+  LazyCollection,
+  Stack,
+  Pair,
+  Try,
+  TryAsync,
+  Result,
+  Failure,
+  Success,
 }
