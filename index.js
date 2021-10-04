@@ -12,9 +12,18 @@ export const identity = x => x
 export const constant = a => b => a
 
 // fip order of arguments
-export const flip = f => a => b => f(b)(a)
-export const flip2 = f => (a, b) => f(b, a)
-export const flip3 = f => (a, b, c) => f(b, c, a)
+export const flip = f =>
+  function flip(a) {
+    return b => f.call(this, b, a)
+  }
+export const flip2 = f =>
+  function flip2(a, b) {
+    return f.call(this, b, a)
+  }
+export const flip3 = f =>
+  function flip3(a, b, c) {
+    return f.call(this, b, c, a)
+  }
 
 // arity functions
 export const arity = (fn, n) =>
@@ -47,10 +56,7 @@ export const isString = isTypeOf('string')
 export const isObject = isTypeOf('object')
 export const isArray = a => Array.isArray(a)
 export const isInstanceOf = a => b => b instanceof a
-export const isFunction = f =>
-  f &&
-  typeof f === 'function' &&
-  Object.prototype.toString.call(f) === '[object Function]'
+export const isFunction = f => f && typeof f === 'function'
 export const isSet = s => s instanceof Set
 export const isMap = m => m instanceof Map
 
@@ -65,23 +71,24 @@ export const len = a =>
     : void 0
 
 // Compose and pipe
-export const compose2 =
-  (f, g) =>
-  (...args) =>
-    f(g(...args))
+export const compose2 = (f, g) =>
+  function compose(...args) {
+    return f.call(this, g.call(this, ...args))
+  }
 export const compose = (...fns) => fns.reduce(compose2)
 export const pipe = (...fns) => fns.reduceRight(compose2)
 
 // Autocurry
-export const curry =
-  fn =>
-  (...args1) =>
-    args1.length === fn.length
-      ? fn(...args1)
+export const curry = fn =>
+  function curryInner(...args1) {
+    return args1.length === fn.length
+      ? fn.apply(this, args1)
       : (...args2) => {
-          const args = [...args1, ...args2]
-          return args.length >= fn.length ? fn(...args) : curry(fn)(...args)
+          return args1.length + args2.length >= fn.length
+            ? fn.call(this, ...args1, ...args2)
+            : curry(fn)(...args1, ...args2)
         }
+  }
 
 // run a side effect with tap
 export const tap = curry((fn, x) => (fn(x), x))
@@ -113,6 +120,14 @@ export const prop = curry(
   (name, a) =>
     a && (name in a ? (isFunction(a[name]) ? a[name].call(a) : a[name]) : void 0)
 )
+export const send =
+  (name, ...args) =>
+  instance =>
+    instance[name].apply(instance, args)
+export const bound = (name, ...args) =>
+  args === []
+    ? instance[name].bind(instance)
+    : Function.prototype.bind.apply(instance[name], [instance].concat(args))
 export const setPropM = curry((name, value, a) =>
   a && name in a ? ((a[name] = value), a) : a
 )
@@ -120,6 +135,14 @@ export const setProp = curry((name, value, a) =>
   a && name in a ? { ...a, [name]: value } : { ...a }
 )
 export const props = curry((names, a) => names.map(n => prop(n, a)))
+export const invoke =
+  (fn, ...args) =>
+  instance =>
+    fn.apply(instance, args)
+export const instanceEval =
+  instance =>
+  (fn, ...args) =>
+    fn.apply(instance, args)
 
 // map, filter, reduce
 export const map = curry((f, M) => M.map(f))
@@ -135,10 +158,10 @@ export const deepMap = fn =>
   }
 
 // compose monads
-export const composeM2 =
-  (f, g) =>
-  (...args) =>
-    g(...args).flatMap(f)
+export const composeM2 = (f, g) =>
+  function innerComposeM2(...args) {
+    return g.apply(this, args).flatMap(f)
+  }
 export const composeM = (...Ms) => Ms.reduce(composeM2)
 
 // flat
@@ -226,11 +249,9 @@ export function memoize(fn) {
 // debounce
 export const debounce = delay => {
   let pending = false
-  return fn => {
-    if (pending) {
-      clearTimeout(pending)
-    }
-    pending = setTimeout(() => fn(), delay)
+  return function debounce(fn) {
+    if (pending) clearTimeout(pending)
+    pending = setTimeout(() => fn.call(this), delay)
   }
 }
 
@@ -238,14 +259,16 @@ export const debounce = delay => {
 export const accumulate = delay => {
   const stack = []
   let pending = false
-  return fn => event => {
-    if (pending) clearTimeout(pending)
-    stack.push(event)
-    pending = setTimeout(() => {
-      pending = false
-      fn(stack.slice())
-      stack.length = 0
-    }, delay)
+  return function accumulate(fn) {
+    return event => {
+      if (pending) clearTimeout(pending)
+      stack.push(event)
+      pending = setTimeout(() => {
+        pending = false
+        fn.call(this, stack.slice())
+        stack.length = 0
+      }, delay)
+    }
   }
 }
 
