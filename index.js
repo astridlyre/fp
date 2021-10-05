@@ -188,15 +188,15 @@ export const every = curry((f, M) => M.every(f))
 export const some = curry((f, M) => M.some(f))
 export const sum = (...args) => args.reduce((x, y) => x + y, 0)
 export const average = ns => sum(...ns) / ns.length
+export const shift = arr => [arr[0], arr.slice(1)]
+export const pop = arr => [arr.slice(0, -1), arr[arr.length - 1]]
+export const unshift = curry((arr, v) => [v].concat(arr))
+export const push = curry((arr, v) => arr.concat(v))
 export const partition = (arr, a, b) =>
   arr.reduce(
     (acc, cv) => (a(cv) ? (acc[0].push(cv), acc) : b(cv) ? (acc[1].push(cv), acc) : acc),
     [[], []]
   )
-export const shift = arr => [arr[0], arr.slice(1)]
-export const pop = arr => [arr.slice(0, -1), arr[arr.length - 1]]
-export const unshift = curry((arr, v) => [v].concat(arr))
-export const push = curry((arr, v) => arr.concat(v))
 
 export const tryCatch = curry((f, g) => {
   try {
@@ -273,20 +273,92 @@ export const accumulate = delay => {
 }
 
 // Object functions
+export const FunctionalMixin = behaviour => {
+  const instanceKeys = Reflect.ownKeys(behaviour)
+  const sharedKeys = Reflect.ownKeys(sharedBehaviour)
+  const typeTag = Symbol('isA')
+
+  function mixin(target) {
+    for (const property of instanceKeys) {
+      if (!target[property]) {
+        Object.defineProperty(target, property, {
+          value: behaviour[property],
+          writable: true,
+        })
+      }
+    }
+    target[typeTag] = true
+    return target
+  }
+
+  for (const property of sharedKeys) {
+    Object.defineProperty(mixin, property, {
+      value: sharedBehaviour[property],
+      enumerable: Object.prototype.propertyIsEnumerable.call(sharedBehaviour, property),
+    })
+  }
+  Object.defineProperty(mixin, Symbol.hasInstance, {
+    value: instance => !!instance[typeTag],
+  })
+  return mixin
+}
+
+// Basically same as above, but for classes
+export const ClassMixin = behaviour => {
+  const instanceKeys = Reflect.ownKeys(behaviour)
+  const sharedKeys = Reflect.ownKeys(sharedBehaviour)
+  const typeTag = Symbol('isA')
+
+  function mixin(classs) {
+    for (const property of instanceKeys) {
+      if (!classs.prototype[property]) {
+        Object.defineProperty(classs.prototype, property, {
+          value: behaviour[property],
+          writable: true,
+        })
+      }
+    }
+    classs.prototype[typeTag] = true
+    return classs
+  }
+
+  for (const property of sharedKeys) {
+    Object.defineProperty(mixin, property, {
+      value: sharedBehaviour[property],
+      enumerable: Object.prototype.propertyIsEnumerable.call(sharedBehaviour, property),
+    })
+  }
+  Object.defineProperty(mixin, Symbol.hasInstance, {
+    value: instance => !!instance[typeTag],
+  })
+  return mixin
+}
+
+export const SubclassFactory = behaviour => superclass =>
+  ClassMixin(behaviour)(class extends superclass {})
+
+export const FactoryFactory =
+  c =>
+  (...args) =>
+    new c(...args)
+
 const detectCollision = (...descriptors) =>
   descriptors
     .flatMap(Object.keys)
     .reduce(sortReducer, [])
     .reduce(collisionReducer, [])
     .forEach(c => console.log(`[WARN] Collision found: ${c}`))
+
 const sortReducer = (accumulator, value) => {
   const nextIndex = accumulator.findIndex(i => value < i)
   const index = nextIndex > -1 ? nextIndex : accumulator.length
   accumulator.splice(index, 0, value)
   return accumulator
 }
+
 const collisionReducer = (accumulator, value, index, arr) =>
   value === arr[index + 1] ? [...accumulator, value] : accumulator
+
 const isDescriptor = obj => obj && (obj['state'] || obj['methods'])
 
 // extend Object
@@ -328,6 +400,7 @@ if (typeof Object.mixin !== 'function') {
     configurable: false,
   })
 }
+
 export const deepFreeze = obj => {
   if (obj && typeof obj === 'object' && !Object.isFrozen(obj)) {
     Object.getOwnPropertyNames(obj).forEach(name => deepFreeze(obj[name]))
@@ -335,6 +408,7 @@ export const deepFreeze = obj => {
   }
   return obj
 }
+
 export const deepCopy = obj => {
   let aux = obj
   if (obj && typeof obj === 'object') {
@@ -356,6 +430,7 @@ class Constant {
     return this.#value
   }
 }
+
 class Variable {
   #value
   constructor(v) {
@@ -368,13 +443,17 @@ class Variable {
 }
 export const lens = (getter, setter) => fn => obj =>
   fn(getter(obj)).map(value => setter(value, obj))
+
 export const view = curry((lensAttr, obj) => lensAttr(x => new Constant(x))(obj).value)
+
 export const set = curry(
   (lensAttr, newVal, obj) => lensAttr(() => new Variable(newVal))(obj).value
 )
+
 export const over = curry(
   (lensAttr, mapfn, obj) => lensAttr(x => new Variable(mapfn(x)))(obj).value
 )
+
 export const lensProp = p => lens(prop(p), setProp(p))
 
 // Iterables
