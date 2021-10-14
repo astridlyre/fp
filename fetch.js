@@ -1,8 +1,9 @@
-import { Success, Failure } from './maybe.js'
-
 export function createClient(
   apiEndpoint,
-  storageKey = `${Math.round(Math.random() * 100000)}_client_key`
+  options = {
+    storageKey: `${Math.round(Math.random() * 100000)}_client_key`,
+    toJSON: true,
+  }
 ) {
   async function isError(res) {
     if (!res.ok) throw new Error(await res.text())
@@ -10,6 +11,7 @@ export function createClient(
   }
 
   async function isJson(res) {
+    if (!options.toJSON) return res
     if (
       res.headers.has('Content-Type') &&
       res.headers.get('Content-Type').includes('application/json')
@@ -21,7 +23,7 @@ export function createClient(
 
   function client(endpoint, method, customConfig = {}) {
     const controller = new AbortController()
-    const token = localStorage.getItem(storageKey)
+    const token = localStorage.getItem(options.storageKey)
     const headers = { 'Content-Type': 'application/json' }
     if (token) headers.Authorization = `Bearer ${token}`
     const config = {
@@ -34,11 +36,7 @@ export function createClient(
       },
     }
     return {
-      req: fetch(`${apiEndpoint}/${endpoint}`, config)
-        .then(isError)
-        .then(isJson)
-        .then(Success.of)
-        .catch(Failure.of),
+      req: fetch(`${apiEndpoint}/${endpoint}`, config).then(isError).then(isJson),
       abort: controller.abort.bind(controller),
     }
   }
