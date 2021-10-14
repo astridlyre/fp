@@ -746,16 +746,4 @@ export function memoizeIter(generator) {
   }
 }
 
-export {
-  Maybe,
-  Just,
-  Nothing,
-  LazyCollection,
-  Stack,
-  Pair,
-  Try,
-  TryAsync,
-  Result,
-  Failure,
-  Success,
-}
+export { Maybe, Just, Nothing, Try, TryAsync, Result, Failure, Success }

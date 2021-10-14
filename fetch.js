@@ -1,3 +1,5 @@
+import { Success, Failure } from './result.js'
+
 export function createClient(
   apiEndpoint,
   storageKey = `${Math.round(Math.random() * 100000)}_client_key`
@@ -32,7 +34,11 @@ export function createClient(
       },
     }
     return {
-      req: fetch(`${apiEndpoint}/${endpoint}`, config).then(isError).then(isJson),
+      res: fetch(`${apiEndpoint}/${endpoint}`, config)
+        .then(isError)
+        .then(isJson)
+        .then(Success.of)
+        .catch(Failure.of),
       abort: controller.abort.bind(controller),
     }
   }
