@@ -1,5 +1,4 @@
-import { Maybe, Just, Nothing } from './maybe.js'
-import { Result, Success, Failure, Try, TryAsync } from './result.js'
+import { Maybe, Just, Nothing, Result, Success, Failure, Try, TryAsync } from './maybe.js'
 /*
  * My lil functional programming collection
  */

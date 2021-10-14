@@ -1,4 +1,4 @@
-import { Success, Failure } from './result.js'
+import { Success, Failure } from './maybe.js'
 
 export function createClient(
   apiEndpoint,
@@ -34,7 +34,7 @@ export function createClient(
       },
     }
     return {
-      res: fetch(`${apiEndpoint}/${endpoint}`, config)
+      req: fetch(`${apiEndpoint}/${endpoint}`, config)
         .then(isError)
         .then(isJson)
         .then(Success.of)
