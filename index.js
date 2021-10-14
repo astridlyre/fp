@@ -1,5 +1,4 @@
 import { Maybe, Just, Nothing } from './maybe.js'
-import { LazyCollection, Stack, Pair } from './lazy.js'
 import { Result, Success, Failure, Try, TryAsync } from './result.js'
 /*
  * My lil functional programming collection
