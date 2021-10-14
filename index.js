@@ -145,6 +145,7 @@ export const instanceEval =
     fn.apply(instance, args)
 
 // map, filter, reduce
+export const forEach = curry((f, M) => M.forEach(f))
 export const map = curry((f, M) => M.map(f))
 export const filter = curry((p, M) => M.filter(p))
 export const reduce = curry((acc, start, M) => M.reduce(acc, start))
@@ -171,6 +172,7 @@ export const fold = curry((f, M) => M.fold(f))
 export const getOrElseThrow = curry((e, M) => M.getOrElseThrow(e))
 
 // math functions
+export const eq = curry((a, b) => a === b)
 export const add = curry((x, y) => x + y)
 export const addRight = curry((x, y) => y + x)
 export const subtract = curry((x, y) => x - y)
@@ -184,6 +186,8 @@ export const pow = (base, power) =>
   power === 0 ? 1 : power & 1 ? base * pow(base, power - 1) : pow(base * base, power >> 1)
 
 // array functions
+export const head = a => a[0]
+export const last = a => a[a.length - 1]
 export const every = curry((f, M) => M.every(f))
 export const some = curry((f, M) => M.some(f))
 export const sum = (...args) => args.reduce((x, y) => x + y, 0)
@@ -197,6 +201,13 @@ export const partition = (arr, a, b) =>
     (acc, cv) => (a(cv) ? (acc[0].push(cv), acc) : b(cv) ? (acc[1].push(cv), acc) : acc),
     [[], []]
   )
+export const sortBy = curry((f, a) => [...a].sort(f))
+export const match = curry((re, s) => re.test(s))
+export const replace = curry((re, rpl, s) => s.replace(re, rpl))
+export const split = curry((sep, s) => s.split(sep))
+export const toLowerCase = s => s.toLowerCase()
+export const toUpperCase = s => s.toUpperCase()
+export const toString = String
 
 export const tryCatch = curry((f, g) => {
   try {
