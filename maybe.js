@@ -230,38 +230,40 @@ export class TryAsync {
 }
 
 export class IO {
-  #unsafePerformIO;
   [Symbol.toStringTag] = 'IO'
 
   constructor(fn) {
-    this.#unsafePerformIO = fn
+    this.unsafePerformIO = fn
   }
   getOrElse(defaultValue) {
-    return this.#unsafePerformIO() ?? defaultValue
+    return this.unsafePerformIO() ?? defaultValue
   }
   getOrElseThrow(error) {
-    return this.#unsafePerformIO() ?? throwError(error)
+    return this.unsafePerformIO() ?? throwError(error)
   }
   get unsafePerformIO() {
-    return this.#unsafePerformIO
+    return this.unsafePerformIO
   }
   fold(fn = x => x) {
-    return fn(this.#unsafePerformIO)
+    return fn(this.unsafePerformIO)
   }
   map(fn) {
-    return IO.of(compose(fn, this.#unsafePerformIO))
+    return new IO(compose(fn, this.unsafePerformIO))
   }
   flatMap(fn) {
-    return IO.of(compose(fn, this.#unsafePerformIO)).merge()
+    return this.map(fn).merge()
+  }
+  ap(f) {
+    return this.chain(fn => f.map(fn))
   }
   merge() {
-    return this.#unsafePerformIO
+    return new IO(() => this.unsafePerformIO().unsafePerformIO())
   }
   toString() {
-    return `IO#(${this.#unsafePerformIO.name})`
+    return `IO#(${this.unsafePerformIO.name})`
   }
   toJSON() {
-    return { type: 'IO', value: this.#unsafePerformIO }
+    return { type: 'IO', value: this.unsafePerformIO }
   }
   static of(fn) {
     return new IO(fn)
@@ -269,38 +271,34 @@ export class IO {
 }
 
 export class IOAsync {
-  #unsafePerformIO;
   [Symbol.toString] = 'IOAsync'
 
   constructor(fn) {
-    this.#unsafePerformIO = fn
+    this.unsafePerformIO = fn
   }
   async getOrElse(defaultValue) {
-    return (await this.#unsafePerformIO()) ?? defaultValue
+    return (await this.unsafePerformIO()) ?? defaultValue
   }
   async getOrElseThrow(error) {
-    return (await this.#unsafePerformIO()) ?? throwError(error)
-  }
-  async unsafePerformIO() {
-    return await this.#unsafePerformIO()
+    return (await this.unsafePerformIO()) ?? throwError(error)
   }
   async fold(fn = async x => await x) {
-    return await fn(this.#unsafePerformIO)
+    return await fn(this.unsafePerformIO)
   }
   async map(fn) {
-    return IO.of(composeAsync(fn, this.unsafePerformIO))
+    return new IO(composeAsync(fn, this.unsafePerformIO))
   }
   async flatMap(fn) {
-    return IO.of(composeAsync(fn, this.unsafePerformIO)).merge()
+    return this.map(fn).merge()
   }
-  merge() {
-    return this.#unsafePerformIO
+  async merge() {
+    return new IOAsync(async () => await this.unsafePerformIO().unsafePerformIO())
   }
   toString() {
-    return `IOAsync#(${this.#unsafePerformIO.name})`
+    return `IOAsync#(${this.unsafePerformIO.name})`
   }
   toJSON() {
-    return { type: 'IOAsync', value: this.#unsafePerformIO }
+    return { type: 'IOAsync', value: this.unsafePerformIO }
   }
   static of(fn) {
     return new IOAsync(fn)
