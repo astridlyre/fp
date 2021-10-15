@@ -1,4 +1,5 @@
-import { Maybe, Just, Nothing, Result, Success, Failure, Try, TryAsync } from './maybe.js'
+import { Maybe, Result, Try, TryAsync, IO, IOAsync } from './maybe.js'
+export { Maybe, Result, Try, TryAsync, IO, IOAsync }
 /*
  * My lil functional programming collection
  */
@@ -122,12 +123,10 @@ export const send =
   (name, ...args) =>
   instance =>
     instance[name].apply(instance, args)
-export const bound =
-  (name, ...args) =>
-  instance =>
-    args === []
-      ? instance[name].bind(instance)
-      : Function.prototype.bind.apply(instance[name], [instance].concat(args))
+export const bound = (name, ...args) =>
+  args === []
+    ? instance => instance[name].bind(instance)
+    : instance => Function.prototype.bind.apply(instance[name], [instance].concat(args))
 export const setPropM = curry((name, value, a) =>
   a && name in a ? ((a[name] = value), a) : a
 )
@@ -178,6 +177,11 @@ export const composeAsync2 = (f, g) =>
 
 export const composeAsync = (...fns) => fns.reduce(composeAsync2)
 export const pipeAsync = (...fns) => fns.reduceRight(composeAsync2)
+export const mapAsync = async (f, a) => await Promise.all(a.map(f))
+export const reduceAsync = async (f, init, a) =>
+  await a.reduce((p, val) => p.then(() => f(val)), Promise.resolve(init))
+export const filterAsync = async (f, a) =>
+  await mapAsync(f, a).then(bools => a.filter((_, i) => Boolean(bools[i])))
 
 // flat
 export const flat = M => M.flat()
@@ -202,8 +206,9 @@ export const pow = (base, power) =>
 // array functions
 export const head = a => a[0]
 export const last = a => a[a.length - 1]
-export const every = curry((f, M) => M.every(f))
-export const some = curry((f, M) => M.some(f))
+export const every = curry((f, arr) => arr.every(f))
+export const some = curry((f, arr) => arr.some(f))
+export const find = curry((f, arr) => arr.find(f))
 export const sum = (...args) => args.reduce((x, y) => x + y, 0)
 export const average = ns => sum(...ns) / ns.length
 export const shift = arr => [arr[0], arr.slice(1)]
@@ -230,6 +235,8 @@ export const split = curry((sep, s) => s.split(sep))
 export const toLowerCase = s => s.toLowerCase()
 export const toUpperCase = s => s.toUpperCase()
 export const toString = String
+export const prepend = curry((s1, s2) => `${s1}${s2}`)
+export const append = curry((s1, s2) => `${s2}${s1}`)
 
 export const tryCatch = curry((f, g) => {
   try {
@@ -627,43 +634,6 @@ export const deepCopy = obj => {
 }
 Object.deepFreeze = Object.deepFreeze || deepFreeze
 
-// Lenses
-class Constant {
-  #value
-  constructor(v) {
-    this.#value = Maybe.of(v)
-    this.map = () => this
-  }
-  get value() {
-    return this.#value
-  }
-}
-
-class Variable {
-  #value
-  constructor(v) {
-    this.#value = Maybe.of(v)
-    this.map = fn => new Variable(fn(v))
-  }
-  get value() {
-    return this.#value
-  }
-}
-export const lens = (getter, setter) => fn => obj =>
-  fn(getter(obj)).map(value => setter(value, obj))
-
-export const view = curry((lensAttr, obj) => lensAttr(x => new Constant(x))(obj).value)
-
-export const set = curry(
-  (lensAttr, newVal, obj) => lensAttr(() => new Variable(newVal))(obj).value
-)
-
-export const over = curry(
-  (lensAttr, mapfn, obj) => lensAttr(x => new Variable(mapfn(x)))(obj).value
-)
-
-export const lensProp = p => lens(prop(p), setProp(p))
-
 // Iterables
 export function* mapWith(fn, iterable) {
   for (const element of iterable) {
@@ -768,5 +738,3 @@ export function memoizeIter(generator) {
     }
   }
 }
-
-export { Maybe, Just, Nothing, Try, TryAsync, Result, Failure, Success }

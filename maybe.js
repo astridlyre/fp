@@ -1,3 +1,4 @@
+import { compose, composeAsync } from './index.js'
 // Maybe
 function throwError(error) {
   throw error
@@ -40,10 +41,10 @@ export class Just extends Maybe {
   isNothing() {
     return false
   }
-  fold(fn = identity) {
+  fold(fn = x => x) {
     return fn(this.value)
   }
-  filter(fn = identity) {
+  filter(fn = x => x) {
     return fn(this.value) ? new Just(a) : new Nothing()
   }
   map(fn) {
@@ -225,5 +226,83 @@ export class TryAsync {
     } catch (e) {
       return new Failure(msg || e.message)
     }
+  }
+}
+
+export class IO {
+  #unsafePerformIO;
+  [Symbol.toStringTag] = 'IO'
+
+  constructor(fn) {
+    this.#unsafePerformIO = fn
+  }
+  getOrElse(defaultValue) {
+    return this.#unsafePerformIO() ?? defaultValue
+  }
+  getOrElseThrow(error) {
+    return this.#unsafePerformIO() ?? throwError(error)
+  }
+  get unsafePerformIO() {
+    return this.#unsafePerformIO
+  }
+  fold(fn = x => x) {
+    return fn(this.#unsafePerformIO)
+  }
+  map(fn) {
+    return IO.of(compose(fn, this.#unsafePerformIO))
+  }
+  flatMap(fn) {
+    return IO.of(compose(fn, this.#unsafePerformIO)).merge()
+  }
+  merge() {
+    return this.#unsafePerformIO
+  }
+  toString() {
+    return `IO#(${this.#unsafePerformIO.name})`
+  }
+  toJSON() {
+    return { type: 'IO', value: this.#unsafePerformIO }
+  }
+  static of(fn) {
+    return new IO(fn)
+  }
+}
+
+export class IOAsync {
+  #unsafePerformIO;
+  [Symbol.toString] = 'IOAsync'
+
+  constructor(fn) {
+    this.#unsafePerformIO = fn
+  }
+  async getOrElse(defaultValue) {
+    return (await this.#unsafePerformIO()) ?? defaultValue
+  }
+  async getOrElseThrow(error) {
+    return (await this.#unsafePerformIO()) ?? throwError(error)
+  }
+  async unsafePerformIO() {
+    return await this.#unsafePerformIO()
+  }
+  async fold(fn = async x => await x) {
+    return await fn(this.#unsafePerformIO)
+  }
+  async map(fn) {
+    return IO.of(composeAsync(fn, this.unsafePerformIO))
+  }
+  async flatMap(fn) {
+    return IO.of(composeAsync(fn, this.unsafePerformIO)).merge()
+  }
+  merge() {
+    return this.#unsafePerformIO
+  }
+  toString() {
+    return `IOAsync#(${this.#unsafePerformIO.name})`
+  }
+  toJSON() {
+    return { type: 'IOAsync', value: this.#unsafePerformIO }
+  }
+  static of(fn) {
+    return new IOAsync(fn)
   }
 }
