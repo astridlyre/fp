@@ -122,10 +122,12 @@ export const send =
   (name, ...args) =>
   instance =>
     instance[name].apply(instance, args)
-export const bound = (name, ...args) =>
-  args === []
-    ? instance[name].bind(instance)
-    : Function.prototype.bind.apply(instance[name], [instance].concat(args))
+export const bound =
+  (name, ...args) =>
+  instance =>
+    args === []
+      ? instance[name].bind(instance)
+      : Function.prototype.bind.apply(instance[name], [instance].concat(args))
 export const setPropM = curry((name, value, a) =>
   a && name in a ? ((a[name] = value), a) : a
 )
@@ -163,6 +165,14 @@ export const composeM2 = (f, g) =>
   }
 export const composeM = (...Ms) => Ms.reduce(composeM2)
 
+export const composeAsync2 = (f, g) =>
+  async function innerComposeAsync(...args) {
+    return await f.call(this, await g.call(this, ...args))
+  }
+
+export const composeAsync = (...fns) => fns.reduce(composeAsync2)
+export const pipeAsync = (...fns) => fns.reduceRight(composeAsync2)
+
 // flat
 export const flat = M => M.flat()
 export const flatMap = curry((f, M) => M.flatMap(f))
@@ -199,6 +209,14 @@ export const partition = (arr, a, b) =>
     (acc, cv) => (a(cv) ? (acc[0].push(cv), acc) : b(cv) ? (acc[1].push(cv), acc) : acc),
     [[], []]
   )
+export const zipMap = (f, ...iters) => {
+  const min = Math.min(...pluck('length')(iters))
+  const result = []
+  for (let i = 0; i < min; i++) {
+    result.push(f(...pluck(i)(iters)))
+  }
+  return result
+}
 export const sortBy = curry((f, a) => [...a].sort(f))
 export const match = curry((re, s) => re.test(s))
 export const replace = curry((re, rpl, s) => s.replace(re, rpl))
@@ -282,7 +300,7 @@ export const accumulate = delay => {
 }
 
 // Object functions
-export const FunctionalMixin = behaviour => {
+export const FunctionalMixin = (behaviour, sharedBehaviour = {}) => {
   const instanceKeys = Reflect.ownKeys(behaviour)
   const sharedKeys = Reflect.ownKeys(sharedBehaviour)
   const typeTag = Symbol('isA')
@@ -313,7 +331,7 @@ export const FunctionalMixin = behaviour => {
 }
 
 // Basically same as above, but for classes
-export const ClassMixin = behaviour => {
+export const ClassMixin = (behaviour, sharedBehaviour = {}) => {
   const instanceKeys = Reflect.ownKeys(behaviour)
   const sharedKeys = Reflect.ownKeys(sharedBehaviour)
   const typeTag = Symbol('isA')
@@ -543,7 +561,7 @@ const sortReducer = (accumulator, value) => {
 const collisionReducer = (accumulator, value, index, arr) =>
   value === arr[index + 1] ? [...accumulator, value] : accumulator
 
-const isDescriptor = obj => obj && (obj['state'] || obj['methods'])
+const isDescriptor = obj => obj && (obj.state || obj.methods)
 
 // extend Object
 if (typeof Object.impl !== 'function') {
@@ -655,7 +673,7 @@ export function* mapAllWith(fn, iterable) {
 
 export function* filterWith(fn, iterable) {
   for (const element of iterable) {
-    if (!!fn(element)) yield element
+    if (!fn(element)) yield element
   }
 }
 
