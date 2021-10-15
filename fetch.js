@@ -36,7 +36,7 @@ export function createClient(
       },
     }
     return {
-      req: fetch(`${apiEndpoint}/${endpoint}`, config).then(isError).then(isJson),
+      req: fetch(`${apiEndpoint}${endpoint}`, config).then(isError).then(isJson),
       abort: controller.abort.bind(controller),
     }
   }
