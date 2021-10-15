@@ -144,6 +144,12 @@ export const instanceEval =
   (fn, ...args) =>
     fn.apply(instance, args)
 
+export const deepProp = curry((path, a) => {
+  if (!Array.isArray(path)) path = path.split('.')
+  const [p, ...rest] = path
+  return !rest.length ? prop(p, a) : deepProp(rest, prop(p, a))
+})
+
 // map, filter, reduce
 export const forEach = curry((f, M) => M.forEach(f))
 export const map = curry((f, M) => M.map(f))
