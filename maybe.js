@@ -1,4 +1,4 @@
-import { compose, composeAsync } from './index.js'
+import { isFunction, compose, composeAsync } from './index.js'
 // Maybe
 function throwError(error) {
   throw error
@@ -235,15 +235,6 @@ export class IO {
   constructor(fn) {
     this.unsafePerformIO = fn
   }
-  getOrElse(defaultValue) {
-    return this.unsafePerformIO() ?? defaultValue
-  }
-  getOrElseThrow(error) {
-    return this.unsafePerformIO() ?? throwError(error)
-  }
-  get unsafePerformIO() {
-    return this.unsafePerformIO
-  }
   fold(fn = x => x) {
     return fn(this.unsafePerformIO)
   }
@@ -254,7 +245,7 @@ export class IO {
     return this.map(fn).merge()
   }
   ap(f) {
-    return this.chain(fn => f.map(fn))
+    return this.flatMap(fn => f.map(fn))
   }
   merge() {
     return new IO(() => this.unsafePerformIO().unsafePerformIO())
@@ -266,7 +257,7 @@ export class IO {
     return { type: 'IO', value: this.unsafePerformIO }
   }
   static of(fn) {
-    return new IO(fn)
+    return new IO(() => fn)
   }
 }
 
@@ -275,12 +266,6 @@ export class IOAsync {
 
   constructor(fn) {
     this.unsafePerformIO = fn
-  }
-  async getOrElse(defaultValue) {
-    return (await this.unsafePerformIO()) ?? defaultValue
-  }
-  async getOrElseThrow(error) {
-    return (await this.unsafePerformIO()) ?? throwError(error)
   }
   async fold(fn = async x => await x) {
     return await fn(this.unsafePerformIO)
@@ -301,6 +286,6 @@ export class IOAsync {
     return { type: 'IOAsync', value: this.unsafePerformIO }
   }
   static of(fn) {
-    return new IOAsync(fn)
+    return new IOAsync(async () => await fn)
   }
 }
