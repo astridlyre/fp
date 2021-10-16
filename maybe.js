@@ -35,10 +35,10 @@ export class Maybe {
 }
 
 export class Just extends Maybe {
-  isJust() {
+  get isJust() {
     return true
   }
-  isNothing() {
+  get isNothing() {
     return false
   }
   fold(fn = x => x) {
@@ -54,7 +54,7 @@ export class Just extends Maybe {
     return Maybe.of(fn(this.value).merge())
   }
   ap(Ma) {
-    return Ma.isNothing()
+    return Ma.isNothing
       ? Ma
       : isFunction(this.value)
       ? Maybe.of(
@@ -76,10 +76,10 @@ export class Just extends Maybe {
 }
 
 export class Nothing extends Maybe {
-  isJust() {
+  get isJust() {
     return false
   }
-  isNothing() {
+  get isNothing() {
     return true
   }
   map() {
@@ -123,10 +123,10 @@ export class Result {
 }
 
 export class Failure extends Result {
-  isSuccess() {
+  get isSuccess() {
     return false
   }
-  isFailure() {
+  get isFailure() {
     return true
   }
   map() {
@@ -159,10 +159,10 @@ export class Failure extends Result {
 }
 
 export class Success extends Result {
-  isSuccess() {
+  get isSuccess() {
     return true
   }
-  isFailure() {
+  get isFailure() {
     return false
   }
   map(fn) {
@@ -172,7 +172,7 @@ export class Success extends Result {
     return Result.of(fn(this.value).merge())
   }
   ap(Rs) {
-    return Rs.isFailure()
+    return Rs.isFailure
       ? Rs
       : isFunction(this.value)
       ? Result.of(
@@ -235,9 +235,6 @@ export class IO {
   constructor(fn) {
     this.unsafePerformIO = fn
   }
-  fold(fn = x => x) {
-    return fn(this.unsafePerformIO)
-  }
   map(fn) {
     return new IO(compose(fn, this.unsafePerformIO))
   }
@@ -256,8 +253,8 @@ export class IO {
   toJSON() {
     return { type: 'IO', value: this.unsafePerformIO }
   }
-  static of(fn) {
-    return new IO(() => fn)
+  static of(x) {
+    return new IO(() => x)
   }
 }
 
@@ -267,14 +264,11 @@ export class IOAsync {
   constructor(fn) {
     this.unsafePerformIO = fn
   }
-  async fold(fn = async x => await x) {
-    return await fn(this.unsafePerformIO)
-  }
   async map(fn) {
     return new IO(composeAsync(fn, this.unsafePerformIO))
   }
   async flatMap(fn) {
-    return this.map(fn).merge()
+    return await this.map(fn).merge()
   }
   async merge() {
     return new IOAsync(async () => await this.unsafePerformIO().unsafePerformIO())

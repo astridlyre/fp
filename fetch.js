@@ -6,7 +6,8 @@ export function createClient(
   }
 ) {
   async function isError(res) {
-    if (!res.ok) throw new Error(await res.text())
+    if (!res.ok)
+      throw new Error((await res.text()) || `HTTP response was not ok: ${res.status}`)
     return res
   }
 

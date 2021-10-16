@@ -175,6 +175,10 @@ export const composeAsync2 = (f, g) =>
     return await f.call(this, await g.call(this, ...args))
   }
 
+export const liftA2 = curry((fn, a1, a2) => a1.map(fn).ap(a2))
+export const liftA3 = curry((fn, a1, a2, a3) => a1.map(fn).ap(a2).ap(a3))
+export const liftA4 = curry((fn, a1, a2, a3, a4) => a1.map(fn).ap(a2).ap(a3).ap(a4))
+
 export const composeAsync = (...fns) => fns.reduce(composeAsync2)
 export const pipeAsync = (...fns) => fns.reduceRight(composeAsync2)
 export const mapAsync = async (f, a) => await Promise.all(a.map(f))
