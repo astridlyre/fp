@@ -259,7 +259,7 @@ export class IO {
 }
 
 export class IOAsync {
-  [Symbol.toString] = 'IOAsync'
+  [Symbol.toStringTag] = 'IOAsync'
 
   constructor(fn) {
     this.unsafePerformIO = fn
@@ -281,5 +281,123 @@ export class IOAsync {
   }
   static of(fn) {
     return new IOAsync(async () => await fn)
+  }
+}
+
+export class Pair {
+  #left
+  #right;
+  [Symbol.toStringTag] = 'Pair'
+
+  constructor(left, right) {
+    this.#left = left
+    this.#right = right
+  }
+  get left() {
+    return this.#left
+  }
+  get right() {
+    return this.#right
+  }
+  get() {
+    return { left: this.#left, right: this.#right }
+  }
+  map(fn) {
+    return new Pair(fn(this.#left), fn(this.#right))
+  }
+  flatMap(fn) {
+    return new Pair(...fn(this.#left, this.#right))
+  }
+  toString() {
+    return `Pair {${this.#left}, ${this.#right}}`
+  }
+  toJSON() {
+    return { type: 'Pair', value: this.get() }
+  }
+  *[Symbol.iterator]() {
+    yield this.#left
+    yield this.#right
+  }
+  static of(left, right) {
+    return new Pair(left, right)
+  }
+  static eq(pairA, pairB) {
+    return pairA.left === pairB.left && pairA.right === pairB.right
+  }
+}
+
+export class Triple {
+  #left
+  #middle
+  #right;
+  [Symbol.toStringTag] = 'Triple'
+
+  constructor(left, middle, right) {
+    this.#left = left
+    this.#middle = middle
+    this.#right = right
+  }
+  get left() {
+    return this.#left
+  }
+  get middle() {
+    return this.#middle
+  }
+  get right() {
+    return this.#right
+  }
+  get() {
+    return { left: this.#left, middle: this.#middle, right: this.#right }
+  }
+  map(fn) {
+    return new Triple(fn(this.#left), fn(this.#middle), fn(this.#right))
+  }
+  flatMap(fn) {
+    return new Triple(...fn(this.#left, this.#middle, this.#right))
+  }
+  toString() {
+    return `Triple {${this.#left}, ${this.#middle}, ${this.#right}}`
+  }
+  toJSON() {
+    return { type: 'Triple', value: this.get() }
+  }
+  *[Symbol.iterator]() {
+    yield this.#left
+    yield this.#middle
+    yield this.#right
+  }
+  static of(left, middle, right) {
+    return new Triple(left, middle, right)
+  }
+  static eq(tripleA, tripleB) {
+    return (
+      tripleA.left === tripleB.left &&
+      tripleA.middle === tripleB.middle &&
+      tripleA.right === tripleB.right
+    )
+  }
+}
+
+export class Enum {
+  #types = new Set();
+  [Symbol.toStringTag] = 'Enum'
+
+  constructor(types) {
+    types.forEach(type => this.#types.add(type))
+  }
+  has(type) {
+    return this.#types.has(type)
+  }
+  toString() {
+    return `Enum [${[...this.#types].join(', ')}]`
+  }
+  toJSON() {
+    return { type: 'Enum', value: [...this.#types] }
+  }
+  [Symbol.iterator]() {
+    return this.#types[Symbol.iterator]
+  }
+  static of(...types) {
+    return new Enum(types)
   }
 }

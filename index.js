@@ -1,5 +1,5 @@
-import { Maybe, Result, Try, TryAsync, IO, IOAsync } from './maybe.js'
-export { Maybe, Result, Try, TryAsync, IO, IOAsync }
+import { Maybe, Result, Try, TryAsync, IO, IOAsync, Pair, Triple, Enum } from './maybe.js'
+export { Maybe, Result, Try, TryAsync, IO, IOAsync, Pair, Triple, Enum }
 /*
  * My lil functional programming collection
  */
