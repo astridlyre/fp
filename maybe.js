@@ -32,6 +32,16 @@ export class Maybe {
   static fromEmpty(v) {
     return Maybe.of(v).map(x => (x.length === 0 ? null : x))
   }
+
+  [Symbol.toPrimitive](hint) {
+    switch (hint) {
+      case 'string':
+        return this.toString()
+      case 'number':
+      default:
+        return this.get()
+    }
+  }
 }
 
 export class Just extends Maybe {
@@ -119,6 +129,16 @@ export class Result {
 
   static fromPromise(p) {
     return p.then(result => new Success(result)).catch(err => new Failure(err.message))
+  }
+
+  [Symbol.toPrimitive](hint) {
+    switch (hint) {
+      case 'string':
+        return this.toString()
+      case 'number':
+      default:
+        return this.get()
+    }
   }
 }
 
