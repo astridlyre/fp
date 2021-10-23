@@ -32,7 +32,6 @@ export class Maybe {
   static fromEmpty(v) {
     return Maybe.of(v).map(x => (x.length === 0 ? null : x))
   }
-
   [Symbol.toPrimitive](hint) {
     switch (hint) {
       case 'string':
@@ -41,6 +40,10 @@ export class Maybe {
       default:
         return this.get()
     }
+  }
+  *[Symbol.iterator]() {
+    yield this.isNothing ? new Nothing(this.#value) : undefined
+    yield this.isJust ? new Just(this.#value) : undefined
   }
 }
 
@@ -130,7 +133,6 @@ export class Result {
   static fromPromise(p) {
     return p.then(result => new Success(result)).catch(err => new Failure(err.message))
   }
-
   [Symbol.toPrimitive](hint) {
     switch (hint) {
       case 'string':
@@ -139,6 +141,10 @@ export class Result {
       default:
         return this.get()
     }
+  }
+  *[Symbol.iterator]() {
+    yield this.isFailure ? new Failure(this.#value) : undefined
+    yield this.isSuccess ? new Success(this.#value) : undefined
   }
 }
 

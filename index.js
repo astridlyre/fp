@@ -155,6 +155,12 @@ export const stringify = JSON.stringify.bind(JSON)
 export const parse = JSON.parse.bind(JSON)
 export const toString = String
 export const toInteger = s => Number.parseInt(s, 10)
+export const padStart = curry((x, reps, fill) =>
+  String.prototype.padStart.call(x, reps, fill)
+)
+export const padEnd = curry((x, reps, fill) =>
+  String.prototype.padEnd.call(x, reps, fill)
+)
 
 // map, filter, reduce
 export const forEach = curry((f, M) => M.forEach(f))
