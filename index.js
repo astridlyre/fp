@@ -149,6 +149,13 @@ export const deepProp = curry((path, a) => {
   return !rest.length ? prop(p, a) : deepProp(rest, prop(p, a))
 })
 
+export const toJSON = x => JSON.stringify(x)
+export const fromJSON = x => JSON.parse(x)
+export const stringify = JSON.stringify.bind(JSON)
+export const parse = JSON.parse.bind(JSON)
+export const toString = String
+export const toInteger = s => Number.parseInt(s, 10)
+
 // map, filter, reduce
 export const forEach = curry((f, M) => M.forEach(f))
 export const map = curry((f, M) => M.map(f))
@@ -238,7 +245,6 @@ export const replace = curry((re, rpl, s) => s.replace(re, rpl))
 export const split = curry((sep, s) => s.split(sep))
 export const toLowerCase = s => s.toLowerCase()
 export const toUpperCase = s => s.toUpperCase()
-export const toString = String
 export const prepend = curry((s1, s2) => `${s1}${s2}`)
 export const append = curry((s1, s2) => `${s2}${s1}`)
 
@@ -637,6 +643,8 @@ export const deepCopy = obj => {
   return aux
 }
 Object.deepFreeze = Object.deepFreeze || deepFreeze
+
+export const immutable = compose(Object.seal, Object.deepFreeze)
 
 // Iterables
 export function* mapWith(fn, iterable) {
