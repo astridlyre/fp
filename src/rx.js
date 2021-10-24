@@ -14,34 +14,32 @@ const withNext = observer => next => ({
 
 if (!(Observable.fromGenerator || typeof Observable.fromGenerator !== 'function')) {
   if (ReadableStream === undefined) {
-    import('stream').then(({ Readable }) => {
-      Object.defineProperty(Observable, 'fromGenerator', {
-        value(generator) {
-          return new Observable(observer => {
-            Readable.from(generator)
-              .on('data', observer.next.bind(observer))
-              .on('end', observer.complete.bind(observer))
-          })
-        },
-        enumerable: false,
-        writable: false,
-        configurable: false,
-      })
+    const { Readable } = await import('stream')
+    Object.defineProperty(Observable, 'fromGenerator', {
+      value(generator) {
+        return new Observable(observer => {
+          Readable.from(generator)
+            .on('data', observer.next.bind(observer))
+            .on('end', observer.complete.bind(observer))
+        })
+      },
+      enumerable: false,
+      writable: false,
+      configurable: false,
     })
   } else {
-    import('./web-streams.js').then(() => {
-      Object.defineProperty(Observable, 'fromGenerator', {
-        value(generator) {
-          return new Observable(observer => {
-            ReadableStream.from(generator)
-              .on('data', observer.next.bind(observer))
-              .on('end', observer.complete.bind(observer))
-          })
-        },
-        enumerable: false,
-        writable: false,
-        configurable: false,
-      })
+    await import('./web-streams.js')
+    Object.defineProperty(Observable, 'fromGenerator', {
+      value(generator) {
+        return new Observable(observer => {
+          ReadableStream.from(generator)
+            .on('data', observer.next.bind(observer))
+            .on('end', observer.complete.bind(observer))
+        })
+      },
+      enumerable: false,
+      writable: false,
+      configurable: false,
     })
   }
 }
