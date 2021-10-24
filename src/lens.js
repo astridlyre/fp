@@ -1,4 +1,5 @@
 import { Maybe } from './maybe.js'
+import { curry } from './combinators.js'
 
 // Lenses
 class Constant {
