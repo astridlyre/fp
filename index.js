@@ -167,6 +167,7 @@ import {
 import * as lazy from './src/lazy.js'
 import * as lens from './src/lens.js'
 import * as rx from './src/rx.js'
+import { EventEmitter, reactivize } from './src/reactivize.js'
 
 const { Observable } = rx
 export {
@@ -209,6 +210,7 @@ export {
   divideRight,
   Enum,
   eq,
+  EventEmitter,
   every,
   FactoryFactory,
   Failure,
@@ -289,6 +291,7 @@ export {
   provided,
   push,
   range,
+  reactivize,
   reduceAsync,
   reduceRight,
   reduceWith,

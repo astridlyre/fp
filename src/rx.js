@@ -125,6 +125,19 @@ export const buffer = curry((count, stream) => {
   })
 })
 
+export const take = curry((numberToTake, stream) => {
+  let taken = 0
+  return new Observable(observer => {
+    const subs = stream.subscribe(
+      withNext(observer)(value => {
+        if (taken++ === numberToTake) return observer.complete()
+        observer.next(value)
+      })
+    )
+    return () => subs.unsubscribe()
+  })
+})
+
 export const skip = curry((count, stream) => {
   let skipped = 0
   return new Observable(observer => {
@@ -178,6 +191,9 @@ export const ReactiveExtensions = {
   },
   skip(count) {
     return skip(count, this)
+  },
+  take(numberToTake) {
+    return take(numberToTake, this)
   },
   reduce(reducer, initialValue = {}) {
     return reduce(reducer, initialValue, this)

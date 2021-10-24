@@ -129,7 +129,6 @@ export class Result {
   static fromEmpty(a) {
     return Result.of(a).map(x => (x.length === 0 ? null : x))
   }
-
   static fromPromise(p) {
     return p.then(result => new Success(result)).catch(err => new Failure(err.message))
   }
