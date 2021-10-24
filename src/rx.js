@@ -143,7 +143,7 @@ export const reduce = curry((reducer, initialValue, stream) => {
   return new Observable(observer => {
     const subs = stream.subscribe({
       next(value) {
-        result = reducer(result, value)
+        accumulator = reducer(accumulator, value)
       },
       error(e) {
         observer.error(e)
