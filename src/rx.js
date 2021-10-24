@@ -1,6 +1,6 @@
 import { curry } from './combinators.js'
 import 'core-js/features/observable/index.js'
-const { Observable } = globalThis
+export const { Observable } = globalThis
 
 const withNext = observer => next => ({
   next,
@@ -190,4 +190,3 @@ export const ReactiveExtensions = {
 }
 
 Object.assign(Observable.prototype, ReactiveExtensions)
-export const Observable
