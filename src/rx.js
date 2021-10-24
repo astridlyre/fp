@@ -13,7 +13,7 @@ const withNext = observer => next => ({
 })
 
 if (!(Observable.fromGenerator || typeof Observable.fromGenerator !== 'function')) {
-  if (!ReadableStream) {
+  if (ReadableStream === undefined) {
     import('stream').then(({ Readable }) => {
       Object.defineProperty(Observable, 'fromGenerator', {
         value(generator) {

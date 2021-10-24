@@ -166,11 +166,9 @@ import {
 } from './src/classes.js'
 import * as lazy from './src/lazy.js'
 import * as lens from './src/lens.js'
-import * as nodeStreams from './src/node-streams.js'
-import * as webStreams from './src/web-streams.js'
 import * as rx from './src/rx.js'
 
-const { Observable } = rx.Observable
+const { Observable } = rx
 export {
   accumulate,
   add,
@@ -269,7 +267,6 @@ export {
   memoizeIter,
   multipy,
   multipyRight,
-  nodeStreams,
   not,
   Nothing,
   Observable,
@@ -331,7 +328,6 @@ export {
   unless,
   unshift,
   untilWith,
-  webStreams,
   wrapWith,
   zip,
   zipMap,
