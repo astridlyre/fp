@@ -12,7 +12,10 @@ const withNext = observer => next => ({
   },
 })
 
-if (!(Observable.fromGenerator || typeof Observable.fromGenerator !== 'function')) {
+if (
+  Observable.fromGenerator === undefined ||
+  typeof Observable.fromGenerator !== 'function'
+) {
   if (ReadableStream === undefined) {
     const { Readable } = await import('stream')
     Object.defineProperty(Observable, 'fromGenerator', {

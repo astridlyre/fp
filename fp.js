@@ -4107,7 +4107,7 @@ var withNext = observer => next => ({
 
 });
 
-if (!(Observable$1.fromGenerator || typeof Observable$1.fromGenerator !== 'function')) {
+if (Observable$1.fromGenerator === undefined || typeof Observable$1.fromGenerator !== 'function') {
   if (ReadableStream$1 === undefined) {
     var {
       Readable
