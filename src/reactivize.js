@@ -70,8 +70,6 @@ function implementsPushProtocol(obj) {
 
 const ON_EVENT = 'on'
 const END_EVENT = 'end'
-const LOG_LABEL = 'IN-STREAM'
-const LOG_LABEL_INNER = `${LOG_LABEL}:push`
 
 export const reactivize = obj => {
   if (!implementsPushProtocol(obj)) {
@@ -95,19 +93,14 @@ export const reactivize = obj => {
   const observable = {
     [Symbol.observable]() {
       return new Observable(observer => {
-        console.group(LOG_LABEL)
         emitter.on(ON_EVENT, newValue => {
-          console.group(LOG_LABEL_INNER)
-          console.log('Emitting new value:', newValue)
           observer.next(newValue)
-          console.groupEnd(LOG_LABEL_INNER)
         })
         emitter.on(END_EVENT, () => observer.complete())
         for (const value of obj) {
           observer.next(value)
         }
         return () => {
-          console.groupEnd(LOG_LABEL)
           emitter.removeAllListeners(ON_EVENT, END_EVENT)
         }
       })
