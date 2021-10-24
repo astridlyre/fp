@@ -1407,7 +1407,7 @@ function* rest(iterable) {
   iterator.next();
   yield* iterator;
 }
-function* take(numberToTake, iterable) {
+function* take$1(numberToTake, iterable) {
   var iterator = iterable[Symbol.iterator]();
 
   for (var i = 0; i < numberToTake; ++i) {
@@ -2234,9 +2234,9 @@ var engineUserAgent = getBuiltIn$5('navigator', 'userAgent') || '';
 
 var global$c = global$e;
 var userAgent = engineUserAgent;
-var process = global$c.process;
+var process$1 = global$c.process;
 var Deno = global$c.Deno;
-var versions = process && process.versions || Deno && Deno.version;
+var versions = process$1 && process$1.versions || Deno && Deno.version;
 var v8 = versions && versions.v8;
 var match, version;
 
@@ -4200,6 +4200,16 @@ var buffer = curry((count, stream) => {
     return () => subs.unsubscribe();
   });
 });
+var take = curry((numberToTake, stream) => {
+  var taken = 0;
+  return new Observable$1(observer => {
+    var subs = stream.subscribe(withNext(observer)(value => {
+      if (taken++ === numberToTake) return observer.complete();
+      observer.next(value);
+    }));
+    return () => subs.unsubscribe();
+  });
+});
 var skip = curry((count, stream) => {
   var skipped = 0;
   return new Observable$1(observer => {
@@ -4253,6 +4263,10 @@ var ReactiveExtensions = {
     return skip(count, this);
   },
 
+  take(numberToTake) {
+    return take(numberToTake, this);
+  },
+
   reduce(reducer) {
     var initialValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     return reduce(reducer, initialValue, this);
@@ -4278,11 +4292,184 @@ var rx = /*#__PURE__*/Object.freeze({
   map: map,
   filter: filter,
   buffer: buffer,
+  take: take,
   skip: skip,
   reduce: reduce,
   mapTo: mapTo,
   ReactiveExtensions: ReactiveExtensions
 });
+
+var EventEmitter;
+
+if (typeof process != 'undefined' && typeof process.versions != 'undefined') {
+  ({
+    EventEmitter
+  } = await import('events'));
+} else {
+  var _events;
+
+  var _defaultValue = /*#__PURE__*/new WeakMap();
+
+  class DefaultMap extends Map {
+    constructor(defaultValue) {
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      super(...args);
+
+      _classPrivateFieldInitSpec(this, _defaultValue, {
+        writable: true,
+        value: void 0
+      });
+
+      _classPrivateFieldSet(this, _defaultValue, defaultValue);
+    }
+
+    get(key) {
+      var value = super.get(key);
+      return value === undefined ? _classPrivateFieldGet(this, _defaultValue) : value;
+    }
+
+  }
+
+  EventEmitter = (_events = /*#__PURE__*/new WeakMap(), class EventEmitter {
+    constructor() {
+      _classPrivateFieldInitSpec(this, _events, {
+        writable: true,
+        value: new DefaultMap([])
+      });
+    }
+
+    getListeners(event) {
+      return _classPrivateFieldGet(this, _events).get(event);
+    }
+
+    addListener(event, listener) {
+      var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      var listeners = _classPrivateFieldGet(this, _events).get(event);
+
+      if (options.once) {
+        _classPrivateFieldGet(this, _events).set(event, listeners.concat({
+          listener,
+          once: true
+        }));
+
+        return this;
+      }
+
+      _classPrivateFieldGet(this, _events).set(event, listeners.concat({
+        listener
+      }));
+
+      return this;
+    }
+
+    addOnceListener(event, listener) {
+      return this.addListener(event, listener, {
+        once: true
+      });
+    }
+
+    on(event, listener, options) {
+      return this.addListener(event, listener, options);
+    }
+
+    removeListener(event, listener) {
+      var listeners = _classPrivateFieldGet(this, _events).get(event);
+
+      _classPrivateFieldGet(this, _events).set(event, listeners.filter(l => l.listener !== listener));
+
+      return this;
+    }
+
+    removeAllListeners() {
+      for (var _len2 = arguments.length, events = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        events[_key2] = arguments[_key2];
+      }
+
+      events.forEach(event => _classPrivateFieldGet(this, _events).delete(event));
+    }
+
+    emit(event) {
+      for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+        args[_key3 - 1] = arguments[_key3];
+      }
+
+      var listeners = _classPrivateFieldGet(this, _events).get(event);
+
+      listeners.forEach(_ref => {
+        var {
+          listener,
+          once
+        } = _ref;
+        return once && this.removeListener(event, listener), listener(...args);
+      });
+      return this;
+    }
+
+  });
+}
+
+function implementsPushProtocol(obj) {
+  return obj && Symbol.iterator in Object(obj) && typeof obj['push'] === 'function' && typeof obj[Symbol.iterator] === 'function';
+}
+
+var ON_EVENT = 'on';
+var END_EVENT = 'end';
+var reactivize = obj => {
+  if (!implementsPushProtocol(obj)) {
+    throw new TypeError('Object does not implement a push protocol');
+  }
+
+  var emitter = new EventEmitter();
+  var pushProxy = new Proxy(obj, {
+    get() {
+      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
+      }
+
+      var [target, key] = args;
+
+      if (key === 'push') {
+        var pushRef = target[key];
+        return function () {
+          for (var _len5 = arguments.length, capturedArgs = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+            capturedArgs[_key5] = arguments[_key5];
+          }
+
+          var result = pushRef.call(target, ...capturedArgs);
+          emitter.emit(ON_EVENT, ...capturedArgs);
+          return result;
+        };
+      }
+
+      return Reflect.get(...args);
+    }
+
+  });
+  var observable = {
+    [Symbol.observable]() {
+      return new Observable$1(observer => {
+        emitter.on(ON_EVENT, newValue => {
+          observer.next(newValue);
+        });
+        emitter.on(END_EVENT, () => observer.complete());
+
+        for (var value of obj) {
+          observer.next(value);
+        }
+
+        return () => {
+          emitter.removeAllListeners(ON_EVENT, END_EVENT);
+        };
+      });
+    }
+
+  };
+  return Object.assign(pushProxy, observable);
+};
 
 var {
   Observable
@@ -4355,4 +4542,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, accumulate, add, addRight, after, afterAll, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, compose2, composeAsync, composeAsync2, composeM, composeM2, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepProp, demethodize, divide, divideRight, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip, flip2, flip3, fold, forEach, fromJSON, getOrElseThrow, head, identity, immutable, instanceEval, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, maybe, memoize, memoizeIter, multipy, multipyRight, not, once, padEnd, padStart, parse, partition, pipe, pipeAsync, pluck, pop, pow, prepend, prop$1 as prop, props, provided, push, range, reduceAsync, reduceRight, reduceWith, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, shift, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unless, unshift, untilWith, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, accumulate, add, addRight, after, afterAll, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, compose2, composeAsync, composeAsync2, composeM, composeM2, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepProp, demethodize, divide, divideRight, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip, flip2, flip3, fold, forEach, fromJSON, getOrElseThrow, head, identity, immutable, instanceEval, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, maybe, memoize, memoizeIter, multipy, multipyRight, not, once, padEnd, padStart, parse, partition, pipe, pipeAsync, pluck, pop, pow, prepend, prop$1 as prop, props, provided, push, range, reactivize, reduceAsync, reduceRight, reduceWith, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, shift, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unless, unshift, untilWith, wrapWith, zip, zipMap, zipWith };
