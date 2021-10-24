@@ -1,6 +1,6 @@
 {
   "name": "@ebflat9/fp",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "description": "my fp utils",
   "main": "index.js",
   "type": "module",
@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/astridlyre/fp/issues"
   },
-  "homepage": "https://github.com/astridlyre/fp#readme"
+  "homepage": "https://github.com/astridlyre/fp#readme",
+  "dependencies": {
+    "core-js": "^3.18.3"
+  }
 }

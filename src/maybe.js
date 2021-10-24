@@ -1,4 +1,4 @@
-import { isFunction, compose, composeAsync } from './index.js'
+import { isFunction, compose, composeAsync } from './combinators.js'
 // Maybe
 function throwError(error) {
   throw error
