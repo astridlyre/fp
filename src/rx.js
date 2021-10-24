@@ -1,6 +1,6 @@
 import { curry } from './combinators.js'
 import 'core-js/features/observable/index.js'
-export const { Observable } = globalThis
+export const { Observable, ReadableStream } = globalThis
 
 const withNext = observer => next => ({
   next,
@@ -13,8 +13,8 @@ const withNext = observer => next => ({
 })
 
 if (!(Observable.fromGenerator || typeof Observable.fromGenerator !== 'function')) {
-  if (process && process.env) {
-    import('streams').then(({ Readable }) => {
+  if (!ReadableStream) {
+    import('stream').then(({ Readable }) => {
       Object.defineProperty(Observable, 'fromGenerator', {
         value(generator) {
           return new Observable(observer => {
