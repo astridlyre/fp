@@ -18,12 +18,4 @@ export default {
   rx,
 }
 
-export const combinators
-export const fetch
-export const rx
-export const iterators
-export const classes
-export const lazy
-export const lens
-export const nodeStreams
-export const webStreams
+export { combinators, fetch, rx, iterators, classes, lazy, lens, nodeStreams, webStreams }
