@@ -125,7 +125,6 @@ export const Numbers = Object.assign(
 )
 
 const EMPTY = { isEmpty: () => true }
-const isEmpty = node => node === EMPTY
 
 export const Pair = (car, cdr = EMPTY) =>
   Object.assign(

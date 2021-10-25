@@ -179,6 +179,13 @@ export const mapTo = curry(
     })
 )
 
+export const forEach = curry((fn, stream) => {
+  const subs = stream.subscribe({
+    next: fn,
+  })
+  return () => subs.unsubscribe()
+})
+
 export const ReactiveExtensions = {
   filter(predicate) {
     return filter(predicate, this)
@@ -203,6 +210,9 @@ export const ReactiveExtensions = {
   },
   throttle(limit) {
     return throttle(limit, this)
+  },
+  forEach(fn) {
+    return forEach(fn, this)
   },
 }
 
