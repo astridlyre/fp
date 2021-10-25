@@ -24,6 +24,7 @@ if (
           Readable.from(generator)
             .on('data', observer.next.bind(observer))
             .on('end', observer.complete.bind(observer))
+            .on('error', observer.error.bind(observer))
         })
       },
       enumerable: false,
@@ -38,6 +39,7 @@ if (
           ReadableStream.from(generator)
             .on('data', observer.next.bind(observer))
             .on('end', observer.complete.bind(observer))
+            .on('error', observer.error.bind(observer))
         })
       },
       enumerable: false,
@@ -45,6 +47,37 @@ if (
       configurable: false,
     })
   }
+}
+
+if (Observable.fromEvent === undefined || typeof Observable.fromEvent !== 'function') {
+  Object.defineProperty(Observable, 'fromEvent', {
+    value: curry(
+      (emitter, event, handler) =>
+        new Observable(observer => {
+          emitter.on(event, (...args) => observer.next(handler(...args)))
+          emitter.on('end', observer.complete.bind(observer))
+          emitter.on('error', observer.error.bind(observer))
+        })
+    ),
+    enumerable: false,
+    writable: false,
+    configurable: false,
+  })
+}
+
+if (
+  Observable.fromPromise === undefined ||
+  typeof Observable.fromPromise !== 'function'
+) {
+  Object.defineProperty(Observable, 'fromPromise', {
+    value: promise =>
+      new Observable(observer => {
+        promise
+          .then(value => observer.next(value))
+          .catch(err => observer.error(err))
+          .finally(() => observer.complete())
+      }),
+  })
 }
 
 export const listen$ = curry((eventName, element) => {
@@ -100,8 +133,12 @@ export const filter = curry(
     new Observable(observer => {
       const subs = stream.subscribe(
         withNext(observer)(value => {
-          if (predicate(value)) {
-            observer.next(value)
+          try {
+            if (predicate(value)) {
+              observer.next(value)
+            }
+          } catch (err) {
+            observer.error(err)
           }
         })
       )
@@ -157,7 +194,11 @@ export const reduce = curry((reducer, initialValue, stream) => {
   return new Observable(observer => {
     const subs = stream.subscribe({
       next(value) {
-        accumulator = reducer(accumulator, value)
+        try {
+          accumulator = reducer(accumulator, value)
+        } catch (err) {
+          observer.error(err)
+        }
       },
       error(e) {
         observer.error(e)
@@ -179,11 +220,29 @@ export const mapTo = curry(
     })
 )
 
+export const _do = curry(
+  (fn, stream) =>
+    new Observable(observer => {
+      const subs = stream.subscribe(
+        withNext(observer)(value => {
+          try {
+            fn(value)
+            observer.next(value)
+          } catch (err) {
+            observer.error(err)
+          }
+        })
+      )
+      return () => subs.unsubscribe()
+    })
+)
+
 export const forEach = curry((fn, stream) => {
   const subs = stream.subscribe({
     next: fn,
+    error: fn,
   })
-  return () => subs.unsubscribe()
+  return { unsubscribe: subs.unsubscribe.bind(subs) }
 })
 
 export const ReactiveExtensions = {
@@ -213,6 +272,9 @@ export const ReactiveExtensions = {
   },
   forEach(fn) {
     return forEach(fn, this)
+  },
+  do(fn) {
+    return _do(fn, this)
   },
 }
 
