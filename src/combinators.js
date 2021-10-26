@@ -4,20 +4,6 @@ export const identity = x => x
 // constant () => a
 export const constant = a => b => a
 
-// fip order of arguments
-export const flip = f =>
-  function flip(a) {
-    return b => f.call(this, b, a)
-  }
-export const flip2 = f =>
-  function flip2(a, b) {
-    return f.call(this, b, a)
-  }
-export const flip3 = f =>
-  function flip3(a, b, c) {
-    return f.call(this, b, c, a)
-  }
-
 // arity functions
 export const arity = (fn, n) =>
   function arity(...args) {
@@ -46,7 +32,7 @@ export const isNumber = isTypeOf('number')
 export const isBoolean = isTypeOf('boolean')
 export const isNull = x => x === null
 export const isString = isTypeOf('string')
-export const isObject = isTypeOf('object')
+export const isObject = x => x !== null && typeof x === 'object'
 export const isArray = a => Array.isArray(a)
 export const isInstanceOf = a => b => b instanceof a
 export const isFunction = f => f && typeof f === 'function'
@@ -60,7 +46,7 @@ export const len = a =>
     : isSet(a) || isMap(a)
     ? a.size
     : isObject(a)
-    ? a.entries().length
+    ? Object.entries(a).length
     : void 0
 
 // Compose and pipe
@@ -89,14 +75,22 @@ export const tap = curry((fn, x) => (fn(x), x))
 // not and invert
 export const not = curry((f, a) => !f(a))
 export const invert = curry((f, a) => -f(a))
+export const flip2 = f =>
+  curry(function flip(a, b) {
+    return f.call(this, b, a)
+  })
+export const flip3 = f =>
+  curry(function flip(a, b, c) {
+    return f.call(this, b, c, a)
+  })
 
 // Logging
 export const tee = tap(console.log.bind(console))
 export const log = (fn, logger = console.log.bind(console)) =>
   function log(...args) {
-    logger(`Entering function ${fn.name}(${JSON.stringify(args, null, 2)})`)
+    logger(`Entering function ${fn.name}(${args.map(a => JSON.stringify(a)).join(',')})`)
     const result = fn.apply(this, args)
-    logger(`Exiting function ${fn.name} -> ${JSON.stringify(result, null, 2)}`)
+    logger(`\nExiting function ${fn.name} -> ${JSON.stringify(result)}`)
     return result
   }
 
@@ -131,10 +125,6 @@ export const props = curry((names, a) => names.map(n => prop(n, a)))
 export const invoke =
   (fn, ...args) =>
   instance =>
-    fn.apply(instance, args)
-export const instanceEval =
-  instance =>
-  (fn, ...args) =>
     fn.apply(instance, args)
 
 export const deepProp = curry((path, a) => {

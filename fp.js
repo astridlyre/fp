@@ -144,17 +144,7 @@ function _classPrivateFieldInitSpec(obj, privateMap, value) {
 // identity x returns x
 var identity = x => x; // constant () => a
 
-var constant = a => b => a; // fip order of arguments
-
-var flip = f => function flip(a) {
-  return b => f.call(this, b, a);
-};
-var flip2 = f => function flip2(a, b) {
-  return f.call(this, b, a);
-};
-var flip3 = f => function flip3(a, b, c) {
-  return f.call(this, b, c, a);
-}; // arity functions
+var constant = a => b => a; // arity functions
 
 var arity = (fn, n) => function arity() {
   for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
@@ -190,14 +180,14 @@ var isNumber = isTypeOf('number');
 var isBoolean = isTypeOf('boolean');
 var isNull = x => x === null;
 var isString = isTypeOf('string');
-var isObject$7 = isTypeOf('object');
+var isObject$7 = x => x !== null && typeof x === 'object';
 var isArray = a => Array.isArray(a);
 var isInstanceOf = a => b => b instanceof a;
 var isFunction = f => f && typeof f === 'function';
 var isSet = s => s instanceof Set;
 var isMap = m => m instanceof Map; // Len gets the length argument a
 
-var len = a => isString(a) || isArray(a) || isFunction(a) ? a.length : isSet(a) || isMap(a) ? a.size : isObject$7(a) ? a.entries().length : void 0; // Compose and pipe
+var len = a => isString(a) || isArray(a) || isFunction(a) ? a.length : isSet(a) || isMap(a) ? a.size : isObject$7(a) ? Object.entries(a).length : void 0; // Compose and pipe
 
 var compose2 = (f, g) => function compose() {
   for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
@@ -240,7 +230,13 @@ var curry = fn => function curryInner() {
 var tap = curry((fn, x) => (fn(x), x)); // not and invert
 
 var not = curry((f, a) => !f(a));
-var invert = curry((f, a) => -f(a)); // Logging
+var invert = curry((f, a) => -f(a));
+var flip2 = f => curry(function flip(a, b) {
+  return f.call(this, b, a);
+});
+var flip3 = f => curry(function flip(a, b, c) {
+  return f.call(this, b, c, a);
+}); // Logging
 
 var tee = tap(console.log.bind(console));
 var log = function log(fn) {
@@ -250,9 +246,9 @@ var log = function log(fn) {
       args[_key9] = arguments[_key9];
     }
 
-    logger("Entering function ".concat(fn.name, "(").concat(JSON.stringify(args, null, 2), ")"));
+    logger("Entering function ".concat(fn.name, "(").concat(args.map(a => JSON.stringify(a)).join(','), ")"));
     var result = fn.apply(this, args);
-    logger("Exiting function ".concat(fn.name, " -> ").concat(JSON.stringify(result, null, 2)));
+    logger("\nExiting function ".concat(fn.name, " -> ").concat(JSON.stringify(result)));
     return result;
   };
 }; // creates a Transducer function
@@ -289,13 +285,6 @@ var invoke = function invoke(fn) {
 
   return instance => fn.apply(instance, args);
 };
-var instanceEval = instance => function (fn) {
-  for (var _len13 = arguments.length, args = new Array(_len13 > 1 ? _len13 - 1 : 0), _key13 = 1; _key13 < _len13; _key13++) {
-    args[_key13 - 1] = arguments[_key13];
-  }
-
-  return fn.apply(instance, args);
-};
 var deepProp = curry((path, a) => {
   if (!Array.isArray(path)) path = path.split('.');
   var [p, ...rest] = path;
@@ -310,33 +299,33 @@ var toInteger = s => Number.parseInt(s, 10);
 var padStart = curry((x, reps, fill) => String.prototype.padStart.call(x, reps, fill));
 var padEnd = curry((x, reps, fill) => String.prototype.padEnd.call(x, reps, fill)); // map, filter, reduce
 
-var forEach = curry((f, M) => M.forEach(f));
+var forEach$1 = curry((f, M) => M.forEach(f));
 var map$1 = curry((f, M) => M.map(f));
 var filter$1 = curry((p, M) => M.filter(p));
 var reduceRight = curry((acc, start, M) => M.reduceRight(acc, start));
-var pluck = compose(map$1, prop$1);
+var pluck$1 = compose(map$1, prop$1);
 var deepMap = fn => function innerDeepMap(tree) {
   return Array.prototype.map.call(tree, element => Array.isArray(element) ? innerDeepMap(element) : fn(element));
 }; // compose monads
 
 var composeM2 = (f, g) => function innerComposeM2() {
-  for (var _len14 = arguments.length, args = new Array(_len14), _key14 = 0; _key14 < _len14; _key14++) {
-    args[_key14] = arguments[_key14];
+  for (var _len13 = arguments.length, args = new Array(_len13), _key13 = 0; _key13 < _len13; _key13++) {
+    args[_key13] = arguments[_key13];
   }
 
   return g.apply(this, args).flatMap(f);
 };
 var composeM = function composeM() {
-  for (var _len15 = arguments.length, Ms = new Array(_len15), _key15 = 0; _key15 < _len15; _key15++) {
-    Ms[_key15] = arguments[_key15];
+  for (var _len14 = arguments.length, Ms = new Array(_len14), _key14 = 0; _key14 < _len14; _key14++) {
+    Ms[_key14] = arguments[_key14];
   }
 
   return Ms.reduce(composeM2);
 };
 var composeAsync2 = (f, g) => /*#__PURE__*/function () {
   var _innerComposeAsync = _asyncToGenerator(function* () {
-    for (var _len16 = arguments.length, args = new Array(_len16), _key16 = 0; _key16 < _len16; _key16++) {
-      args[_key16] = arguments[_key16];
+    for (var _len15 = arguments.length, args = new Array(_len15), _key15 = 0; _key15 < _len15; _key15++) {
+      args[_key15] = arguments[_key15];
     }
 
     return yield f.call(this, yield g.call(this, ...args));
@@ -353,15 +342,15 @@ var liftA3 = curry((fn, a1, a2, a3) => a1.map(fn).ap(a2).ap(a3));
 var liftA4 = curry((fn, a1, a2, a3, a4) => a1.map(fn).ap(a2).ap(a3).ap(a4));
 var apply = curry((fn, F) => map$1.call(F, fn));
 var composeAsync = function composeAsync() {
-  for (var _len17 = arguments.length, fns = new Array(_len17), _key17 = 0; _key17 < _len17; _key17++) {
-    fns[_key17] = arguments[_key17];
+  for (var _len16 = arguments.length, fns = new Array(_len16), _key16 = 0; _key16 < _len16; _key16++) {
+    fns[_key16] = arguments[_key16];
   }
 
   return fns.reduce(composeAsync2);
 };
 var pipeAsync = function pipeAsync() {
-  for (var _len18 = arguments.length, fns = new Array(_len18), _key18 = 0; _key18 < _len18; _key18++) {
-    fns[_key18] = arguments[_key18];
+  for (var _len17 = arguments.length, fns = new Array(_len17), _key17 = 0; _key17 < _len17; _key17++) {
+    fns[_key17] = arguments[_key17];
   }
 
   return fns.reduceRight(composeAsync2);
@@ -417,8 +406,8 @@ var every = curry((f, arr) => arr.every(f));
 var some = curry((f, arr) => arr.some(f));
 var find = curry((f, arr) => arr.find(f));
 var sum = function sum() {
-  for (var _len19 = arguments.length, args = new Array(_len19), _key19 = 0; _key19 < _len19; _key19++) {
-    args[_key19] = arguments[_key19];
+  for (var _len18 = arguments.length, args = new Array(_len18), _key18 = 0; _key18 < _len18; _key18++) {
+    args[_key18] = arguments[_key18];
   }
 
   return args.reduce((x, y) => x + y, 0);
@@ -430,15 +419,15 @@ var unshift = curry((arr, v) => [v].concat(arr));
 var push = curry((arr, v) => arr.concat(v));
 var partition = (arr, a, b) => arr.reduce((acc, cv) => a(cv) ? (acc[0].push(cv), acc) : b(cv) ? (acc[1].push(cv), acc) : acc, [[], []]);
 var zipMap = function zipMap(f) {
-  for (var _len20 = arguments.length, iters = new Array(_len20 > 1 ? _len20 - 1 : 0), _key20 = 1; _key20 < _len20; _key20++) {
-    iters[_key20 - 1] = arguments[_key20];
+  for (var _len19 = arguments.length, iters = new Array(_len19 > 1 ? _len19 - 1 : 0), _key19 = 1; _key19 < _len19; _key19++) {
+    iters[_key19 - 1] = arguments[_key19];
   }
 
-  var min = Math.min(...pluck('length')(iters));
+  var min = Math.min(...pluck$1('length')(iters));
   var result = [];
 
   for (var i = 0; i < min; i++) {
-    result.push(f(...pluck(i)(iters)));
+    result.push(f(...pluck$1(i)(iters)));
   }
 
   return result;
@@ -459,8 +448,8 @@ var tryCatch = curry((f, g) => {
   }
 });
 var maybe = fn => function maybe() {
-  for (var _len21 = arguments.length, args = new Array(_len21), _key21 = 0; _key21 < _len21; _key21++) {
-    args[_key21] = arguments[_key21];
+  for (var _len20 = arguments.length, args = new Array(_len20), _key20 = 0; _key20 < _len20; _key20++) {
+    args[_key20] = arguments[_key20];
   }
 
   return args.reduce((acc, cv) => acc && cv != null, true) ? fn.apply(this, args) : void 0;
@@ -484,8 +473,8 @@ function once(fn) {
   var done = false;
   var result;
   return function once() {
-    for (var _len22 = arguments.length, args = new Array(_len22), _key22 = 0; _key22 < _len22; _key22++) {
-      args[_key22] = arguments[_key22];
+    for (var _len21 = arguments.length, args = new Array(_len21), _key21 = 0; _key21 < _len21; _key21++) {
+      args[_key21] = arguments[_key21];
     }
 
     return !done ? (done = true, result = fn.apply(this, args), result) : result;
@@ -500,8 +489,8 @@ function memoize(fn) {
   var isPrimitive = x => typeof x === 'number' || typeof x === 'string' || typeof x === 'boolean';
 
   return function memoize() {
-    for (var _len23 = arguments.length, args = new Array(_len23), _key23 = 0; _key23 < _len23; _key23++) {
-      args[_key23] = arguments[_key23];
+    for (var _len22 = arguments.length, args = new Array(_len22), _key22 = 0; _key22 < _len22; _key22++) {
+      args[_key22] = arguments[_key22];
     }
 
     var key = args.length === 1 && isPrimitive(args[0]) ? args[0] : toKey(args);
@@ -567,8 +556,8 @@ var FunctionalMixin = function FunctionalMixin(behaviour) {
 };
 
 var detectCollision = function detectCollision() {
-  for (var _len24 = arguments.length, descriptors = new Array(_len24), _key24 = 0; _key24 < _len24; _key24++) {
-    descriptors[_key24] = arguments[_key24];
+  for (var _len23 = arguments.length, descriptors = new Array(_len23), _key23 = 0; _key23 < _len23; _key23++) {
+    descriptors[_key23] = arguments[_key23];
   }
 
   return descriptors.flatMap(Object.keys).reduce(sortReducer, []).reduce(collisionReducer, []).forEach(c => console.log("[WARN] Collision found: ".concat(c)));
@@ -589,8 +578,8 @@ var isDescriptor = obj => obj && (obj.state || obj.methods); // extend Object
 if (typeof Object.impl !== 'function') {
   Object.defineProperty(Object, 'impl', {
     value: function value() {
-      for (var _len25 = arguments.length, mixins = new Array(_len25), _key25 = 0; _key25 < _len25; _key25++) {
-        mixins[_key25] = arguments[_key25];
+      for (var _len24 = arguments.length, mixins = new Array(_len24), _key24 = 0; _key24 < _len24; _key24++) {
+        mixins[_key24] = arguments[_key24];
       }
 
       return target => {
@@ -617,8 +606,8 @@ if (typeof Object.mixin !== 'function') {
         base = _objectSpread2(_objectSpread2(_objectSpread2({}, base.state), base.methods), base.interop);
       }
 
-      for (var _len26 = arguments.length, mixins = new Array(_len26 > 1 ? _len26 - 1 : 0), _key26 = 1; _key26 < _len26; _key26++) {
-        mixins[_key26 - 1] = arguments[_key26];
+      for (var _len25 = arguments.length, mixins = new Array(_len25 > 1 ? _len25 - 1 : 0), _key25 = 1; _key25 < _len25; _key25++) {
+        mixins[_key25 - 1] = arguments[_key25];
       }
 
       detectCollision(base, ...mixins);
@@ -1968,7 +1957,6 @@ var Numbers = Object.assign({
 var EMPTY = {
   isEmpty: () => true
 };
-
 var Pair = function Pair(car) {
   var cdr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : EMPTY;
   return Object.assign({
@@ -4115,7 +4103,7 @@ if (Observable$1.fromGenerator === undefined || typeof Observable$1.fromGenerato
     Object.defineProperty(Observable$1, 'fromGenerator', {
       value(generator) {
         return new Observable$1(observer => {
-          Readable.from(generator).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer));
+          Readable.from(generator).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
         });
       },
 
@@ -4128,7 +4116,7 @@ if (Observable$1.fromGenerator === undefined || typeof Observable$1.fromGenerato
     Object.defineProperty(Observable$1, 'fromGenerator', {
       value(generator) {
         return new Observable$1(observer => {
-          ReadableStream$1.from(generator).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer));
+          ReadableStream$1.from(generator).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
         });
       },
 
@@ -4137,6 +4125,29 @@ if (Observable$1.fromGenerator === undefined || typeof Observable$1.fromGenerato
       configurable: false
     });
   }
+}
+
+if (Observable$1.fromEvent === undefined || typeof Observable$1.fromEvent !== 'function') {
+  Object.defineProperty(Observable$1, 'fromEvent', {
+    value: curry((emitter, event, handler) => new Observable$1(observer => {
+      emitter.on(event, function () {
+        return observer.next(handler(...arguments));
+      });
+      emitter.on('end', observer.complete.bind(observer));
+      emitter.on('error', observer.error.bind(observer));
+    })),
+    enumerable: false,
+    writable: false,
+    configurable: false
+  });
+}
+
+if (Observable$1.fromPromise === undefined || typeof Observable$1.fromPromise !== 'function') {
+  Object.defineProperty(Observable$1, 'fromPromise', {
+    value: promise => new Observable$1(observer => {
+      promise.then(value => observer.next(value)).catch(err => observer.error(err)).finally(() => observer.complete());
+    })
+  });
 }
 
 var listen$ = curry((eventName, element) => {
@@ -4180,8 +4191,12 @@ var map = curry((fn, stream) => new Observable$1(observer => {
 }));
 var filter = curry((predicate, stream) => new Observable$1(observer => {
   var subs = stream.subscribe(withNext(observer)(value => {
-    if (predicate(value)) {
-      observer.next(value);
+    try {
+      if (predicate(value)) {
+        observer.next(value);
+      }
+    } catch (err) {
+      observer.error(err);
     }
   }));
   return () => subs.unsubscribe();
@@ -4226,7 +4241,11 @@ var reduce = curry((reducer, initialValue, stream) => {
   return new Observable$1(observer => {
     var subs = stream.subscribe({
       next(value) {
-        accumulator = reducer(accumulator, value);
+        try {
+          accumulator = reducer(accumulator, value);
+        } catch (err) {
+          observer.error(err);
+        }
       },
 
       error(e) {
@@ -4244,6 +4263,30 @@ var reduce = curry((reducer, initialValue, stream) => {
 });
 var mapTo = curry((value, stream) => new Observable$1(observer => {
   var subs = stream.subscribe(withNext(observer)(() => observer.next(value)));
+  return () => subs.unsubscribe();
+}));
+var _do = curry((fn, stream) => new Observable$1(observer => {
+  var subs = stream.subscribe(withNext(observer)(value => {
+    try {
+      fn(value);
+      observer.next(value);
+    } catch (err) {
+      observer.error(err);
+    }
+  }));
+  return () => subs.unsubscribe();
+}));
+var forEach = curry((fn, stream) => {
+  var subs = stream.subscribe({
+    next: fn,
+    error: fn
+  });
+  return {
+    unsubscribe: subs.unsubscribe.bind(subs)
+  };
+});
+var pluck = curry((key, stream) => new Observable$1(observer => {
+  var subs = stream.subscribe(withNext(observer)(obj => observer.next(obj[key])));
   return () => subs.unsubscribe();
 }));
 var ReactiveExtensions = {
@@ -4278,6 +4321,18 @@ var ReactiveExtensions = {
 
   throttle(limit) {
     return throttle(limit, this);
+  },
+
+  forEach(fn) {
+    return forEach(fn, this);
+  },
+
+  do(fn) {
+    return _do(fn, this);
+  },
+
+  pluck(key) {
+    return pluck(key, this);
   }
 
 };
@@ -4296,6 +4351,9 @@ var rx = /*#__PURE__*/Object.freeze({
   skip: skip,
   reduce: reduce,
   mapTo: mapTo,
+  _do: _do,
+  forEach: forEach,
+  pluck: pluck,
   ReactiveExtensions: ReactiveExtensions
 });
 
@@ -4542,4 +4600,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, accumulate, add, addRight, after, afterAll, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, compose2, composeAsync, composeAsync2, composeM, composeM2, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepProp, demethodize, divide, divideRight, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip, flip2, flip3, fold, forEach, fromJSON, getOrElseThrow, head, identity, immutable, instanceEval, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, maybe, memoize, memoizeIter, multipy, multipyRight, not, once, padEnd, padStart, parse, partition, pipe, pipeAsync, pluck, pop, pow, prepend, prop$1 as prop, props, provided, push, range, reactivize, reduceAsync, reduceRight, reduceWith, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, shift, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unless, unshift, untilWith, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, accumulate, add, addRight, after, afterAll, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, compose2, composeAsync, composeAsync2, composeM, composeM2, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepProp, demethodize, divide, divideRight, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, maybe, memoize, memoizeIter, multipy, multipyRight, not, once, padEnd, padStart, parse, partition, pipe, pipeAsync, pluck$1 as pluck, pop, pow, prepend, prop$1 as prop, props, provided, push, range, reactivize, reduceAsync, reduceRight, reduceWith, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, shift, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unless, unshift, untilWith, wrapWith, zip, zipMap, zipWith };

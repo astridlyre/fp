@@ -245,6 +245,14 @@ export const forEach = curry((fn, stream) => {
   return { unsubscribe: subs.unsubscribe.bind(subs) }
 })
 
+export const pluck = curry(
+  (key, stream) =>
+    new Observable(observer => {
+      const subs = stream.subscribe(withNext(observer)(obj => observer.next(obj[key])))
+      return () => subs.unsubscribe()
+    })
+)
+
 export const ReactiveExtensions = {
   filter(predicate) {
     return filter(predicate, this)
@@ -275,6 +283,9 @@ export const ReactiveExtensions = {
   },
   do(fn) {
     return _do(fn, this)
+  },
+  pluck(key) {
+    return pluck(key, this)
   },
 }
 
