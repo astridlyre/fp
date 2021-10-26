@@ -161,6 +161,7 @@ import * as lazy from './src/lazy.js'
 import * as lens from './src/lens.js'
 import * as rx from './src/rx.js'
 import { EventEmitter, reactivize } from './src/reactivize.js'
+import { withValidation, ValidationError } from './src/hofs.js'
 
 const { Observable } = rx
 export {
@@ -317,6 +318,8 @@ export {
   unary,
   unless,
   untilWith,
+  ValidationError,
+  withValidation,
   wrapWith,
   zip,
   zipMap,

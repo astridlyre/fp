@@ -273,7 +273,7 @@ var pipe = function pipe() {
  * function fn.
  */
 
-var curry = fn => function curryInner() {
+var curry$1 = fn => function curryInner() {
   var _this = this;
 
   for (var _len7 = arguments.length, args1 = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
@@ -285,7 +285,7 @@ var curry = fn => function curryInner() {
       args2[_key8] = arguments[_key8];
     }
 
-    return args1.length + args2.length >= fn.length ? fn.call(_this, ...args1, ...args2) : curry(fn)(...args1, ...args2);
+    return args1.length + args2.length >= fn.length ? fn.call(_this, ...args1, ...args2) : curry$1(fn)(...args1, ...args2);
   };
 };
 /**
@@ -301,7 +301,7 @@ var isNull = x => x === null;
 var isString = isTypeOf('string');
 var isObject$7 = x => x !== null && typeof x === 'object';
 var isArray = a => Array.isArray(a);
-var isInstanceOf = curry((a, b) => b instanceof a);
+var isInstanceOf = curry$1((a, b) => b instanceof a);
 var isFunction = f => f && typeof f === 'function';
 var isSet = s => s instanceof Set;
 var isMap = m => m instanceof Map;
@@ -311,28 +311,28 @@ var isMap = m => m instanceof Map;
  * @param {any} x - Value to return
  */
 
-var tap = curry((fn, x) => (fn(x), x));
+var tap = curry$1((fn, x) => (fn(x), x));
 /**
  * Not
  * @param {function} f - Function to negate
  * @param {any} a - Argument for function f
  */
 
-var not = curry((f, a) => !f(a));
+var not = curry$1((f, a) => !f(a));
 /**
  * Invert
  * @param {function} f - Function to reverse the sign of result
  * @param {any} a - Argument for function f
  */
 
-var invert = curry((f, a) => -f(a));
+var invert = curry$1((f, a) => -f(a));
 /**
  * Flip2
  * @param {function} f - Function to flip arguments
  * @returns {function} flip - Function f with arguments a and b flipped
  */
 
-var flip2 = f => curry(function flip(a, b) {
+var flip2 = f => curry$1(function flip(a, b) {
   return f.call(this, b, a);
 });
 /**
@@ -342,7 +342,7 @@ var flip2 = f => curry(function flip(a, b) {
  * arguments a, b, c flipped to b, c, a.
  */
 
-var flip3 = f => curry(function flip(a, b, c) {
+var flip3 = f => curry$1(function flip(a, b, c) {
   return f.call(this, b, c, a);
 });
 /**
@@ -380,7 +380,7 @@ var log = function log(fn) {
  * @param {any} initial - Initial value to pass to reducer
  */
 
-var transduce = curry((arr, fns, reducer, initial) => arr.reduce(compose(...fns)(reducer), initial));
+var transduce = curry$1((arr, fns, reducer, initial) => arr.reduce(compose(...fns)(reducer), initial));
 /**
  * MapTR
  * @param {function} fn - Create a transducer from map function
@@ -401,7 +401,7 @@ var filterTR = fn => reducer => (acc, val) => fn(val) ? reducer(acc, val) : acc;
  * @param {object} a - Object to get property in
  */
 
-var prop$1 = curry((name, a) => a && (name in a ? isFunction(a[name]) ? a[name].call(a) : a[name] : void 0));
+var prop$1 = curry$1((name, a) => a && (name in a ? isFunction(a[name]) ? a[name].call(a) : a[name] : void 0));
 /**
  * Send
  * @param {string} name - Property name
@@ -440,7 +440,7 @@ var bound = function bound(name) {
  * @returns {object} a
  */
 
-var setPropM = curry((name, value, a) => a && name in a ? (a[name] = value, a) : a);
+var setPropM = curry$1((name, value, a) => a && name in a ? (a[name] = value, a) : a);
 /**
  * SetProp
  * @param {name} name - Property name
@@ -449,7 +449,7 @@ var setPropM = curry((name, value, a) => a && name in a ? (a[name] = value, a) :
  * @returns {object} Copy of a with new value set
  */
 
-var setProp$1 = curry((name, value, a) => a && name in a ? _objectSpread2(_objectSpread2({}, a), {}, {
+var setProp$1 = curry$1((name, value, a) => a && name in a ? _objectSpread2(_objectSpread2({}, a), {}, {
   [name]: value
 }) : _objectSpread2({}, a));
 /**
@@ -459,7 +459,7 @@ var setProp$1 = curry((name, value, a) => a && name in a ? _objectSpread2(_objec
  * @returns {array} Array of values
  */
 
-var props = curry((names, a) => names.map(n => prop$1(n, a)));
+var props = curry$1((names, a) => names.map(n => prop$1(n, a)));
 /**
  * Invoke
  * @param {function} fn - Function to invoke in new context
@@ -483,7 +483,7 @@ var invoke = function invoke(fn) {
  * @returns {any} Value of property access
  */
 
-var deepProp = curry((path, a) => {
+var deepProp = curry$1((path, a) => {
   if (!Array.isArray(path)) path = path.split('.');
   var [p, ...rest] = path;
   return !rest.length ? prop$1(p, a) : deepProp(rest, prop$1(p, a));
@@ -500,17 +500,17 @@ var stringify = JSON.stringify.bind(JSON);
 var parse = JSON.parse.bind(JSON);
 var toString$5 = String;
 var toInteger = s => Number.parseInt(s, 10);
-var padStart = curry((x, reps, fill) => String.prototype.padStart.call(x, reps, fill));
-var padEnd = curry((x, reps, fill) => String.prototype.padEnd.call(x, reps, fill));
+var padStart = curry$1((x, reps, fill) => String.prototype.padStart.call(x, reps, fill));
+var padEnd = curry$1((x, reps, fill) => String.prototype.padEnd.call(x, reps, fill));
 /**
  * Monad-related functions
  * Provides functions to help when working with Monads, such as Array
  */
 
-var forEach$1 = curry((f, M) => M.forEach(f));
-var map$1 = curry((f, M) => M.map(f));
-var filter$1 = curry((p, M) => M.filter(p));
-var reduceRight = curry((acc, start, M) => M.reduceRight(acc, start));
+var forEach$1 = curry$1((f, M) => M.forEach(f));
+var map$1 = curry$1((f, M) => M.map(f));
+var filter$1 = curry$1((p, M) => M.filter(p));
+var reduceRight = curry$1((acc, start, M) => M.reduceRight(acc, start));
 var pluck$1 = compose(map$1, prop$1);
 var deepMap = fn => function innerDeepMap(tree) {
   return Array.prototype.map.call(tree, element => Array.isArray(element) ? innerDeepMap(element) : fn(element));
@@ -529,10 +529,10 @@ var composeM = function composeM() {
 
   return Ms.reduce(composeM2);
 };
-var liftA2 = curry((fn, a1, a2) => a1.map(fn).ap(a2));
-var liftA3 = curry((fn, a1, a2, a3) => a1.map(fn).ap(a2).ap(a3));
-var liftA4 = curry((fn, a1, a2, a3, a4) => a1.map(fn).ap(a2).ap(a3).ap(a4));
-var apply = curry((fn, F) => map$1.call(F, fn));
+var liftA2 = curry$1((fn, a1, a2) => a1.map(fn).ap(a2));
+var liftA3 = curry$1((fn, a1, a2, a3) => a1.map(fn).ap(a2).ap(a3));
+var liftA4 = curry$1((fn, a1, a2, a3, a4) => a1.map(fn).ap(a2).ap(a3).ap(a4));
+var apply = curry$1((fn, F) => map$1.call(F, fn));
 var composeAsync2 = (f, g) => /*#__PURE__*/function () {
   var _innerComposeAsync = _asyncToGenerator(function* () {
     for (var _len15 = arguments.length, args = new Array(_len15), _key15 = 0; _key15 < _len15; _key15++) {
@@ -590,23 +590,23 @@ var filterAsync = /*#__PURE__*/function () {
   };
 }();
 var flat = M => M.flat();
-var flatMap = curry((f, M) => M.flatMap(f));
-var fold = curry((f, M) => M.fold(f));
-var getOrElseThrow = curry((e, M) => M.getOrElseThrow(e));
+var flatMap = curry$1((f, M) => M.flatMap(f));
+var fold = curry$1((f, M) => M.fold(f));
+var getOrElseThrow = curry$1((e, M) => M.getOrElseThrow(e));
 /**
  * Math functions
  * Provides a set of functions for common math operations
  */
 
-var eq = curry((a, b) => a === b);
-var add = curry((x, y) => x + y);
-var addRight = curry((x, y) => y + x);
-var subtract = curry((x, y) => x - y);
-var subtractRight = curry((x, y) => y - x);
-var multiply = curry((x, y) => x * y);
-var multiplyRight = curry((x, y) => y * x);
-var divide = curry((x, y) => x / y);
-var divideRight = curry((x, y) => y / x);
+var eq = curry$1((a, b) => a === b);
+var add = curry$1((x, y) => x + y);
+var addRight = curry$1((x, y) => y + x);
+var subtract = curry$1((x, y) => x - y);
+var subtractRight = curry$1((x, y) => y - x);
+var multiply = curry$1((x, y) => x * y);
+var multiplyRight = curry$1((x, y) => y * x);
+var divide = curry$1((x, y) => x / y);
+var divideRight = curry$1((x, y) => y / x);
 var roundTo = n => x => Math.round(x * Math.pow(10, n)) / Math.pow(10, n);
 var pow = (base, power) => power === 0 ? 1 : power & 1 ? base * pow(base, power - 1) : pow(base * base, power >> 1);
 /**
@@ -616,9 +616,9 @@ var pow = (base, power) => power === 0 ? 1 : power & 1 ? base * pow(base, power 
 
 var head = a => a[0];
 var last = a => a[a.length - 1];
-var every = curry((f, arr) => arr.every(f));
-var some = curry((f, arr) => arr.some(f));
-var find = curry((f, arr) => arr.find(f));
+var every = curry$1((f, arr) => arr.every(f));
+var some = curry$1((f, arr) => arr.some(f));
+var find = curry$1((f, arr) => arr.find(f));
 var sum = function sum() {
   for (var _len18 = arguments.length, args = new Array(_len18), _key18 = 0; _key18 < _len18; _key18++) {
     args[_key18] = arguments[_key18];
@@ -642,14 +642,14 @@ var zipMap = function zipMap(f) {
 
   return result;
 };
-var sortBy = curry((f, a) => [...a].sort(f));
-var match$1 = curry((re, s) => re.test(s));
-var replace = curry((re, rpl, s) => s.replace(re, rpl));
-var split$1 = curry((sep, s) => s.split(sep));
+var sortBy = curry$1((f, a) => [...a].sort(f));
+var match$1 = curry$1((re, s) => re.test(s));
+var replace = curry$1((re, rpl, s) => s.replace(re, rpl));
+var split$1 = curry$1((sep, s) => s.split(sep));
 var toLowerCase = s => s.toLowerCase();
 var toUpperCase = s => s.toUpperCase();
-var prepend = curry((s1, s2) => "".concat(s1).concat(s2));
-var append = curry((s1, s2) => "".concat(s2).concat(s1));
+var prepend = curry$1((s1, s2) => "".concat(s1).concat(s2));
+var append = curry$1((s1, s2) => "".concat(s2).concat(s1));
 /**
  * TryCatch
  * @param {function} f - Try function, may throw
@@ -657,7 +657,7 @@ var append = curry((s1, s2) => "".concat(s2).concat(s1));
  * @returns {any} Calls g if function f throws
  */
 
-var tryCatch = curry((f, g) => {
+var tryCatch = curry$1((f, g) => {
   try {
     return f();
   } catch (e) {
@@ -2439,9 +2439,9 @@ class Variable {
 }
 
 var lens = (getter, setter) => fn => obj => fn(getter(obj)).map(value => setter(value, obj));
-var view = curry((lensAttr, obj) => lensAttr(x => new Constant(x))(obj).value);
-var set$1 = curry((lensAttr, newVal, obj) => lensAttr(() => new Variable(newVal))(obj).value);
-var over = curry((lensAttr, mapfn, obj) => lensAttr(x => new Variable(mapfn(x)))(obj).value);
+var view = curry$1((lensAttr, obj) => lensAttr(x => new Constant(x))(obj).value);
+var set$1 = curry$1((lensAttr, newVal, obj) => lensAttr(() => new Variable(newVal))(obj).value);
+var over = curry$1((lensAttr, mapfn, obj) => lensAttr(x => new Variable(mapfn(x)))(obj).value);
 var lensProp = p => lens(prop(p), setProp(p));
 
 var lens$1 = /*#__PURE__*/Object.freeze({
@@ -4480,7 +4480,7 @@ if (Observable$1.fromGenerator === undefined || typeof Observable$1.fromGenerato
 
 if (Observable$1.fromEvent === undefined || typeof Observable$1.fromEvent !== 'function') {
   Object.defineProperty(Observable$1, 'fromEvent', {
-    value: curry((emitter, event, handler) => new Observable$1(observer => {
+    value: curry$1((emitter, event, handler) => new Observable$1(observer => {
       emitter.on(event, function () {
         return observer.next(handler(...arguments));
       });
@@ -4501,7 +4501,7 @@ if (Observable$1.fromPromise === undefined || typeof Observable$1.fromPromise !=
   });
 }
 
-var listen$ = curry((eventName, element) => {
+var listen$ = curry$1((eventName, element) => {
   return new Observable$1(observer => {
     var handler = event => observer.next(event);
 
@@ -4509,7 +4509,7 @@ var listen$ = curry((eventName, element) => {
     return () => element.removeEventListener(eventName, handler, true);
   });
 });
-var throttle = curry((limit, stream) => {
+var throttle = curry$1((limit, stream) => {
   var lastRan = 0;
   var lastInterval = 0;
   return new Observable$1(observer => {
@@ -4530,7 +4530,7 @@ var throttle = curry((limit, stream) => {
     return () => subs.unsubscribe();
   });
 });
-var map = curry((fn, stream) => new Observable$1(observer => {
+var map = curry$1((fn, stream) => new Observable$1(observer => {
   var subs = stream.subscribe(withNext(observer)(value => {
     try {
       observer.next(fn(value));
@@ -4540,7 +4540,7 @@ var map = curry((fn, stream) => new Observable$1(observer => {
   }));
   return () => subs.unsubscribe();
 }));
-var filter = curry((predicate, stream) => new Observable$1(observer => {
+var filter = curry$1((predicate, stream) => new Observable$1(observer => {
   var subs = stream.subscribe(withNext(observer)(value => {
     try {
       if (predicate(value)) {
@@ -4552,7 +4552,7 @@ var filter = curry((predicate, stream) => new Observable$1(observer => {
   }));
   return () => subs.unsubscribe();
 }));
-var buffer = curry((count, stream) => {
+var buffer = curry$1((count, stream) => {
   var _internalStorage = [];
   return new Observable$1(observer => {
     var subs = stream.subscribe(withNext(observer)(value => {
@@ -4566,7 +4566,7 @@ var buffer = curry((count, stream) => {
     return () => subs.unsubscribe();
   });
 });
-var take = curry((numberToTake, stream) => {
+var take = curry$1((numberToTake, stream) => {
   var taken = 0;
   return new Observable$1(observer => {
     var subs = stream.subscribe(withNext(observer)(value => {
@@ -4576,7 +4576,7 @@ var take = curry((numberToTake, stream) => {
     return () => subs.unsubscribe();
   });
 });
-var skip = curry((count, stream) => {
+var skip = curry$1((count, stream) => {
   var skipped = 0;
   return new Observable$1(observer => {
     var subs = stream.subscribe(withNext(observer)(value => {
@@ -4587,7 +4587,7 @@ var skip = curry((count, stream) => {
     return () => subs.unsubscribe();
   });
 });
-var reduce = curry((reducer, initialValue, stream) => {
+var reduce = curry$1((reducer, initialValue, stream) => {
   var accumulator = initialValue !== null && initialValue !== void 0 ? initialValue : {};
   return new Observable$1(observer => {
     var subs = stream.subscribe({
@@ -4612,11 +4612,11 @@ var reduce = curry((reducer, initialValue, stream) => {
     return () => subs.unsubscribe();
   });
 });
-var mapTo = curry((value, stream) => new Observable$1(observer => {
+var mapTo = curry$1((value, stream) => new Observable$1(observer => {
   var subs = stream.subscribe(withNext(observer)(() => observer.next(value)));
   return () => subs.unsubscribe();
 }));
-var _do = curry((fn, stream) => new Observable$1(observer => {
+var _do = curry$1((fn, stream) => new Observable$1(observer => {
   var subs = stream.subscribe(withNext(observer)(value => {
     try {
       fn(value);
@@ -4627,7 +4627,7 @@ var _do = curry((fn, stream) => new Observable$1(observer => {
   }));
   return () => subs.unsubscribe();
 }));
-var forEach = curry((fn, stream) => {
+var forEach = curry$1((fn, stream) => {
   var subs = stream.subscribe({
     next: fn,
     error: fn
@@ -4636,7 +4636,7 @@ var forEach = curry((fn, stream) => {
     unsubscribe: subs.unsubscribe.bind(subs)
   };
 });
-var pluck = curry((key, stream) => new Observable$1(observer => {
+var pluck = curry$1((key, stream) => new Observable$1(observer => {
   var subs = stream.subscribe(withNext(observer)(obj => observer.next(obj[key])));
   return () => subs.unsubscribe();
 }));
@@ -4880,6 +4880,33 @@ var reactivize = obj => {
   return Object.assign(pushProxy, observable);
 };
 
+class ValidationError {
+  constructor(message, errors) {
+    Error.call(this, message);
+    Error.captureStackTrace(this);
+    this.errors = errors;
+  }
+
+  get messages() {
+    return this.errors.map(e => e.message);
+  }
+
+}
+/**
+ * WithValidation
+ * @param {function} validator - Function to validate data
+ * @param {function} fn - Function to wrap with validation
+ * @returns {function} Wrapped function fn with validation logic
+ */
+
+var withValidation = curry((validator, fn) => data => {
+  if (!validator(data)) {
+    throw new ValidationError('Validation failed', validator.errors);
+  }
+
+  return fn(data);
+});
+
 var {
   Observable
 } = rx;
@@ -4951,4 +4978,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, accumulate, add, addRight, after, afterAll, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, compose2, composeAsync, composeAsync2, composeM, composeM2, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepProp, demethodize, divide, divideRight, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduceAsync, reduceRight, reduceWith, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unless, untilWith, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, compose2, composeAsync, composeAsync2, composeM, composeM2, constant, createClient, curry$1 as curry, debounce, deepCopy, deepFreeze, deepMap, deepProp, demethodize, divide, divideRight, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduceAsync, reduceRight, reduceWith, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unless, untilWith, withValidation, wrapWith, zip, zipMap, zipWith };
