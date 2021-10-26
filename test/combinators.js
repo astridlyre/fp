@@ -1,7 +1,6 @@
 import * as combinators from '../src/combinators.js'
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
-import { AssertionError } from 'assert/strict'
 
 describe('Combinators', function () {
   describe('identity', function () {
@@ -285,6 +284,17 @@ describe('Combinators', function () {
     })
   })
 
+  describe('pick', function () {
+    it('should create a new object with only prop names', function () {
+      const obj = {
+        firstName: 'Bob',
+        lastName: 'Burgers',
+        email: 'bob@burgers.co.uk',
+      }
+      assert.deepEqual(combinators.pick(['email'])(obj), { email: 'bob@burgers.co.uk' })
+    })
+  })
+
   describe('send', function () {
     it('should call an instance with arguments', function () {
       assert.equal(
@@ -342,6 +352,48 @@ describe('Combinators', function () {
       }
       assert.equal(combinators.deepProp('a.b.a.d')(obj), 'hi')
       assert.equal(combinators.deepProp(['a', 'b', 'a', 'd'])(obj), 'hi')
+    })
+  })
+
+  describe('deepSetProp', function () {
+    it('should set a deeply nested property', function () {
+      assert.deepEqual(combinators.deepSetProp('a.b.c.d', 'hi')({}), {
+        a: { b: { c: { d: 'hi' } } },
+      })
+    })
+    it('should not mutate object', function () {
+      const obj = {
+        a: {
+          b: {
+            c: {
+              d: 'hi',
+            },
+          },
+          e: 'world',
+        },
+      }
+      const result = combinators.deepSetProp('a.b.c.d', 'hello')(obj)
+      assert.deepEqual(result, {
+        a: { b: { c: { d: 'hello' } }, e: 'world' },
+      })
+      assert.notEqual(obj, result)
+    })
+  })
+
+  describe('deepPick', function () {
+    it('should return an object with only keys from paths', function () {
+      const obj = {
+        a: {
+          b: {
+            c: 'hi',
+          },
+          e: 'world',
+        },
+        h: 'sup',
+      }
+      const result = combinators.deepPick(['a.b.c', 'a.e'])(obj)
+      assert.deepEqual(result, { a: { b: { c: 'hi' }, e: 'world' } })
+      assert.notEqual(obj, result)
     })
   })
 

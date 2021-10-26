@@ -294,6 +294,19 @@ export const setProp = curry((name, value, a) =>
 export const props = curry((names, a) => names.map(n => prop(n, a)))
 
 /**
+ * Pick
+ * @param {array} names - Array of property names
+ * @param {object} a - Object to get property names from
+ * @returns {object} A new object with only properties names
+ */
+export const pick = curry((names, a) =>
+  names.reduce(
+    (result, key) => (key in a ? ((result[key] = a[key]), result) : result),
+    {}
+  )
+)
+
+/**
  * Invoke
  * @param {function} fn - Function to invoke in new context
  * @param {any} args - Argument for function fn
@@ -317,6 +330,43 @@ export const deepProp = curry((path, a) => {
   const [p, ...rest] = path
   return !rest.length ? prop(p, a) : deepProp(rest, prop(p, a))
 })
+
+/**
+ * DeepSetProp
+ * @param {string} {array} path - A path of properties or an Array of
+ * properties to set
+ * @param {any} value - The value to set
+ * @param {object} a - Object to set new property in
+ * @returns {object} A copy of Object a, with new property set
+ */
+export const deepSetProp = curry((path, value, a) => {
+  if (!Array.isArray(path)) path = path.split('.')
+  function innerDeepSetProp(path, value, obj) {
+    if (path.length === 1) {
+      obj[path[0]] = value
+      return obj
+    }
+    if (path[0] in obj && isObject(obj[path[0]])) {
+      const newObj = obj[path[0]]
+      return innerDeepSetProp(path.slice(1), value, newObj)
+    }
+    const newObj = {}
+    obj[path[0]] = newObj
+    return innerDeepSetProp(path.slice(1), value, newObj)
+  }
+  const aux = deepCopy(a)
+  return innerDeepSetProp(path, value, aux), aux
+})
+
+/**
+ * DeepPick
+ * @param {array} paths - An array of string paths of property names
+ * @param {object} a - The Object to pick properties from
+ * @returns {object} A copy of Object a with only properties paths
+ */
+export const deepPick = curry((paths, a) =>
+  paths.reduce((result, path) => deepSetProp(path, deepProp(path)(a))(result), {})
+)
 
 /**
  * Stringifying functions
@@ -533,7 +583,7 @@ export const accumulate = delay => {
  * @returns {function} mixin - Function which takes argument target, which is
  * the object to mix behaviour into
  */
-export const FunctionalMixin = (behaviour, sharedBehaviour = {}) => {
+export function FunctionalMixin(behaviour, sharedBehaviour = {}) {
   const instanceKeys = Reflect.ownKeys(behaviour)
   const sharedKeys = Reflect.ownKeys(sharedBehaviour)
   const typeTag = Symbol('isA')
@@ -627,7 +677,7 @@ if (typeof Object.mixin !== 'function') {
  * @param {object} obj - Object to deep freeze
  * @returns {object} obj - Object that was deep frozen
  */
-export const deepFreeze = obj => {
+export function deepFreeze(obj) {
   if (obj && typeof obj === 'object' && !Object.isFrozen(obj)) {
     Object.getOwnPropertyNames(obj).forEach(name => deepFreeze(obj[name]))
     Object.freeze(obj)
@@ -640,7 +690,7 @@ export const deepFreeze = obj => {
  * @param {object} obj - Object to deep copy
  * @returns {object} aux - Copy of Object obj
  */
-export const deepCopy = obj => {
+export function deepCopy(obj) {
   let aux = obj
   if (obj && typeof obj === 'object') {
     aux = new obj.constructor()

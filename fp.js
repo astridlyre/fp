@@ -770,7 +770,7 @@ var accumulate = delay => {
  * the object to mix behaviour into
  */
 
-var FunctionalMixin = function FunctionalMixin(behaviour) {
+function FunctionalMixin(behaviour) {
   var sharedBehaviour = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   var instanceKeys = Reflect.ownKeys(behaviour);
   var sharedKeys = Reflect.ownKeys(sharedBehaviour);
@@ -801,7 +801,7 @@ var FunctionalMixin = function FunctionalMixin(behaviour) {
     value: instance => !!instance[typeTag]
   });
   return mixin;
-};
+}
 
 var detectCollision = function detectCollision() {
   for (var _len22 = arguments.length, descriptors = new Array(_len22), _key22 = 0; _key22 < _len22; _key22++) {
@@ -878,21 +878,21 @@ if (typeof Object.mixin !== 'function') {
  */
 
 
-var deepFreeze = obj => {
+function deepFreeze(obj) {
   if (obj && typeof obj === 'object' && !Object.isFrozen(obj)) {
     Object.getOwnPropertyNames(obj).forEach(name => deepFreeze(obj[name]));
     Object.freeze(obj);
   }
 
   return obj;
-};
+}
 /**
  * DeepCopy
  * @param {object} obj - Object to deep copy
  * @returns {object} aux - Copy of Object obj
  */
 
-var deepCopy = obj => {
+function deepCopy(obj) {
   var aux = obj;
 
   if (obj && typeof obj === 'object') {
@@ -901,7 +901,7 @@ var deepCopy = obj => {
   }
 
   return aux;
-};
+}
 Object.deepFreeze = Object.deepFreeze || deepFreeze;
 /**
  * Immutate
@@ -1629,39 +1629,95 @@ function createClient(apiEndpoint) {
   };
 }
 
-// Iterables
+/**
+ * MapWith
+ * @param {function} fn - Mapper function
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function
+ */
 function* mapWith(fn, iterable) {
   for (var element of iterable) {
     yield fn(element);
   }
 }
+/**
+ * MapAllWith
+ * @param {function} fn - Mapper function
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function that applies mapper to all
+ * elements and then yields the result of their individual iteration
+ */
+
 function* mapAllWith(fn, iterable) {
   for (var element of iterable) {
     yield* fn(element);
   }
 }
+/**
+ * FilterWith
+ * @param {function} fn - Filter function
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function that filters elements by
+ * function fn
+ */
+
 function* filterWith(fn, iterable) {
   for (var element of iterable) {
-    if (!fn(element)) yield element;
+    if (fn(element)) yield element;
   }
 }
+/**
+ * Compact
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function that removes nullable
+ * values
+ */
+
 function* compact(iterable) {
   for (var element of iterable) {
     if (element != null) yield element;
   }
 }
+/**
+ * UntilWith
+ * @param {function} fn - Tester function
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function that returns elements until
+ * the result of fn(element) is true
+ */
+
 function* untilWith(fn, iterable) {
   for (var element of iterable) {
     if (fn(element)) break;
     yield element;
   }
 }
+/**
+ * First
+ * @param {iterable} iterable
+ * @returns {any} First element of iterable
+ */
+
 var first = iterable => iterable[Symbol.iterator]().next().value;
+/**
+ * Rest
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function skipping the first element
+ */
+
 function* rest(iterable) {
   var iterator = iterable[Symbol.iterator]();
   iterator.next();
   yield* iterator;
 }
+/**
+ * Take
+ * @param {number} numberToTake
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function that yields numberToTake
+ * number elements from iteratable
+ */
+
 function* take$1(numberToTake, iterable) {
   var iterator = iterable[Symbol.iterator]();
 
@@ -1673,6 +1729,13 @@ function* take$1(numberToTake, iterable) {
     if (!done) yield value;
   }
 }
+/**
+ * Zip
+ * @param {iterable} iterables
+ * @returns {function} Generator iterator function that yields an array of
+ * the combined values of each iterator of iterables
+ */
+
 function* zip() {
   for (var _len = arguments.length, iterables = new Array(_len), _key = 0; _key < _len; _key++) {
     iterables[_key] = arguments[_key];
@@ -1695,6 +1758,14 @@ function* zip() {
     if (_ret === "break") break;
   }
 }
+/**
+ * ZipWith
+ * @param {function} zipper - Function to apply to values
+ * @param {iterable} iterables - Iterables to zip
+ * @returns {function} Generator iterator function that yields the result
+ * of applying zipper function to elements of iterables
+ */
+
 function* zipWith(zipper) {
   for (var _len2 = arguments.length, iterables = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
     iterables[_key2 - 1] = arguments[_key2];
@@ -1717,6 +1788,14 @@ function* zipWith(zipper) {
     if (_ret2 === "break") break;
   }
 }
+/**
+ * ReduceWith
+ * @param {function} fn - Reducer function
+ * @param {any} seed - Initial value
+ * @param {iterable} iterable
+ * @returns {any} Result of reducing iterable with reducer
+ */
+
 function reduceWith(fn, seed, iterable) {
   var accumulator = seed;
 
@@ -1726,6 +1805,12 @@ function reduceWith(fn, seed, iterable) {
 
   return accumulator;
 }
+/**
+ * MemoizeIter
+ * @param {function} generator - Iterator function
+ * @returns {function} Memoized generator function
+ */
+
 function memoizeIter(generator) {
   var memos = Object.create(null);
   var iters = Object.create(null);
