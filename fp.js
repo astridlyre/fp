@@ -141,10 +141,25 @@ function _classPrivateFieldInitSpec(obj, privateMap, value) {
   privateMap.set(obj, value);
 }
 
-// identity x returns x
-var identity = x => x; // constant () => a
+/**
+ * Identity
+ * @param {any} x
+ * @return {any} x
+ */
+var identity = x => x;
+/**
+ * Constant
+ * @param {any} a
+ * @returns {any} a
+ */
 
-var constant = a => b => a; // arity functions
+var constant = a => b => a;
+/**
+ * Arity
+ * @param {function} fn
+ * @param {number} n - desired arity
+ * @returns {function} arity - Function fn with new arity
+ */
 
 var arity = (fn, n) => function arity() {
   for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
@@ -153,9 +168,33 @@ var arity = (fn, n) => function arity() {
 
   return fn.apply(this, args.slice(0, n));
 };
+/**
+ * Unary
+ * @param {function} fn
+ * @returns {function} arity - Function with arity of 1
+ */
+
 var unary = fn => arity(fn, 1);
+/**
+ * Binary
+ * @param {function} fn
+ * @returns {function} arity - Function with arity of 2
+ */
+
 var binary = fn => arity(fn, 2);
-var ternary = fn => arity(fn, 3); // partial application
+/**
+ * Ternary
+ * @param {function} fn
+ * @returns {function} arity - Function with arity of 3
+ */
+
+var ternary = fn => arity(fn, 3);
+/**
+ * Call First
+ * @param {function} fn - Function to partially apply
+ * @param {any} larg - Leftmost argument
+ * @returns {function} callFirst - Function fn partially applied with larg
+ */
 
 var callFirst = (fn, larg) => function callFirst() {
   for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
@@ -164,28 +203,32 @@ var callFirst = (fn, larg) => function callFirst() {
 
   return fn.call(this, larg, ...args);
 };
+/**
+ * Call Last
+ * @param {function} fn - Function to partially apply
+ * @param {any} rarg - Rightmost argument
+ * @returns {function} callLast - Function fn partially applied with rarg
+ */
+
 var callLast = (fn, rarg) => function callLast() {
   for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
     args[_key3] = arguments[_key3];
   }
 
   return fn.call(this, ...args, rarg);
-}; // de-methodize
+};
+/**
+ * Demethodize
+ * @param {method} method - Method to demethodize
+ * @returns {function} method bound to use as regular function
+ */
 
-var demethodize = Function.prototype.bind.bind(Function.prototype.call); // typeof functions
-
-var isTypeOf = a => b => typeof b === a;
-
-var isNumber = isTypeOf('number');
-var isBoolean = isTypeOf('boolean');
-var isNull = x => x === null;
-var isString = isTypeOf('string');
-var isObject$7 = x => x !== null && typeof x === 'object';
-var isArray = a => Array.isArray(a);
-var isInstanceOf = a => b => b instanceof a;
-var isFunction = f => f && typeof f === 'function';
-var isSet = s => s instanceof Set;
-var isMap = m => m instanceof Map; // Len gets the length argument a
+var demethodize = Function.prototype.bind.bind(Function.prototype.call);
+/**
+ * Len - provides a simple way to get the length/size of something
+ * @param {any} a
+ * @returns {number} {undefined} The length or size of the argument
+ */
 
 var len = a => isString(a) || isArray(a) || isFunction(a) ? a.length : isSet(a) || isMap(a) ? a.size : isObject$7(a) ? Object.entries(a).length : void 0; // Compose and pipe
 
@@ -196,6 +239,12 @@ var compose2 = (f, g) => function compose() {
 
   return f.call(this, g.call(this, ...args));
 };
+/**
+ * Compose
+ * @param {function} Any number of functions fns to compose
+ * @returns {function} A function composed of fns
+ */
+
 var compose = function compose() {
   for (var _len5 = arguments.length, fns = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
     fns[_key5] = arguments[_key5];
@@ -203,13 +252,26 @@ var compose = function compose() {
 
   return fns.reduce(compose2);
 };
+/**
+ * Pipe
+ * @param {function} fns to pipe
+ * @returns {function} A function pipe of fns
+ */
+
 var pipe = function pipe() {
   for (var _len6 = arguments.length, fns = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
     fns[_key6] = arguments[_key6];
   }
 
   return fns.reduceRight(compose2);
-}; // Autocurry
+};
+/**
+ * Curry
+ * @param {function} fn - Function to curry
+ * @returns {function} Partially applied function, or result of calling
+ * function fn if arguments are greater than or equal to total arity of
+ * function fn.
+ */
 
 var curry = fn => function curryInner() {
   var _this = this;
@@ -225,20 +287,78 @@ var curry = fn => function curryInner() {
 
     return args1.length + args2.length >= fn.length ? fn.call(_this, ...args1, ...args2) : curry(fn)(...args1, ...args2);
   };
-}; // run a side effect with tap
+};
+/**
+ * Typeof Functions
+ * Provides several functions to test whether x is of type y
+ */
 
-var tap = curry((fn, x) => (fn(x), x)); // not and invert
+var isTypeOf = a => b => typeof b === a;
+
+var isNumber = isTypeOf('number');
+var isBoolean = isTypeOf('boolean');
+var isNull = x => x === null;
+var isString = isTypeOf('string');
+var isObject$7 = x => x !== null && typeof x === 'object';
+var isArray = a => Array.isArray(a);
+var isInstanceOf = curry((a, b) => b instanceof a);
+var isFunction = f => f && typeof f === 'function';
+var isSet = s => s instanceof Set;
+var isMap = m => m instanceof Map;
+/**
+ * Tap
+ * @param {function} fn - Side effect to run
+ * @param {any} x - Value to return
+ */
+
+var tap = curry((fn, x) => (fn(x), x));
+/**
+ * Not
+ * @param {function} f - Function to negate
+ * @param {any} a - Argument for function f
+ */
 
 var not = curry((f, a) => !f(a));
+/**
+ * Invert
+ * @param {function} f - Function to reverse the sign of result
+ * @param {any} a - Argument for function f
+ */
+
 var invert = curry((f, a) => -f(a));
+/**
+ * Flip2
+ * @param {function} f - Function to flip arguments
+ * @returns {function} flip - Function f with arguments a and b flipped
+ */
+
 var flip2 = f => curry(function flip(a, b) {
   return f.call(this, b, a);
 });
+/**
+ * Flip3
+ * @param {function} f - Function to flip arguments
+ * @returns {function} flip - Function f with
+ * arguments a, b, c flipped to b, c, a.
+ */
+
 var flip3 = f => curry(function flip(a, b, c) {
   return f.call(this, b, c, a);
-}); // Logging
+});
+/**
+ * Tee - Logs argument and returns it
+ * @param {any}
+ * @returns {any}
+ */
 
 var tee = tap(console.log.bind(console));
+/**
+ * Log
+ * @param {function} fn - Function to log
+ * @param {function} logger - Logging function
+ * @returns {function} log - Function fn with enhanced logging
+ */
+
 var log = function log(fn) {
   var logger = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : console.log.bind(console);
   return function log() {
@@ -251,14 +371,45 @@ var log = function log(fn) {
     logger("\nExiting function ".concat(fn.name, " -> ").concat(JSON.stringify(result)));
     return result;
   };
-}; // creates a Transducer function
+};
+/**
+ * Transduce
+ * @param {array} arr - Array to reduce
+ * @param {array} fns - Array of functions to apply to arr
+ * @param {function} reducer - Reducer function to apply to arr
+ * @param {any} initial - Initial value to pass to reducer
+ */
 
-var transduce = curry((arr, fns, reducer, initial) => arr.reduce(compose(...fns)(reducer), initial)); // Transducers
+var transduce = curry((arr, fns, reducer, initial) => arr.reduce(compose(...fns)(reducer), initial));
+/**
+ * MapTR
+ * @param {function} fn - Create a transducer from map function
+ * @returns {function}
+ */
 
 var mapTR = fn => reducer => (acc, val) => reducer(acc, fn(val));
-var filterTR = fn => reducer => (acc, val) => fn(val) ? reducer(acc, val) : acc; // prop & props get object properties
+/**
+ * filterTR
+ * @param {function} fn - Create a transducer from a filter function
+ * @returns {function}
+ */
+
+var filterTR = fn => reducer => (acc, val) => fn(val) ? reducer(acc, val) : acc;
+/**
+ * Prop
+ * @param {string} name - Property name
+ * @param {object} a - Object to get property in
+ */
 
 var prop$1 = curry((name, a) => a && (name in a ? isFunction(a[name]) ? a[name].call(a) : a[name] : void 0));
+/**
+ * Send
+ * @param {string} name - Property name
+ * @param {any} args - Arguments to send to instance method
+ * @returns {function} send - Function send takes an instance and calls
+ * instance#name with args
+ */
+
 var send = function send(name) {
   for (var _len10 = arguments.length, args = new Array(_len10 > 1 ? _len10 - 1 : 0), _key10 = 1; _key10 < _len10; _key10++) {
     args[_key10 - 1] = arguments[_key10];
@@ -266,6 +417,14 @@ var send = function send(name) {
 
   return instance => instance[name].apply(instance, args);
 };
+/**
+ * Bound
+ * @param {name} name - Property name
+ * @param {any} args - Arguments to send to bound method
+ * @returns {function} {any} Returns bound method or bound method called with
+ * args
+ */
+
 var bound = function bound(name) {
   for (var _len11 = arguments.length, args = new Array(_len11 > 1 ? _len11 - 1 : 0), _key11 = 1; _key11 < _len11; _key11++) {
     args[_key11 - 1] = arguments[_key11];
@@ -273,11 +432,42 @@ var bound = function bound(name) {
 
   return args === [] ? instance => instance[name].bind(instance) : instance => Function.prototype.bind.apply(instance[name], [instance].concat(args));
 };
+/**
+ * SetPropM
+ * @param {name} name - Property name
+ * @param {value} value - New value to set
+ * @param {object} a - Object to mutate with new value
+ * @returns {object} a
+ */
+
 var setPropM = curry((name, value, a) => a && name in a ? (a[name] = value, a) : a);
+/**
+ * SetProp
+ * @param {name} name - Property name
+ * @param {value} value - New value to set
+ * @param {object} a - Object to set value in
+ * @returns {object} Copy of a with new value set
+ */
+
 var setProp$1 = curry((name, value, a) => a && name in a ? _objectSpread2(_objectSpread2({}, a), {}, {
   [name]: value
 }) : _objectSpread2({}, a));
+/**
+ * Props
+ * @param {array} names - Array of property names
+ * @param {object} a - Object to get property names from
+ * @returns {array} Array of values
+ */
+
 var props = curry((names, a) => names.map(n => prop$1(n, a)));
+/**
+ * Invoke
+ * @param {function} fn - Function to invoke in new context
+ * @param {any} args - Argument for function fn
+ * @returns {function} invoke - Function which takes instance and calls fn with
+ * args in context of instance
+ */
+
 var invoke = function invoke(fn) {
   for (var _len12 = arguments.length, args = new Array(_len12 > 1 ? _len12 - 1 : 0), _key12 = 1; _key12 < _len12; _key12++) {
     args[_key12 - 1] = arguments[_key12];
@@ -285,11 +475,25 @@ var invoke = function invoke(fn) {
 
   return instance => fn.apply(instance, args);
 };
+/**
+ * DeepProp
+ * @param {string} {array} path - A path of properties or an Array of
+ * properties to get
+ * @param {object} a - Object to get properties from
+ * @returns {any} Value of property access
+ */
+
 var deepProp = curry((path, a) => {
   if (!Array.isArray(path)) path = path.split('.');
   var [p, ...rest] = path;
   return !rest.length ? prop$1(p, a) : deepProp(rest, prop$1(p, a));
 });
+/**
+ * Stringifying functions
+ * Provides helper functions to stringify and parse JSON, along with numbers
+ * and strings
+ */
+
 var toJSON = x => JSON.stringify(x);
 var fromJSON = x => JSON.parse(x);
 var stringify = JSON.stringify.bind(JSON);
@@ -297,7 +501,11 @@ var parse = JSON.parse.bind(JSON);
 var toString$5 = String;
 var toInteger = s => Number.parseInt(s, 10);
 var padStart = curry((x, reps, fill) => String.prototype.padStart.call(x, reps, fill));
-var padEnd = curry((x, reps, fill) => String.prototype.padEnd.call(x, reps, fill)); // map, filter, reduce
+var padEnd = curry((x, reps, fill) => String.prototype.padEnd.call(x, reps, fill));
+/**
+ * Monad-related functions
+ * Provides functions to help when working with Monads, such as Array
+ */
 
 var forEach$1 = curry((f, M) => M.forEach(f));
 var map$1 = curry((f, M) => M.map(f));
@@ -306,8 +514,7 @@ var reduceRight = curry((acc, start, M) => M.reduceRight(acc, start));
 var pluck$1 = compose(map$1, prop$1);
 var deepMap = fn => function innerDeepMap(tree) {
   return Array.prototype.map.call(tree, element => Array.isArray(element) ? innerDeepMap(element) : fn(element));
-}; // compose monads
-
+};
 var composeM2 = (f, g) => function innerComposeM2() {
   for (var _len13 = arguments.length, args = new Array(_len13), _key13 = 0; _key13 < _len13; _key13++) {
     args[_key13] = arguments[_key13];
@@ -322,6 +529,10 @@ var composeM = function composeM() {
 
   return Ms.reduce(composeM2);
 };
+var liftA2 = curry((fn, a1, a2) => a1.map(fn).ap(a2));
+var liftA3 = curry((fn, a1, a2, a3) => a1.map(fn).ap(a2).ap(a3));
+var liftA4 = curry((fn, a1, a2, a3, a4) => a1.map(fn).ap(a2).ap(a3).ap(a4));
+var apply = curry((fn, F) => map$1.call(F, fn));
 var composeAsync2 = (f, g) => /*#__PURE__*/function () {
   var _innerComposeAsync = _asyncToGenerator(function* () {
     for (var _len15 = arguments.length, args = new Array(_len15), _key15 = 0; _key15 < _len15; _key15++) {
@@ -337,10 +548,6 @@ var composeAsync2 = (f, g) => /*#__PURE__*/function () {
 
   return innerComposeAsync;
 }();
-var liftA2 = curry((fn, a1, a2) => a1.map(fn).ap(a2));
-var liftA3 = curry((fn, a1, a2, a3) => a1.map(fn).ap(a2).ap(a3));
-var liftA4 = curry((fn, a1, a2, a3, a4) => a1.map(fn).ap(a2).ap(a3).ap(a4));
-var apply = curry((fn, F) => map$1.call(F, fn));
 var composeAsync = function composeAsync() {
   for (var _len16 = arguments.length, fns = new Array(_len16), _key16 = 0; _key16 < _len16; _key16++) {
     fns[_key16] = arguments[_key16];
@@ -381,24 +588,31 @@ var filterAsync = /*#__PURE__*/function () {
   return function filterAsync(_x6, _x7) {
     return _ref3.apply(this, arguments);
   };
-}(); // flat
-
+}();
 var flat = M => M.flat();
 var flatMap = curry((f, M) => M.flatMap(f));
 var fold = curry((f, M) => M.fold(f));
-var getOrElseThrow = curry((e, M) => M.getOrElseThrow(e)); // math functions
+var getOrElseThrow = curry((e, M) => M.getOrElseThrow(e));
+/**
+ * Math functions
+ * Provides a set of functions for common math operations
+ */
 
 var eq = curry((a, b) => a === b);
 var add = curry((x, y) => x + y);
 var addRight = curry((x, y) => y + x);
 var subtract = curry((x, y) => x - y);
 var subtractRight = curry((x, y) => y - x);
-var multipy = curry((x, y) => x * y);
-var multipyRight = curry((x, y) => y * x);
+var multiply = curry((x, y) => x * y);
+var multiplyRight = curry((x, y) => y * x);
 var divide = curry((x, y) => x / y);
 var divideRight = curry((x, y) => y / x);
 var roundTo = n => x => Math.round(x * Math.pow(10, n)) / Math.pow(10, n);
-var pow = (base, power) => power === 0 ? 1 : power & 1 ? base * pow(base, power - 1) : pow(base * base, power >> 1); // array functions
+var pow = (base, power) => power === 0 ? 1 : power & 1 ? base * pow(base, power - 1) : pow(base * base, power >> 1);
+/**
+ * Array functions
+ * Provides a set of functions for common array operations
+ */
 
 var head = a => a[0];
 var last = a => a[a.length - 1];
@@ -413,10 +627,6 @@ var sum = function sum() {
   return args.reduce((x, y) => x + y, 0);
 };
 var average = ns => sum(...ns) / ns.length;
-var shift = arr => [arr[0], arr.slice(1)];
-var pop = arr => [arr.slice(0, -1), arr[arr.length - 1]];
-var unshift = curry((arr, v) => [v].concat(arr));
-var push = curry((arr, v) => arr.concat(v));
 var partition = (arr, a, b) => arr.reduce((acc, cv) => a(cv) ? (acc[0].push(cv), acc) : b(cv) ? (acc[1].push(cv), acc) : acc, [[], []]);
 var zipMap = function zipMap(f) {
   for (var _len19 = arguments.length, iters = new Array(_len19 > 1 ? _len19 - 1 : 0), _key19 = 1; _key19 < _len19; _key19++) {
@@ -440,6 +650,13 @@ var toLowerCase = s => s.toLowerCase();
 var toUpperCase = s => s.toUpperCase();
 var prepend = curry((s1, s2) => "".concat(s1).concat(s2));
 var append = curry((s1, s2) => "".concat(s2).concat(s1));
+/**
+ * TryCatch
+ * @param {function} f - Try function, may throw
+ * @param {function} g - Catch function, to catch error
+ * @returns {any} Calls g if function f throws
+ */
+
 var tryCatch = curry((f, g) => {
   try {
     return f();
@@ -447,13 +664,14 @@ var tryCatch = curry((f, g) => {
     return g(e);
   }
 });
-var maybe = fn => function maybe() {
-  for (var _len20 = arguments.length, args = new Array(_len20), _key20 = 0; _key20 < _len20; _key20++) {
-    args[_key20] = arguments[_key20];
-  }
-
-  return args.reduce((acc, cv) => acc && cv != null, true) ? fn.apply(this, args) : void 0;
-}; // range
+/**
+ * Range
+ * @param {number} start
+ * @param {number} end
+ * @param {number} step
+ * @returns {array} result - An array of numbers from start to end, spaced by
+ * step
+ */
 
 var range = function range(start, end) {
   var step = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : start < end ? 1 : -1;
@@ -467,19 +685,30 @@ var range = function range(start, end) {
   }
 
   return result;
-}; // once only runs a function once, then returns cached result
+};
+/**
+ * Once
+ * @param {function} fn - Function to run only once
+ * @returns {function} once - Function fn will be called once, and thereafter
+ * will return the cached result of the call
+ */
 
 function once(fn) {
   var done = false;
   var result;
   return function once() {
-    for (var _len21 = arguments.length, args = new Array(_len21), _key21 = 0; _key21 < _len21; _key21++) {
-      args[_key21] = arguments[_key21];
+    for (var _len20 = arguments.length, args = new Array(_len20), _key20 = 0; _key20 < _len20; _key20++) {
+      args[_key20] = arguments[_key20];
     }
 
     return !done ? (done = true, result = fn.apply(this, args), result) : result;
   };
-} // memoize a function
+}
+/**
+ * Memoize
+ * @param {function} fn - Function to memoize
+ * @returns {function} memorize - Memoized function fn
+ */
 
 function memoize(fn) {
   var cache = Object.create(null);
@@ -489,14 +718,20 @@ function memoize(fn) {
   var isPrimitive = x => typeof x === 'number' || typeof x === 'string' || typeof x === 'boolean';
 
   return function memoize() {
-    for (var _len22 = arguments.length, args = new Array(_len22), _key22 = 0; _key22 < _len22; _key22++) {
-      args[_key22] = arguments[_key22];
+    for (var _len21 = arguments.length, args = new Array(_len21), _key21 = 0; _key21 < _len21; _key21++) {
+      args[_key21] = arguments[_key21];
     }
 
     var key = args.length === 1 && isPrimitive(args[0]) ? args[0] : toKey(args);
     return key in cache ? cache[key] : cache[key] = fn.apply(this, args);
   };
-} // debounce
+}
+/**
+ * Debounce
+ * @param {number} delay - Amount of time to debounce
+ * @returns {function} debounce - Function which takes an argument fn, which is
+ * a function to debounce
+ */
 
 var debounce = delay => {
   var pending = false;
@@ -504,7 +739,13 @@ var debounce = delay => {
     if (pending) clearTimeout(pending);
     pending = setTimeout(() => fn.call(this), delay);
   };
-}; // accumulate
+};
+/**
+ * Accumulate
+ * @param {number} delay - Amount of time to delay result
+ * @returns {function} accumulate - Function which takes argument fn,
+ * a function that will be called with all accumulated events after delay
+ */
 
 var accumulate = delay => {
   var stack = [];
@@ -520,7 +761,14 @@ var accumulate = delay => {
       }, delay);
     };
   };
-}; // Object functions
+};
+/**
+ * FunctionalMixin
+ * @param {object} behaviour - Desired mixin behaviour
+ * @param {object} sharedBehaviour - Desired behaviour to add to prototype
+ * @returns {function} mixin - Function which takes argument target, which is
+ * the object to mix behaviour into
+ */
 
 var FunctionalMixin = function FunctionalMixin(behaviour) {
   var sharedBehaviour = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -556,8 +804,8 @@ var FunctionalMixin = function FunctionalMixin(behaviour) {
 };
 
 var detectCollision = function detectCollision() {
-  for (var _len23 = arguments.length, descriptors = new Array(_len23), _key23 = 0; _key23 < _len23; _key23++) {
-    descriptors[_key23] = arguments[_key23];
+  for (var _len22 = arguments.length, descriptors = new Array(_len22), _key22 = 0; _key22 < _len22; _key22++) {
+    descriptors[_key22] = arguments[_key22];
   }
 
   return descriptors.flatMap(Object.keys).reduce(sortReducer, []).reduce(collisionReducer, []).forEach(c => console.log("[WARN] Collision found: ".concat(c)));
@@ -578,8 +826,8 @@ var isDescriptor = obj => obj && (obj.state || obj.methods); // extend Object
 if (typeof Object.impl !== 'function') {
   Object.defineProperty(Object, 'impl', {
     value: function value() {
-      for (var _len24 = arguments.length, mixins = new Array(_len24), _key24 = 0; _key24 < _len24; _key24++) {
-        mixins[_key24] = arguments[_key24];
+      for (var _len23 = arguments.length, mixins = new Array(_len23), _key23 = 0; _key23 < _len23; _key23++) {
+        mixins[_key23] = arguments[_key23];
       }
 
       return target => {
@@ -606,8 +854,8 @@ if (typeof Object.mixin !== 'function') {
         base = _objectSpread2(_objectSpread2(_objectSpread2({}, base.state), base.methods), base.interop);
       }
 
-      for (var _len25 = arguments.length, mixins = new Array(_len25 > 1 ? _len25 - 1 : 0), _key25 = 1; _key25 < _len25; _key25++) {
-        mixins[_key25 - 1] = arguments[_key25];
+      for (var _len24 = arguments.length, mixins = new Array(_len24 > 1 ? _len24 - 1 : 0), _key24 = 1; _key24 < _len24; _key24++) {
+        mixins[_key24 - 1] = arguments[_key24];
       }
 
       detectCollision(base, ...mixins);
@@ -623,6 +871,12 @@ if (typeof Object.mixin !== 'function') {
     configurable: false
   });
 }
+/**
+ * DeepFreeze
+ * @param {object} obj - Object to deep freeze
+ * @returns {object} obj - Object that was deep frozen
+ */
+
 
 var deepFreeze = obj => {
   if (obj && typeof obj === 'object' && !Object.isFrozen(obj)) {
@@ -632,6 +886,12 @@ var deepFreeze = obj => {
 
   return obj;
 };
+/**
+ * DeepCopy
+ * @param {object} obj - Object to deep copy
+ * @returns {object} aux - Copy of Object obj
+ */
+
 var deepCopy = obj => {
   var aux = obj;
 
@@ -643,6 +903,12 @@ var deepCopy = obj => {
   return aux;
 };
 Object.deepFreeze = Object.deepFreeze || deepFreeze;
+/**
+ * Immutate
+ * @param {object} Object to seal and deep freeze
+ * @returns {object} Object that is sealed and deep frozen
+ */
+
 var immutable = compose(Object.seal, Object.deepFreeze);
 
 var _Symbol$toStringTag, _Symbol$toPrimitive, _Symbol$iterator, _Symbol$toPrimitive2, _Symbol$iterator2, _Symbol$toStringTag2, _Symbol$toStringTag3, _Symbol$toStringTag4, _Symbol$iterator3, _Symbol$toStringTag5, _Symbol$iterator4, _Symbol$toStringTag6, _Symbol$iterator5;
@@ -4600,4 +4866,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, accumulate, add, addRight, after, afterAll, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, compose2, composeAsync, composeAsync2, composeM, composeM2, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepProp, demethodize, divide, divideRight, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, maybe, memoize, memoizeIter, multipy, multipyRight, not, once, padEnd, padStart, parse, partition, pipe, pipeAsync, pluck$1 as pluck, pop, pow, prepend, prop$1 as prop, props, provided, push, range, reactivize, reduceAsync, reduceRight, reduceWith, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, shift, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unless, unshift, untilWith, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, accumulate, add, addRight, after, afterAll, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, compose2, composeAsync, composeAsync2, composeM, composeM2, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepProp, demethodize, divide, divideRight, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduceAsync, reduceRight, reduceWith, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unless, untilWith, wrapWith, zip, zipMap, zipWith };
