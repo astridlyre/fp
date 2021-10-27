@@ -1,19 +1,19 @@
 /**
- * Identity
+ * Identity, x => x
  * @param {any} x
  * @return {any} x
  */
 export const identity = x => x
 
 /**
- * Constant
+ * Constant, x => y => x
  * @param {any} a
  * @returns {any} a
  */
 export const constant = a => b => a
 
 /**
- * Arity
+ * Arity, turn a function into one with n arguments
  * @param {function} fn
  * @param {number} n - desired arity
  * @returns {function} arity - Function fn with new arity
@@ -24,28 +24,28 @@ export const arity = (fn, n) =>
   }
 
 /**
- * Unary
+ * Unary, turn a function into one with 1 argument
  * @param {function} fn
  * @returns {function} arity - Function with arity of 1
  */
 export const unary = fn => arity(fn, 1)
 
 /**
- * Binary
+ * Binary, turn a function into one with 2 arguments
  * @param {function} fn
  * @returns {function} arity - Function with arity of 2
  */
 export const binary = fn => arity(fn, 2)
 
 /**
- * Ternary
+ * Ternary, turn a function into one with 3 arguments
  * @param {function} fn
  * @returns {function} arity - Function with arity of 3
  */
 export const ternary = fn => arity(fn, 3)
 
 /**
- * Call First
+ * Call First, partially apply a function's leftmost argument
  * @param {function} fn - Function to partially apply
  * @param {any} larg - Leftmost argument
  * @returns {function} callFirst - Function fn partially applied with larg
@@ -56,7 +56,7 @@ export const callFirst = (fn, larg) =>
   }
 
 /**
- * Call Last
+ * Call Last, partially apply a function's rightmost argument
  * @param {function} fn - Function to partially apply
  * @param {any} rarg - Rightmost argument
  * @returns {function} callLast - Function fn partially applied with rarg
@@ -67,15 +67,15 @@ export const callLast = (fn, rarg) =>
   }
 
 /**
- * Demethodize
+ * Demethodize, convert a method to a standalone function
  * @param {method} method - Method to demethodize
  * @returns {function} method bound to use as regular function
  */
 export const demethodize = Function.prototype.bind.bind(Function.prototype.call)
 
 /**
- * Len - provides a simple way to get the length/size of something
- * @param {any} a
+ * Len, provides a simple way to get the length/size of something
+ * @param {any} a - The subject of the length inquiry
  * @returns {number} {undefined} The length or size of the argument
  */
 export const len = a =>
@@ -87,28 +87,27 @@ export const len = a =>
     ? Object.entries(a).length
     : void 0
 
-// Compose and pipe
-export const compose2 = (f, g) =>
+const compose2 = (f, g) =>
   function compose(...args) {
     return f.call(this, g.call(this, ...args))
   }
 
 /**
- * Compose
+ * Compose, combine any number of functions together, right to left
  * @param {function} Any number of functions fns to compose
  * @returns {function} A function composed of fns
  */
 export const compose = (...fns) => fns.reduce(compose2)
 
 /**
- * Pipe
+ * Pipe, combine any number of functions together, left to right
  * @param {function} fns to pipe
  * @returns {function} A function pipe of fns
  */
 export const pipe = (...fns) => fns.reduceRight(compose2)
 
 /**
- * Curry
+ * Curry, automatically curry a function, only works with non-variadic functions
  * @param {function} fn - Function to curry
  * @returns {function} Partially applied function, or result of calling
  * function fn if arguments are greater than or equal to total arity of
@@ -130,40 +129,101 @@ export const curry = fn =>
  * Provides several functions to test whether x is of type y
  */
 const isTypeOf = a => b => typeof b === a
+
+/**
+ * IsNumber, checks if x is a Number
+ * @param {any} x
+ * @returns {boolean}
+ */
 export const isNumber = isTypeOf('number')
+
+/**
+ * IsBoolean, checks if x is a Boolean
+ * @param {any} x
+ * @returns {boolean}
+ */
 export const isBoolean = isTypeOf('boolean')
+
+/**
+ * IsNull, checks if x is null
+ * @param {any} x
+ * @returns {boolean}
+ */
 export const isNull = x => x === null
+
+/**
+ * IsString, checks if x is a String
+ * @param {any} x
+ * @returns {boolean}
+ */
 export const isString = isTypeOf('string')
+
+/**
+ * IsObject, checks if x is an Object
+ * @param {any} x
+ * @returns {boolean}
+ */
 export const isObject = x => x !== null && typeof x === 'object'
+
+/**
+ * IsArray, checks if x is an Array
+ * @param {any} x
+ * @returns {boolean}
+ */
 export const isArray = a => Array.isArray(a)
+
+/**
+ * IsInstanceOf, checks if a is instanceof b
+ * @param {any} a
+ * @param {any} b
+ * @returns {boolean}
+ */
 export const isInstanceOf = curry((a, b) => b instanceof a)
+
+/**
+ * IsFunction, checks if f is a Function
+ * @param {any} f
+ * @returns {boolean}
+ */
 export const isFunction = f => f && typeof f === 'function'
+
+/**
+ * IsSet, checks if s is a Set
+ * @param {any} s
+ * @returns {boolean}
+ */
 export const isSet = s => s instanceof Set
+
+/**
+ * IsMap, checks if m is a Map
+ * @param {any} m
+ * @returns {boolean}
+ */
 export const isMap = m => m instanceof Map
 
 /**
- * Tap
+ * Tap, run a side effect fn and then return x
  * @param {function} fn - Side effect to run
  * @param {any} x - Value to return
  */
 export const tap = curry((fn, x) => (fn(x), x))
 
 /**
- * Not
+ * Not, negate the result of a function
  * @param {function} f - Function to negate
  * @param {any} a - Argument for function f
  */
 export const not = curry((f, a) => !f(a))
 
 /**
- * Invert
+ * Invert, reverse the sign of a numerical result of a function
  * @param {function} f - Function to reverse the sign of result
  * @param {any} a - Argument for function f
  */
 export const invert = curry((f, a) => -f(a))
 
 /**
- * Flip2
+ * Flip2, flip the position of a function's arguments
  * @param {function} f - Function to flip arguments
  * @returns {function} flip - Function f with arguments a and b flipped
  */
@@ -173,7 +233,7 @@ export const flip2 = f =>
   })
 
 /**
- * Flip3
+ * Flip3, flip the first argument to the last argument
  * @param {function} f - Function to flip arguments
  * @returns {function} flip - Function f with
  * arguments a, b, c flipped to b, c, a.
@@ -184,14 +244,14 @@ export const flip3 = f =>
   })
 
 /**
- * Tee - Logs argument and returns it
+ * Tee, logs argument and returns it
  * @param {any}
  * @returns {any}
  */
 export const tee = tap(console.log.bind(console))
 
 /**
- * Log
+ * Log, spy on the execution of a function fn with logger
  * @param {function} fn - Function to log
  * @param {function} logger - Logging function
  * @returns {function} log - Function fn with enhanced logging
@@ -205,7 +265,7 @@ export const log = (fn, logger = console.log.bind(console)) =>
   }
 
 /**
- * Transduce
+ * Transduce, combine multiple maps, filters, into a more efficient operation
  * @param {array} arr - Array to reduce
  * @param {array} fns - Array of functions to apply to arr
  * @param {function} reducer - Reducer function to apply to arr
@@ -216,21 +276,21 @@ export const transduce = curry((arr, fns, reducer, initial) =>
 )
 
 /**
- * MapTR
+ * MapTR, create a map transducer
  * @param {function} fn - Create a transducer from map function
  * @returns {function}
  */
 export const mapTR = fn => reducer => (acc, val) => reducer(acc, fn(val))
 
 /**
- * filterTR
+ * filterTR, create a filter transducer
  * @param {function} fn - Create a transducer from a filter function
  * @returns {function}
  */
 export const filterTR = fn => reducer => (acc, val) => fn(val) ? reducer(acc, val) : acc
 
 /**
- * Prop
+ * Prop, access a property in an object
  * @param {string} name - Property name
  * @param {object} a - Object to get property in
  */
@@ -240,7 +300,7 @@ export const prop = curry(
 )
 
 /**
- * Send
+ * Send, returns a function that applies instance method name with args
  * @param {string} name - Property name
  * @param {any} args - Arguments to send to instance method
  * @returns {function} send - Function send takes an instance and calls
@@ -252,7 +312,7 @@ export const send =
     instance[name].apply(instance, args)
 
 /**
- * Bound
+ * Bound, returns a bound method or calls method with args
  * @param {name} name - Property name
  * @param {any} args - Arguments to send to bound method
  * @returns {function} {any} Returns bound method or bound method called with
@@ -264,7 +324,7 @@ export const bound = (name, ...args) =>
     : instance => Function.prototype.bind.apply(instance[name], [instance].concat(args))
 
 /**
- * SetPropM
+ * SetPropM, sets a property in an object **MUTATES**
  * @param {name} name - Property name
  * @param {value} value - New value to set
  * @param {object} a - Object to mutate with new value
@@ -275,7 +335,7 @@ export const setPropM = curry((name, value, a) =>
 )
 
 /**
- * SetProp
+ * SetProp, returns a copy of an object with new property name set to value
  * @param {name} name - Property name
  * @param {value} value - New value to set
  * @param {object} a - Object to set value in
@@ -286,7 +346,7 @@ export const setProp = curry((name, value, a) =>
 )
 
 /**
- * Props
+ * Props, gets an array of property names from an object, shallow
  * @param {array} names - Array of property names
  * @param {object} a - Object to get property names from
  * @returns {array} Array of values
@@ -294,7 +354,7 @@ export const setProp = curry((name, value, a) =>
 export const props = curry((names, a) => names.map(n => prop(n, a)))
 
 /**
- * Pick
+ * Pick, returns an object with only the selected property names, shallow
  * @param {array} names - Array of property names
  * @param {object} a - Object to get property names from
  * @returns {object} A new object with only properties names
@@ -307,7 +367,7 @@ export const pick = curry((names, a) =>
 )
 
 /**
- * Invoke
+ * Invoke, returns a function that takes a context to call function fn with args in
  * @param {function} fn - Function to invoke in new context
  * @param {any} args - Argument for function fn
  * @returns {function} invoke - Function which takes instance and calls fn with
@@ -319,7 +379,7 @@ export const invoke =
     fn.apply(instance, args)
 
 /**
- * DeepProp
+ * DeepProp, get a property from any object, deep
  * @param {string} {array} path - A path of properties or an Array of
  * properties to get
  * @param {object} a - Object to get properties from
@@ -332,7 +392,7 @@ export const deepProp = curry((path, a) => {
 })
 
 /**
- * DeepSetProp
+ * DeepSetProp, set a property in an object, returns a copy, deep
  * @param {string} {array} path - A path of properties or an Array of
  * properties to set
  * @param {any} value - The value to set
@@ -359,7 +419,7 @@ export const deepSetProp = curry((path, value, a) => {
 })
 
 /**
- * DeepPick
+ * DeepPick, returns an object with only deep properties paths
  * @param {array} paths - An array of string paths of property names
  * @param {object} a - The Object to pick properties from
  * @returns {object} A copy of Object a with only properties paths
@@ -369,7 +429,7 @@ export const deepPick = curry((paths, a) =>
 )
 
 /**
- * DiffObject
+ * DiffObject, returns the changed values from newObj that are not in oldObj
  * @param {object} oldObj - Old Object
  * @param {object} newObj - New Object to diff against oldObj
  * @returns {object} result - Object of differences between newObj and oldObj
@@ -399,7 +459,7 @@ export function diffObjects(oldObj, newObj) {
 }
 
 /**
- * DiffArray
+ * DiffArray, returns the changed items from newArr, that are not in oldArr
  * @param {array} oldArr - Array to diff
  * @param {array} newArr - Array to diff
  * @returns {array} result - Array of items that have changed
@@ -418,7 +478,7 @@ export function diffArrays(oldArr, newArr) {
 }
 
 /**
- * Diff
+ * Diff, get the naive difference between a and b
  * Only diffs simple objects, arrays and primitives. Maybe I'll extend it to
  * support Maps and Sets later.
  * @param {object} a - Object to compare
@@ -430,7 +490,7 @@ export function diff(a, b) {
 }
 
 /**
- * Merge
+ * Merge, deep merge a and b
  * @param {object} a - Object to merge into
  * @param {object} b - Object with diffs to merge
  * @return {object} c - Result of merge
@@ -461,49 +521,153 @@ export const stringify = JSON.stringify.bind(JSON)
 export const parse = JSON.parse.bind(JSON)
 export const toString = String
 export const toInteger = s => Number.parseInt(s, 10)
+
+/**
+ * PadStart
+ * @param {any} x - Base to stringify
+ * @param {number} reps - Length to pad up to
+ * @param {string} fill - Fill characters
+ * @returns {string}
+ */
 export const padStart = curry((x, reps, fill) =>
   String.prototype.padStart.call(x, reps, fill)
 )
+
+/**
+ * PadEnd
+ * @param {any} x - Base to stringify
+ * @param {number} reps - Length to pad up to
+ * @param {string} fill - Fill characters
+ * @returns {string}
+ */
 export const padEnd = curry((x, reps, fill) =>
   String.prototype.padEnd.call(x, reps, fill)
 )
 
 /**
- * Monad-related functions
- * Provides functions to help when working with Monads, such as Array
+ * ForEach
+ * @param {function} f - Function to run on value(s) of M
+ * @param {array} M - Monad / iterable that implements forEach
+ * @returns {undefined}
  */
 export const forEach = curry((f, M) => M.forEach(f))
+
+/**
+ * Map
+ * @param {function} f - Mapper function
+ * @param {array} M - Monad / iterable that implements map
+ * @returns {array}
+ */
 export const map = curry((f, M) => M.map(f))
+
+/**
+ * Filter
+ * @param {function} p - Predicate to filter with
+ * @param {array} M - Monad / iterable to filter
+ * @returns {array}
+ */
 export const filter = curry((p, M) => M.filter(p))
-export const reduce = curry((acc, start, M) => M.reduce(acc, start))
-export const reduceRight = curry((acc, start, M) => M.reduceRight(acc, start))
+
+/**
+ * Reduce
+ * @param {function} reducer - Reducer function
+ * @param {any} seed - Initial value
+ * @param {array} M - Monad / iterable to reduce
+ * @returns {any}
+ */
+export const reduce = curry((reducer, seed, M) => M.reduce(reducer, seed))
+
+/**
+ * ReduceRight
+ * @param {function} reducer - Reducer function
+ * @param {any} seed - Initial value
+ * @param {array} M - Monad / iterable to reduce
+ * @returns {any}
+ */
+export const reduceRight = curry((reducer, seed, M) => M.reduceRight(reducer, seed))
+
+/**
+ * Pluck
+ * @param {string} prop - Property to pluck
+ * @param {array} M - Monad / iterable to pluck prop out of
+ * @returns {array}
+ */
 export const pluck = compose(map, prop)
+
+/**
+ * DeepMap
+ * @param {function} fn - Mapper function
+ * @returns {function} innerDeepMap - Maps recursively over nested array / tree
+ */
 export const deepMap = fn =>
   function innerDeepMap(tree) {
     return Array.prototype.map.call(tree, element =>
       Array.isArray(element) ? innerDeepMap(element) : fn(element)
     )
   }
-export const composeM2 = (f, g) =>
+
+const composeM2 = (f, g) =>
   function innerComposeM2(...args) {
     return g.apply(this, args).flatMap(f)
   }
+
+/**
+ * ComposeM
+ * @param {monad} - Monads to compose
+ * @returns {function} - Reduction of monads
+ */
 export const composeM = (...Ms) => Ms.reduce(composeM2)
 export const liftA2 = curry((fn, a1, a2) => a1.map(fn).ap(a2))
 export const liftA3 = curry((fn, a1, a2, a3) => a1.map(fn).ap(a2).ap(a3))
 export const liftA4 = curry((fn, a1, a2, a3, a4) => a1.map(fn).ap(a2).ap(a3).ap(a4))
 export const apply = curry((fn, F) => map.call(F, fn))
-export const composeAsync2 = (f, g) =>
+
+const composeAsync2 = (f, g) =>
   async function innerComposeAsync(...args) {
     return await f.call(this, await g.call(this, ...args))
   }
+
+/**
+ * ComposeAsync
+ * @param {function} Async functions to compose, right to left
+ * @returns {function}
+ */
 export const composeAsync = (...fns) => fns.reduce(composeAsync2)
+
+/**
+ * PipeAsync
+ * @param {function} Async functions to pipe, left to right
+ * @returns {function}
+ */
 export const pipeAsync = (...fns) => fns.reduceRight(composeAsync2)
+
+/**
+ * MapAsync
+ * @param {function} Async mapper function
+ * @param {array} a - Array of values to map over
+ * @returns {array}
+ */
 export const mapAsync = async (f, a) => await Promise.all(a.map(f))
+
+/**
+ * ReduceAsync
+ * @param {function} f - Async Reducer function
+ * @param {any} init - Initial value
+ * @param {array} a - Array of values to reduce
+ * @returns {any}
+ */
 export const reduceAsync = async (f, init, a) =>
   await a.reduce((p, val) => p.then(() => f(val)), Promise.resolve(init))
+
+/**
+ * FilterAsync
+ * @param {function} f - Predicate to filter a with
+ * @param {array} a - Array to filter
+ * @returns {array}
+ */
 export const filterAsync = async (f, a) =>
   await mapAsync(f, a).then(bools => a.filter((_, i) => Boolean(bools[i])))
+
 export const flat = M => M.flat()
 export const flatMap = curry((f, M) => M.flatMap(f))
 export const fold = curry((f, M) => M.fold(f))
@@ -537,11 +701,26 @@ export const some = curry((f, arr) => arr.some(f))
 export const find = curry((f, arr) => arr.find(f))
 export const sum = (...args) => args.reduce((x, y) => x + y, 0)
 export const average = ns => sum(...ns) / ns.length
+
+/**
+ * Partition, divide an array into two
+ * @param {array} arr - Array to partition in to two
+ * @param {function} a - Left side function
+ * @param {function} b - Right side function
+ * @returns {array} Multidimensional array
+ */
 export const partition = (arr, a, b) =>
   arr.reduce(
     (acc, cv) => (a(cv) ? (acc[0].push(cv), acc) : b(cv) ? (acc[1].push(cv), acc) : acc),
     [[], []]
   )
+
+/**
+ * ZipMap
+ * @param {function} f - Mapper function
+ * @param {iterable} Iterables
+ * @returns {array}
+ */
 export const zipMap = (f, ...iters) => {
   const min = Math.min(...pluck('length')(iters))
   const result = []
@@ -550,9 +729,38 @@ export const zipMap = (f, ...iters) => {
   }
   return result
 }
+
+/**
+ * SortBy
+ * @param {function} f - Sorter function (a, b) => a - b
+ * @param {array} a - Array to sort
+ * @returns {array} Copy of array a, sorted with f
+ */
 export const sortBy = curry((f, a) => [...a].sort(f))
+
+/**
+ * Match
+ * @param {regexp} re - Matcher RegExp
+ * @param {string} s - String to test
+ * @returns {boolean}
+ */
 export const match = curry((re, s) => re.test(s))
+
+/**
+ * Replace
+ * @param {regexp} {string} - Regexp or String to match and replace
+ * @param {string} Replacer string
+ * @param {string} s - String to perform search and replace on
+ * @returns {string}
+ */
 export const replace = curry((re, rpl, s) => s.replace(re, rpl))
+
+/**
+ * Split
+ * @param {string} sep - Separater string
+ * @param {string} s - String to split
+ * @returns {array}
+ */
 export const split = curry((sep, s) => s.split(sep))
 export const toLowerCase = s => s.toLowerCase()
 export const toUpperCase = s => s.toUpperCase()

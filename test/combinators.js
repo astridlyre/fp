@@ -171,9 +171,9 @@ describe('Combinators', function () {
     })
   })
 
-  describe('compose2', function () {
+  describe('compose', function () {
     it('should compose two functions', function () {
-      const shout = combinators.compose2(
+      const shout = combinators.compose(
         x => x + '!',
         x => x.toUpperCase()
       )
@@ -476,18 +476,18 @@ describe('Combinators', function () {
     })
   })
 
-  describe('composeM2', function () {
+  describe('composeM', function () {
     it('should compose two monads', function () {
       const fn = x => [x]
-      assert.deepEqual(combinators.composeM2(fn, fn)('hi'), ['hi'])
+      assert.deepEqual(combinators.composeM(fn, fn)('hi'), ['hi'])
     })
   })
 
-  describe('composeAsync2', function () {
+  describe('composeAsync', function () {
     it('should compose two async functions', function (done) {
       const a = x => new Promise(resolve => setTimeout(() => resolve(x), 0))
       const b = x => new Promise(resolve => setTimeout(() => resolve(x), 1))
-      const c = async x => await combinators.composeAsync2(a, b)
+      const c = async x => await combinators.composeAsync(a, b)
       ;(async () => assert.equal(await c(5), 5), done())()
     })
   })

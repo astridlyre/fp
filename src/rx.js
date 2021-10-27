@@ -80,6 +80,12 @@ if (
   })
 }
 
+/**
+ * Listen$
+ * @param {string} eventName - Event to listen on
+ * @param {HTMLElement} element
+ * @returns {observable}
+ */
 export const listen$ = curry((eventName, element) => {
   return new Observable(observer => {
     const handler = event => observer.next(event)
@@ -88,6 +94,12 @@ export const listen$ = curry((eventName, element) => {
   })
 })
 
+/**
+ * Throttle
+ * @param {number} limit - Delay between function calls
+ * @param {observable} stream - Stream to throttle to
+ * @returns {observable}
+ */
 export const throttle = curry((limit, stream) => {
   let lastRan = 0
   let lastInterval = 0
@@ -112,6 +124,12 @@ export const throttle = curry((limit, stream) => {
   })
 })
 
+/**
+ * Map
+ * @param {function} fn - Mapper function
+ * @parma {observable} stream - Stream to map
+ * @returns {observable}
+ */
 export const map = curry(
   (fn, stream) =>
     new Observable(observer => {
@@ -128,6 +146,12 @@ export const map = curry(
     })
 )
 
+/**
+ * Filter
+ * @param {function} predicate - Filter function
+ * @param {observable} stream - Stream to filter
+ * @returns {observable}
+ */
 export const filter = curry(
   (predicate, stream) =>
     new Observable(observer => {
@@ -146,6 +170,12 @@ export const filter = curry(
     })
 )
 
+/**
+ * Buffer
+ * @param {number} count - Size of events to buffer
+ * @param {observable} stream - Stream to buffer
+ * @returns {observable}
+ */
 export const buffer = curry((count, stream) => {
   const _internalStorage = []
   return new Observable(observer => {
@@ -162,6 +192,12 @@ export const buffer = curry((count, stream) => {
   })
 })
 
+/**
+ * Take
+ * @param {number} numberToTake - Items to take from stream
+ * @param {observable} stream
+ * @returns {observable}
+ */
 export const take = curry((numberToTake, stream) => {
   let taken = 0
   return new Observable(observer => {
@@ -175,6 +211,12 @@ export const take = curry((numberToTake, stream) => {
   })
 })
 
+/**
+ * Skip
+ * @param {number} count - Number of items to skip
+ * @parma {observable} stream
+ * @returns {observable}
+ */
 export const skip = curry((count, stream) => {
   let skipped = 0
   return new Observable(observer => {
@@ -189,6 +231,13 @@ export const skip = curry((count, stream) => {
   })
 })
 
+/**
+ * Reduce
+ * @param {function} reducer
+ * @param {any} initialValue
+ * @param {observable} stream
+ * @returns {observable}
+ */
 export const reduce = curry((reducer, initialValue, stream) => {
   let accumulator = initialValue ?? {}
   return new Observable(observer => {
@@ -212,6 +261,12 @@ export const reduce = curry((reducer, initialValue, stream) => {
   })
 })
 
+/**
+ * MapTo, map a stream to only output value
+ * @param {any} value
+ * @param {observable} stream
+ * @returns {observable}
+ */
 export const mapTo = curry(
   (value, stream) =>
     new Observable(observer => {
@@ -220,6 +275,12 @@ export const mapTo = curry(
     })
 )
 
+/**
+ * Do
+ * @param {function} fn - Side effect function to run on each event
+ * @param {observable} stream
+ * @returns {observable}
+ */
 export const _do = curry(
   (fn, stream) =>
     new Observable(observer => {
@@ -237,6 +298,12 @@ export const _do = curry(
     })
 )
 
+/**
+ * ForEach, syntactic sugar for Observable.subscribe()
+ * @param {function} fn - Function to run on each event
+ * @param {observable} stream
+ * @returns {object} unsubscribe object
+ */
 export const forEach = curry((fn, stream) => {
   const subs = stream.subscribe({
     next: fn,
@@ -245,6 +312,12 @@ export const forEach = curry((fn, stream) => {
   return { unsubscribe: subs.unsubscribe.bind(subs) }
 })
 
+/**
+ * Pluck, pick keys from objects of stream
+ * @param {string} key
+ * @param {observable} stream
+ * @returns {observable}
+ */
 export const pluck = curry(
   (key, stream) =>
     new Observable(observer => {
