@@ -1,3 +1,5 @@
+import { curry } from './combinators.js'
+
 export class ValidationError {
   constructor(message, errors) {
     Error.call(this, message)
