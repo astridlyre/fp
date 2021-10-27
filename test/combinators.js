@@ -912,7 +912,7 @@ describe('Combinators', function () {
         },
       }
       assert.deepEqual(combinators.aggregate(a, b), {
-        a: 2,
+        a: [1, 2],
         b: 2,
         c: {
           d: 4,
@@ -923,11 +923,11 @@ describe('Combinators', function () {
     it('should aggregate objects with array properties', function () {
       const a = {
         title: 'my book',
-        authors: ['astrid'],
+        authors: 'astrid',
       }
       const b = {
         title: 'my book',
-        authors: ['liz'],
+        authors: 'liz',
       }
       assert.deepEqual(combinators.aggregate(a, b), {
         title: 'my book',

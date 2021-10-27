@@ -528,16 +528,35 @@ export function aggregate(a, b) {
   const keys = unique([...Reflect.ownKeys(a), ...Reflect.ownKeys(b)])
   for (const key of keys) {
     const [aVal, bVal] = [a[key], b[key]]
-    if (isArray(aVal) && isArray(bVal)) {
+
+    // If a === b just deepCopy b
+    if (aVal === bVal) {
+      result[key] = deepCopy(bVal)
+    }
+
+    // if both are arrays, merge them with unique elements
+    else if (isArray(aVal) && isArray(bVal)) {
       result[key] = unique([...aVal, ...bVal])
-    } else if (isObject(aVal) && isObject(bVal)) {
+    }
+
+    // If both are objects, aggregate them
+    else if (isObject(aVal) && isObject(bVal)) {
       result[key] = aggregate(aVal, bVal)
-    } else if (aVal && !bVal) {
+    }
+
+    // If a but not b, deepCopy a
+    else if (aVal && !bVal) {
       result[key] = deepCopy(aVal)
-    } else if (bVal && !aVal) {
+    }
+
+    // If b but not a, deepCopy b
+    else if (bVal && !aVal) {
       result[key] = deepCopy(bVal)
-    } else {
-      result[key] = deepCopy(bVal)
+    }
+
+    // Otherwise aggregate results in an array
+    else {
+      result[key] = [deepCopy(aVal), deepCopy(bVal)]
     }
   }
   return result

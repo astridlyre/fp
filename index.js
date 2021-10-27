@@ -2,6 +2,7 @@ export {
   accumulate,
   add,
   addRight,
+  aggregate,
   append,
   apply,
   arity,
@@ -114,6 +115,7 @@ export {
   transduce,
   tryCatch,
   unary,
+  unique,
   values,
   zipMap,
 } from './src/combinators.js'
