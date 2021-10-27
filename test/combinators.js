@@ -745,7 +745,35 @@ describe('Combinators', function () {
         catName: 'Steve Lu-cat-ther',
       }
       assert.deepEqual(combinators.diff(a, b), { age: 16 })
-      assert.deepEqual(combinators.merge(b, combinators.diff(a, b)), b)
+      const merged = combinators.merge(b, combinators.diff(a, b))
+      assert.deepEqual(merged, b)
+      assert.notEqual(merged, b)
+    })
+  })
+
+  describe('deepCopy', function () {
+    it('should copy maps, sets and objects', function () {
+      const s = new Set([1, 2, 3])
+      assert.deepEqual(combinators.deepCopy(s), new Set([1, 2, 3]))
+      const m = new Map([
+        ['hi', 'there'],
+        [{}, null],
+      ])
+      assert.deepEqual(
+        combinators.deepCopy(m),
+        new Map([
+          ['hi', 'there'],
+          [{}, null],
+        ])
+      )
+      const o = {
+        a: {
+          b: 'x',
+        },
+        c: ['cat'],
+      }
+      assert.deepEqual(combinators.deepCopy(o), o)
+      assert.notEqual(combinators.deepCopy(o), o)
     })
   })
 })

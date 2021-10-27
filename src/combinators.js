@@ -776,7 +776,18 @@ export function deepCopy(obj) {
   let aux = obj
   if (obj && typeof obj === 'object') {
     aux = new obj.constructor()
-    Object.getOwnPropertyNames(obj).forEach(prop => (aux[prop] = deepCopy(obj[prop])))
+    if (isMap(aux)) {
+      for (const key of obj.keys()) {
+        const keyCopy = deepCopy(key)
+        aux.set(keyCopy, obj.get(key))
+      }
+    } else if (isSet(aux)) {
+      for (const val of obj.values()) {
+        aux.add(val)
+      }
+    } else {
+      Object.getOwnPropertyNames(obj).forEach(prop => (aux[prop] = deepCopy(obj[prop])))
+    }
   }
   return aux
 }
