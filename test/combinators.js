@@ -699,4 +699,53 @@ describe('Combinators', function () {
       assert.notEqual(a, copy)
     })
   })
+
+  describe('merge', function () {
+    it('should merge arrays', function () {
+      const a = [1, 2, 3]
+      const b = [1, 2, 4]
+      assert.deepEqual(combinators.merge(a, b), [1, 2, 4])
+    })
+    it('should merge objects', function () {
+      const a = {
+        name: 'jim',
+        age: 15,
+        address: {
+          city: 'Hellosville',
+        },
+      }
+      const b = {
+        name: 'john',
+        likes: ['cats', 'birds'],
+        address: {
+          street: '123 Fake st',
+        },
+      }
+      assert.deepEqual(combinators.merge(a, b), {
+        name: 'john',
+        age: 15,
+        likes: ['cats', 'birds'],
+        address: {
+          city: 'Hellosville',
+          street: '123 Fake st',
+        },
+      })
+    })
+  })
+
+  describe('merge and diff', function () {
+    it('should diff and merge resulting in deepEqual objects', function () {
+      const a = {
+        name: 'Jim',
+        catName: 'Steve Lu-cat-ther',
+      }
+      const b = {
+        name: 'Jim',
+        age: 16,
+        catName: 'Steve Lu-cat-ther',
+      }
+      assert.deepEqual(combinators.diff(a, b), { age: 16 })
+      assert.deepEqual(combinators.merge(b, combinators.diff(a, b)), b)
+    })
+  })
 })

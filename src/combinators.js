@@ -430,6 +430,27 @@ export function diff(a, b) {
 }
 
 /**
+ * Merge
+ * @param {object} a - Object to merge into
+ * @param {object} b - Object with diffs to merge
+ * @return {object} c - Result of merge
+ */
+export function merge(a, b) {
+  if (!a && b) return b
+  if (isArray(b)) {
+    return b.map((value, i) => merge(a[i], value))
+  }
+  if (isObject(b)) {
+    const result = deepCopy(a)
+    for (const key of Reflect.ownKeys(b)) {
+      result[key] = merge(a[key], b[key])
+    }
+    return result
+  }
+  return b
+}
+
+/**
  * Stringifying functions
  * Provides helper functions to stringify and parse JSON, along with numbers
  * and strings
