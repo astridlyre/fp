@@ -1,3 +1,5 @@
+import { Observable } from './src/rx.js'
+
 export {
   accumulate,
   add,
@@ -165,4 +167,4 @@ export * as lens from './src/lens.js'
 export * as rx from './src/rx.js'
 export { EventEmitter, reactivize } from './src/reactivize.js'
 export { withValidation, ValidationError } from './src/hofs.js'
-export const { Observable } = rx
+export { Observable } from './src/rx.js'
