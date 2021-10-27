@@ -90,6 +90,7 @@ export {
   reduce,
   reduceAsync,
   reduceRight,
+  rename,
   replace,
   roundTo,
   send,
