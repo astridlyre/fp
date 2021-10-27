@@ -853,4 +853,45 @@ describe('Combinators', function () {
       assert.deepEqual(combinators.keys(s), [1, 2])
     })
   })
+
+  describe('rename', function () {
+    it('should rename object keys', function () {
+      const o = {
+        title: 'my book',
+        publication_date: 1987,
+        available: true,
+      }
+      assert.deepEqual(
+        combinators.rename(
+          {
+            title: 'bookTitle',
+            publication_date: 'publicationDate',
+          },
+          o
+        ),
+        {
+          bookTitle: 'my book',
+          publicationDate: 1987,
+          available: true,
+        }
+      )
+    })
+    it('should rename map keys', function () {
+      const m = new Map()
+      m.set('hi', 'there')
+      m.set(8, 10)
+      assert.deepEqual(
+        combinators.rename(
+          {
+            hi: 'HI',
+          },
+          m
+        ),
+        new Map([
+          ['HI', 'there'],
+          [8, 10],
+        ])
+      )
+    })
+  })
 })

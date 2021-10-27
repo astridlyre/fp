@@ -631,6 +631,26 @@ export function keys(iterable) {
 }
 
 /**
+ * Rename
+ * @param {object} Key map of keys to rename
+ * @param {object} a - Object to rename
+ * @returns {object} Copy of a with renamed keys
+ */
+export const rename = curry((keyMap, a) => {
+  const result = deepCopy(a)
+  for (const [oldKey, newKey] of entries(keyMap)) {
+    if (isMap(result)) {
+      result.set(newKey, a.get(oldKey))
+      result.delete(oldKey)
+    } else {
+      result[newKey] = a[oldKey]
+      delete result[oldKey]
+    }
+  }
+  return result
+})
+
+/**
  * DeepMap
  * @param {function} fn - Mapper function
  * @returns {function} innerDeepMap - Maps recursively over nested array / tree
