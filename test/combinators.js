@@ -894,4 +894,53 @@ describe('Combinators', function () {
       )
     })
   })
+
+  describe('aggregate', function () {
+    it('should aggregate object properties', function () {
+      const a = {
+        a: 1,
+        b: 2,
+        c: {
+          d: 4,
+        },
+      }
+      const b = {
+        a: 2,
+        b: 2,
+        c: {
+          e: 'f',
+        },
+      }
+      assert.deepEqual(combinators.aggregate(a, b), {
+        a: 2,
+        b: 2,
+        c: {
+          d: 4,
+          e: 'f',
+        },
+      })
+    })
+    it('should aggregate objects with array properties', function () {
+      const a = {
+        title: 'my book',
+        authors: ['astrid'],
+      }
+      const b = {
+        title: 'my book',
+        authors: ['liz'],
+      }
+      assert.deepEqual(combinators.aggregate(a, b), {
+        title: 'my book',
+        authors: ['astrid', 'liz'],
+      })
+    })
+  })
+
+  describe('unique', function () {
+    it('should filter non-unique items from arrays', function () {
+      const a = [1, 2, 3]
+      const b = [3, 4, 5]
+      assert.deepEqual(combinators.unique(a, b), [1, 2, 3, 4, 5])
+    })
+  })
 })

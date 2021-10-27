@@ -511,6 +511,39 @@ export function merge(a, b) {
 }
 
 /**
+ * Unique
+ * @param {array} arr - Array to remove non-unique items
+ * @returns {array} Array of unique items
+ */
+export const unique = (...items) => Array.from(new Set(items.flat()))
+
+/**
+ * Aggregate, combine all keys
+ * @param {object} a - Object one
+ * @param {object} b - Object two
+ * @returns {object} c - Result of aggregation
+ */
+export function aggregate(a, b) {
+  const result = {}
+  const keys = unique([...Reflect.ownKeys(a), ...Reflect.ownKeys(b)])
+  for (const key of keys) {
+    const [aVal, bVal] = [a[key], b[key]]
+    if (isArray(aVal) && isArray(bVal)) {
+      result[key] = unique([...aVal, ...bVal])
+    } else if (isObject(aVal) && isObject(bVal)) {
+      result[key] = aggregate(aVal, bVal)
+    } else if (aVal && !bVal) {
+      result[key] = deepCopy(aVal)
+    } else if (bVal && !aVal) {
+      result[key] = deepCopy(bVal)
+    } else {
+      result[key] = deepCopy(bVal)
+    }
+  }
+  return result
+}
+
+/**
  * Stringifying functions
  * Provides helper functions to stringify and parse JSON, along with numbers
  * and strings
