@@ -770,6 +770,45 @@ var reduceRight = curry((reducer, seed, M) => M.reduceRight(reducer, seed));
 
 var pluck$1 = compose(map$1, prop$1);
 /**
+ * Entries, eagerly get entries of an object or iterable
+ * @param {iterable} {object} Object that implements entries() or is iterable
+ * @returns {array} Array of [key, value] entries
+ */
+
+function entries(iterable) {
+  if (iterable.entries && isFunction(iterable.entries)) {
+    return [...iterable.entries()];
+  }
+
+  return Object.entries(iterable);
+}
+/**
+ * Values, eagerly get values of an object or iterable
+ * @param {iterable} {object} Object that implements values() or is iterable
+ * @returns {array} Array of values
+ */
+
+function values(iterable) {
+  if (iterable.values && isFunction(iterable.values)) {
+    return [...iterable.values()];
+  }
+
+  return Object.values(iterable);
+}
+/**
+ * Keys, eagerly get keys of an object or iterable
+ * @param {iterable} {object} Object that implements keys() or is iterable
+ * @returns {array} Array of keys
+ */
+
+function keys$1(iterable) {
+  if (iterable.keys && isFunction(iterable.keys)) {
+    return [...iterable.keys()];
+  }
+
+  return Object.keys(iterable);
+}
+/**
  * DeepMap
  * @param {function} fn - Mapper function
  * @returns {function} innerDeepMap - Maps recursively over nested array / tree
@@ -1274,6 +1313,1548 @@ Object.deepFreeze = Object.deepFreeze || deepFreeze;
 
 var immutable = compose(Object.seal, Object.deepFreeze);
 
+var _Symbol$toStringTag, _Symbol$toPrimitive, _Symbol$iterator, _Symbol$toPrimitive2, _Symbol$iterator2, _Symbol$toStringTag2, _Symbol$toStringTag3, _Symbol$toStringTag4, _Symbol$iterator3, _Symbol$toStringTag5, _Symbol$iterator4, _Symbol$toStringTag6, _Symbol$iterator5;
+
+function throwError(error) {
+  throw error;
+}
+
+function errorWith(str) {
+  throw new TypeError(str);
+}
+
+var _value$1 = /*#__PURE__*/new WeakMap();
+
+_Symbol$toStringTag = Symbol.toStringTag;
+_Symbol$toPrimitive = Symbol.toPrimitive;
+_Symbol$iterator = Symbol.iterator;
+class Maybe {
+  constructor(v) {
+    _classPrivateFieldInitSpec(this, _value$1, {
+      writable: true,
+      value: void 0
+    });
+
+    _defineProperty(this, _Symbol$toStringTag, 'Maybe');
+
+    _classPrivateFieldSet(this, _value$1, v);
+  }
+
+  get() {
+    var _this$value;
+
+    return (_this$value = this.value) !== null && _this$value !== void 0 ? _this$value : errorWith('Unable to get from a Maybe#Nothing');
+  }
+
+  getOrElse(defaultValue) {
+    var _this$value2;
+
+    return (_this$value2 = this.value) !== null && _this$value2 !== void 0 ? _this$value2 : defaultValue;
+  }
+
+  getOrElseThrow(error) {
+    var _this$value3;
+
+    return (_this$value3 = this.value) !== null && _this$value3 !== void 0 ? _this$value3 : throwError(error);
+  }
+
+  get value() {
+    return _classPrivateFieldGet(this, _value$1);
+  }
+
+  static of(v) {
+    return v == null ? new Nothing(v) : new Just(v);
+  }
+
+  static fromEmpty(v) {
+    return Maybe.of(v).map(x => x.length === 0 ? null : x);
+  }
+
+  [_Symbol$toPrimitive](hint) {
+    switch (hint) {
+      case 'string':
+        return this.toString();
+
+      case 'number':
+      default:
+        return this.get();
+    }
+  }
+
+  *[_Symbol$iterator]() {
+    yield this.isNothing ? new Nothing(_classPrivateFieldGet(this, _value$1)) : undefined;
+    yield this.isJust ? new Just(_classPrivateFieldGet(this, _value$1)) : undefined;
+  }
+
+}
+class Just extends Maybe {
+  get isJust() {
+    return true;
+  }
+
+  get isNothing() {
+    return false;
+  }
+
+  fold() {
+    var fn = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : x => x;
+    return fn(this.value);
+  }
+
+  filter() {
+    var fn = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : x => x;
+    return fn(this.value) ? new Just(a) : new Nothing();
+  }
+
+  map(fn) {
+    return Maybe.of(fn(this.value));
+  }
+
+  flatMap(fn) {
+    return Maybe.of(fn(this.value).merge());
+  }
+
+  ap(Ma) {
+    return Ma.isNothing ? Ma : isFunction(this.value) ? Maybe.of(isFunction(Ma.merge()) ? Ma.merge().call(Ma, this.value) : this.value(Ma.merge())) : Maybe.of(Ma.merge().call(Ma, this.value));
+  }
+
+  merge() {
+    return this.value;
+  }
+
+  toString() {
+    return "Maybe#Just (".concat(this.value, ")");
+  }
+
+  toJSON() {
+    return {
+      type: 'Maybe#Just',
+      value: this.value
+    };
+  }
+
+}
+class Nothing extends Maybe {
+  get isJust() {
+    return false;
+  }
+
+  get isNothing() {
+    return true;
+  }
+
+  map() {
+    return this;
+  }
+
+  flatMap() {
+    return this;
+  }
+
+  ap() {
+    return this;
+  }
+
+  fold() {
+    return this;
+  }
+
+  toString() {
+    return "Maybe#Nothing ()";
+  }
+
+  toJSON() {
+    return {
+      type: 'Maybe#Nothing',
+      value: {}
+    };
+  }
+
+}
+
+var _value2$1 = /*#__PURE__*/new WeakMap();
+
+_Symbol$toPrimitive2 = Symbol.toPrimitive;
+_Symbol$iterator2 = Symbol.iterator;
+class Result$1 {
+  constructor(v) {
+    _classPrivateFieldInitSpec(this, _value2$1, {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldSet(this, _value2$1, v);
+  }
+
+  get value() {
+    return _classPrivateFieldGet(this, _value2$1);
+  }
+
+  static of(v) {
+    var error = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'Null argument provided';
+    return v == null ? new Failure(error) : new Success(v);
+  }
+
+  static fromEmpty(a) {
+    return Result$1.of(a).map(x => x.length === 0 ? null : x);
+  }
+
+  static fromPromise(p) {
+    return p.then(result => new Success(result)).catch(err => new Failure(err.message));
+  }
+
+  [_Symbol$toPrimitive2](hint) {
+    switch (hint) {
+      case 'string':
+        return this.toString();
+
+      case 'number':
+      default:
+        return this.get();
+    }
+  }
+
+  *[_Symbol$iterator2]() {
+    yield this.isFailure ? new Failure(_classPrivateFieldGet(this, _value2$1)) : undefined;
+    yield this.isSuccess ? new Success(_classPrivateFieldGet(this, _value2$1)) : undefined;
+  }
+
+}
+class Failure extends Result$1 {
+  get isSuccess() {
+    return false;
+  }
+
+  get isFailure() {
+    return true;
+  }
+
+  map() {
+    return this;
+  }
+
+  flatMap() {
+    return this;
+  }
+
+  ap() {
+    return this;
+  }
+
+  get() {
+    errorWith('Unable to get from a Result#Failure');
+  }
+
+  merge() {
+    errorWith('Unable to merge from a Result#Failure');
+  }
+
+  getOrElse(defaultValue) {
+    return defaultValue;
+  }
+
+  getOrElseThrow() {
+    throw new Error(this.value);
+  }
+
+  toString() {
+    return "Result#Failure (".concat(this.value, ")");
+  }
+
+  toJSON() {
+    return {
+      type: 'Result#Failure',
+      value: this.value
+    };
+  }
+
+}
+class Success extends Result$1 {
+  get isSuccess() {
+    return true;
+  }
+
+  get isFailure() {
+    return false;
+  }
+
+  map(fn) {
+    return Result$1.of(fn(this.value));
+  }
+
+  flatMap(fn) {
+    return Result$1.of(fn(this.value).merge());
+  }
+
+  ap(Rs) {
+    return Rs.isFailure ? Rs : isFunction(this.value) ? Result$1.of(isFunction(Rs.merge()) ? Rs.merge().call(Rs, this.value) : this.value(Rs.merge())) : Result$1.of(Rs.merge().call(Rs, this.value));
+  }
+
+  get() {
+    return this.value;
+  }
+
+  getOrElse() {
+    return this.value;
+  }
+
+  getOrElseThrow() {
+    return this.value;
+  }
+
+  merge() {
+    return this.value;
+  }
+
+  toString() {
+    return "Result#Success (".concat(this.value, ")");
+  }
+
+  toJSON() {
+    return {
+      type: 'Result#Success',
+      value: this.value
+    };
+  }
+
+}
+class Try {
+  constructor(fn, msg) {
+    try {
+      return new Success(fn());
+    } catch (e) {
+      return new Failure(msg || e.message);
+    }
+  }
+
+  static of(fn, msg) {
+    return new Try(fn, msg);
+  }
+
+}
+class TryAsync {
+  constructor() {
+    throw new Error('Must use static method of');
+  }
+
+  static of(fn, msg) {
+    return _asyncToGenerator(function* () {
+      try {
+        var result = yield fn();
+        return new Success(result);
+      } catch (e) {
+        return new Failure(msg || e.message);
+      }
+    })();
+  }
+
+}
+_Symbol$toStringTag2 = Symbol.toStringTag;
+class IO {
+  constructor(fn) {
+    _defineProperty(this, _Symbol$toStringTag2, 'IO');
+
+    this.unsafePerformIO = fn;
+  }
+
+  map(fn) {
+    return new IO(compose(fn, this.unsafePerformIO));
+  }
+
+  flatMap(fn) {
+    return this.map(fn).merge();
+  }
+
+  ap(f) {
+    return this.flatMap(fn => f.map(fn));
+  }
+
+  merge() {
+    return new IO(() => this.unsafePerformIO().unsafePerformIO());
+  }
+
+  toString() {
+    return "IO#(".concat(this.unsafePerformIO.name, ")");
+  }
+
+  toJSON() {
+    return {
+      type: 'IO',
+      value: this.unsafePerformIO
+    };
+  }
+
+  static of(x) {
+    return new IO(() => x);
+  }
+
+}
+_Symbol$toStringTag3 = Symbol.toStringTag;
+class IOAsync {
+  constructor(fn) {
+    _defineProperty(this, _Symbol$toStringTag3, 'IOAsync');
+
+    this.unsafePerformIO = fn;
+  }
+
+  map(fn) {
+    var _this = this;
+
+    return _asyncToGenerator(function* () {
+      return new IO(composeAsync(fn, _this.unsafePerformIO));
+    })();
+  }
+
+  flatMap(fn) {
+    var _this2 = this;
+
+    return _asyncToGenerator(function* () {
+      return yield _this2.map(fn).merge();
+    })();
+  }
+
+  merge() {
+    var _this3 = this;
+
+    return _asyncToGenerator(function* () {
+      return new IOAsync( /*#__PURE__*/_asyncToGenerator(function* () {
+        return yield _this3.unsafePerformIO().unsafePerformIO();
+      }));
+    })();
+  }
+
+  toString() {
+    return "IOAsync#(".concat(this.unsafePerformIO.name, ")");
+  }
+
+  toJSON() {
+    return {
+      type: 'IOAsync',
+      value: this.unsafePerformIO
+    };
+  }
+
+  static of(fn) {
+    return new IOAsync( /*#__PURE__*/_asyncToGenerator(function* () {
+      return yield fn;
+    }));
+  }
+
+}
+
+var _left = /*#__PURE__*/new WeakMap();
+
+var _right = /*#__PURE__*/new WeakMap();
+
+_Symbol$toStringTag4 = Symbol.toStringTag;
+_Symbol$iterator3 = Symbol.iterator;
+class Pair$1 {
+  constructor(left, right) {
+    _classPrivateFieldInitSpec(this, _left, {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldInitSpec(this, _right, {
+      writable: true,
+      value: void 0
+    });
+
+    _defineProperty(this, _Symbol$toStringTag4, 'Pair');
+
+    _classPrivateFieldSet(this, _left, left);
+
+    _classPrivateFieldSet(this, _right, right);
+  }
+
+  get left() {
+    return _classPrivateFieldGet(this, _left);
+  }
+
+  get right() {
+    return _classPrivateFieldGet(this, _right);
+  }
+
+  get() {
+    return {
+      left: _classPrivateFieldGet(this, _left),
+      right: _classPrivateFieldGet(this, _right)
+    };
+  }
+
+  map(fn) {
+    return new Pair$1(fn(_classPrivateFieldGet(this, _left)), fn(_classPrivateFieldGet(this, _right)));
+  }
+
+  flatMap(fn) {
+    return new Pair$1(...fn(_classPrivateFieldGet(this, _left), _classPrivateFieldGet(this, _right)));
+  }
+
+  toString() {
+    return "Pair {".concat(_classPrivateFieldGet(this, _left), ", ").concat(_classPrivateFieldGet(this, _right), "}");
+  }
+
+  toJSON() {
+    return {
+      type: 'Pair',
+      value: this.get()
+    };
+  }
+
+  *[_Symbol$iterator3]() {
+    yield _classPrivateFieldGet(this, _left);
+    yield _classPrivateFieldGet(this, _right);
+  }
+
+  static of(left, right) {
+    return new Pair$1(left, right);
+  }
+
+  static eq(pairA, pairB) {
+    return pairA.left === pairB.left && pairA.right === pairB.right;
+  }
+
+}
+
+var _left2 = /*#__PURE__*/new WeakMap();
+
+var _middle = /*#__PURE__*/new WeakMap();
+
+var _right2 = /*#__PURE__*/new WeakMap();
+
+_Symbol$toStringTag5 = Symbol.toStringTag;
+_Symbol$iterator4 = Symbol.iterator;
+class Triple {
+  constructor(left, middle, right) {
+    _classPrivateFieldInitSpec(this, _left2, {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldInitSpec(this, _middle, {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldInitSpec(this, _right2, {
+      writable: true,
+      value: void 0
+    });
+
+    _defineProperty(this, _Symbol$toStringTag5, 'Triple');
+
+    _classPrivateFieldSet(this, _left2, left);
+
+    _classPrivateFieldSet(this, _middle, middle);
+
+    _classPrivateFieldSet(this, _right2, right);
+  }
+
+  get left() {
+    return _classPrivateFieldGet(this, _left2);
+  }
+
+  get middle() {
+    return _classPrivateFieldGet(this, _middle);
+  }
+
+  get right() {
+    return _classPrivateFieldGet(this, _right2);
+  }
+
+  get() {
+    return {
+      left: _classPrivateFieldGet(this, _left2),
+      middle: _classPrivateFieldGet(this, _middle),
+      right: _classPrivateFieldGet(this, _right2)
+    };
+  }
+
+  map(fn) {
+    return new Triple(fn(_classPrivateFieldGet(this, _left2)), fn(_classPrivateFieldGet(this, _middle)), fn(_classPrivateFieldGet(this, _right2)));
+  }
+
+  flatMap(fn) {
+    return new Triple(...fn(_classPrivateFieldGet(this, _left2), _classPrivateFieldGet(this, _middle), _classPrivateFieldGet(this, _right2)));
+  }
+
+  toString() {
+    return "Triple {".concat(_classPrivateFieldGet(this, _left2), ", ").concat(_classPrivateFieldGet(this, _middle), ", ").concat(_classPrivateFieldGet(this, _right2), "}");
+  }
+
+  toJSON() {
+    return {
+      type: 'Triple',
+      value: this.get()
+    };
+  }
+
+  *[_Symbol$iterator4]() {
+    yield _classPrivateFieldGet(this, _left2);
+    yield _classPrivateFieldGet(this, _middle);
+    yield _classPrivateFieldGet(this, _right2);
+  }
+
+  static of(left, middle, right) {
+    return new Triple(left, middle, right);
+  }
+
+  static eq(tripleA, tripleB) {
+    return tripleA.left === tripleB.left && tripleA.middle === tripleB.middle && tripleA.right === tripleB.right;
+  }
+
+}
+
+var _types = /*#__PURE__*/new WeakMap();
+
+_Symbol$toStringTag6 = Symbol.toStringTag;
+_Symbol$iterator5 = Symbol.iterator;
+class Enum {
+  constructor(types) {
+    _classPrivateFieldInitSpec(this, _types, {
+      writable: true,
+      value: new Set()
+    });
+
+    _defineProperty(this, _Symbol$toStringTag6, 'Enum');
+
+    types.forEach(type => _classPrivateFieldGet(this, _types).add(type));
+  }
+
+  has(type) {
+    return _classPrivateFieldGet(this, _types).has(type);
+  }
+
+  toString() {
+    return "Enum [".concat([..._classPrivateFieldGet(this, _types)].join(', '), "]");
+  }
+
+  toJSON() {
+    return {
+      type: 'Enum',
+      value: [..._classPrivateFieldGet(this, _types)]
+    };
+  }
+
+  [_Symbol$iterator5]() {
+    return _classPrivateFieldGet(this, _types)[Symbol.iterator];
+  }
+
+  static of() {
+    for (var _len = arguments.length, types = new Array(_len), _key = 0; _key < _len; _key++) {
+      types[_key] = arguments[_key];
+    }
+
+    return new Enum(types);
+  }
+
+}
+
+function createClient(apiEndpoint) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+    storageKey: "".concat(Math.round(Math.random() * 100000), "_client_key"),
+    toJSON: true
+  };
+
+  function isError(_x) {
+    return _isError.apply(this, arguments);
+  }
+
+  function _isError() {
+    _isError = _asyncToGenerator(function* (res) {
+      if (!res.ok) throw new Error((yield res.text()) || "HTTP response was not ok: ".concat(res.status));
+      return res;
+    });
+    return _isError.apply(this, arguments);
+  }
+
+  function isJson(_x2) {
+    return _isJson.apply(this, arguments);
+  }
+
+  function _isJson() {
+    _isJson = _asyncToGenerator(function* (res) {
+      if (!options.toJSON) return res;
+
+      if (res.headers.has('Content-Type') && res.headers.get('Content-Type').includes('application/json')) {
+        return yield res.json();
+      }
+
+      throw new TypeError('Response is not JSON');
+    });
+    return _isJson.apply(this, arguments);
+  }
+
+  function client(endpoint, method) {
+    var customConfig = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    var controller = new AbortController();
+    var token = localStorage.getItem(options.storageKey);
+    var headers = {
+      'Content-Type': 'application/json'
+    };
+    if (token) headers.Authorization = "Bearer ".concat(token);
+
+    var config = _objectSpread2(_objectSpread2({
+      signal: controller.signal,
+      method
+    }, customConfig), {}, {
+      headers: _objectSpread2(_objectSpread2({}, headers), customConfig.headers)
+    });
+
+    return {
+      req: fetch("".concat(apiEndpoint).concat(endpoint), config).then(isError).then(isJson),
+      abort: controller.abort.bind(controller)
+    };
+  }
+
+  return {
+    get(url, options) {
+      return client(url, 'GET', options);
+    },
+
+    post(url, body, options) {
+      return client(url, 'POST', _objectSpread2(_objectSpread2({}, options), {}, {
+        body: JSON.stringify(body)
+      }));
+    },
+
+    put(url, body, options) {
+      return client(url, 'PUT', _objectSpread2(_objectSpread2({}, options), {}, {
+        body: JSON.stringify(body)
+      }));
+    },
+
+    delete(url, options) {
+      return client(url, 'DELETE', options);
+    }
+
+  };
+}
+
+/**
+ * MapWith
+ * @param {function} fn - Mapper function
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function
+ */
+function* mapWith(fn, iterable) {
+  for (var element of iterable) {
+    yield fn(element);
+  }
+}
+/**
+ * MapAllWith
+ * @param {function} fn - Mapper function
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function that applies mapper to all
+ * elements and then yields the result of their individual iteration
+ */
+
+function* mapAllWith(fn, iterable) {
+  for (var element of iterable) {
+    yield* fn(element);
+  }
+}
+/**
+ * FilterWith
+ * @param {function} fn - Filter function
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function that filters elements by
+ * function fn
+ */
+
+function* filterWith(fn, iterable) {
+  for (var element of iterable) {
+    if (fn(element)) yield element;
+  }
+}
+/**
+ * Compact
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function that removes nullable
+ * values
+ */
+
+function* compact(iterable) {
+  for (var element of iterable) {
+    if (element != null) yield element;
+  }
+}
+/**
+ * UntilWith
+ * @param {function} fn - Tester function
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function that returns elements until
+ * the result of fn(element) is true
+ */
+
+function* untilWith(fn, iterable) {
+  for (var element of iterable) {
+    if (fn(element)) break;
+    yield element;
+  }
+}
+/**
+ * First
+ * @param {iterable} iterable
+ * @returns {any} First element of iterable
+ */
+
+var first = iterable => iterable[Symbol.iterator]().next().value;
+/**
+ * Rest
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function skipping the first element
+ */
+
+function* rest(iterable) {
+  var iterator = iterable[Symbol.iterator]();
+  iterator.next();
+  yield* iterator;
+}
+/**
+ * Take
+ * @param {number} numberToTake
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function that yields numberToTake
+ * number elements from iteratable
+ */
+
+function* take$1(numberToTake, iterable) {
+  var iterator = iterable[Symbol.iterator]();
+
+  for (var i = 0; i < numberToTake; ++i) {
+    var {
+      done,
+      value
+    } = iterator.next();
+    if (!done) yield value;
+  }
+}
+/**
+ * Zip
+ * @param {iterable} iterables
+ * @returns {function} Generator iterator function that yields an array of
+ * the combined values of each iterator of iterables
+ */
+
+function* zip() {
+  for (var _len = arguments.length, iterables = new Array(_len), _key = 0; _key < _len; _key++) {
+    iterables[_key] = arguments[_key];
+  }
+
+  var iterators = iterables.map(i => i[Symbol.iterator]());
+
+  var _loop = function* _loop() {
+    var pairs = iterators.map(j => j.next());
+    var dones = [];
+    var values = [];
+    pairs.forEach(p => (dones.push(p.done), values.push(p.value)));
+    if (dones.indexOf(true) >= 0) return "break";
+    yield values;
+  };
+
+  while (true) {
+    var _ret = yield* _loop();
+
+    if (_ret === "break") break;
+  }
+}
+/**
+ * ZipWith
+ * @param {function} zipper - Function to apply to values
+ * @param {iterable} iterables - Iterables to zip
+ * @returns {function} Generator iterator function that yields the result
+ * of applying zipper function to elements of iterables
+ */
+
+function* zipWith(zipper) {
+  for (var _len2 = arguments.length, iterables = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+    iterables[_key2 - 1] = arguments[_key2];
+  }
+
+  var iterators = iterables.map(i => i[Symbol.iterator]());
+
+  var _loop2 = function* _loop2() {
+    var pairs = iterators.map(j => j.next());
+    var dones = [];
+    var values = [];
+    pairs.forEach(p => (dones.push(p.done), values.push(p.value)));
+    if (dones.indexOf(true) >= 0) return "break";
+    yield zipper(...values);
+  };
+
+  while (true) {
+    var _ret2 = yield* _loop2();
+
+    if (_ret2 === "break") break;
+  }
+}
+/**
+ * ReduceWith
+ * @param {function} fn - Reducer function
+ * @param {any} seed - Initial value
+ * @param {iterable} iterable
+ * @returns {any} Result of reducing iterable with reducer
+ */
+
+function reduceWith(fn, seed, iterable) {
+  var accumulator = seed;
+
+  for (var element of iterable) {
+    accumulator = fn(accumulator, element);
+  }
+
+  return accumulator;
+}
+/**
+ * MemoizeIter
+ * @param {function} generator - Iterator function
+ * @returns {function} Memoized generator function
+ */
+
+function memoizeIter(generator) {
+  var memos = Object.create(null);
+  var iters = Object.create(null);
+  return function* memoize() {
+    for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+      args[_key3] = arguments[_key3];
+    }
+
+    var key = JSON.stringify(args);
+    var i = 0;
+
+    if (memos[key] == null) {
+      memos[key] = [];
+      iters[key] = generator(...args);
+    }
+
+    while (true) {
+      if (i < memos[key].length) {
+        yield memos[key][i++];
+      } else {
+        var {
+          done,
+          value
+        } = iters[key].next();
+        if (done) return;else yield memos[key][i++] = value;
+      }
+    }
+  };
+}
+
+var ClassMixin = function ClassMixin(behaviour) {
+  var sharedBehaviour = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var instanceKeys = Reflect.ownKeys(behaviour);
+  var sharedKeys = Reflect.ownKeys(sharedBehaviour);
+  var typeTag = Symbol('isA');
+
+  function mixin(classs) {
+    for (var property of instanceKeys) {
+      if (!classs.prototype[property]) {
+        Object.defineProperty(classs.prototype, property, {
+          value: behaviour[property],
+          writable: true
+        });
+      }
+    }
+
+    classs.prototype[typeTag] = true;
+    return classs;
+  }
+
+  for (var property of sharedKeys) {
+    Object.defineProperty(mixin, property, {
+      value: sharedBehaviour[property],
+      enumerable: Object.prototype.propertyIsEnumerable.call(sharedBehaviour, property)
+    });
+  }
+
+  Object.defineProperty(mixin, Symbol.hasInstance, {
+    value: instance => !!instance[typeTag]
+  });
+  return mixin;
+}; // Class decorators
+
+function Define(behaviour) {
+  var instanceKeys = Reflect.ownKeys(behaviour);
+  return function define(clazz) {
+    for (var prop of instanceKeys) {
+      if (!clazz.prototype[prop]) {
+        Object.defineProperty(clazz.prototype, prop, {
+          value: behaviour[prop],
+          writable: true
+        });
+      } else throw new Error("Illegal attempt to override ".concat(prop, ", which already exists."));
+    }
+  };
+}
+function Override(behaviour) {
+  var instanceKeys = Reflect.ownKeys(behaviour);
+  return function override(clazz) {
+    var _loop = function _loop(prop) {
+      if (clazz.prototype[prop]) {
+        var overriddenMethodFunction = clazz.prototype[prop];
+        Object.defineProperty(clazz.prototype, prop, {
+          value() {
+            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+              args[_key] = arguments[_key];
+            }
+
+            return behaviour[prop].call(this, overriddenMethodFunction.bind(this, ...args));
+          },
+
+          writable: true
+        });
+      } else throw new Error("Attempt to override non-existant method".concat(prop));
+    };
+
+    for (var prop of instanceKeys) {
+      _loop(prop);
+    }
+
+    return clazz;
+  };
+}
+function Prepend(behaviour) {
+  var instanceKeys = Reflect.ownKeys(behaviour);
+  return function prepend(clazz) {
+    var _loop2 = function _loop2(prop) {
+      if (clazz.prototype[prop]) {
+        var overriddenMethodFunction = clazz.prototype[prop];
+        Object.defineProperty(clazz.prototype, prop, {
+          value() {
+            for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+              args[_key2] = arguments[_key2];
+            }
+
+            var prependValue = behaviour[prop].apply(this, args);
+
+            if (prependValue === undefined || !!prependValue) {
+              return overriddenMethodFunction.apply(this, args);
+            }
+          },
+
+          writable: true
+        });
+      } else throw new Error("Attempt to override non-existant method ".concat(prop));
+    };
+
+    for (var prop of instanceKeys) {
+      _loop2(prop);
+    }
+
+    return clazz;
+  };
+}
+function Append(behaviour) {
+  var instanceKeys = Reflect.ownKeys(behaviour);
+  return function append(clazz) {
+    var _loop3 = function _loop3(prop) {
+      if (clazz.prototype[prop]) {
+        var overriddenMethodFunction = clazz.prototype[prop];
+        Object.defineProperty(clazz.prototype, prop, {
+          value() {
+            for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+              args[_key3] = arguments[_key3];
+            }
+
+            var returnedValue = overriddenMethodFunction.apply(this, args);
+            behaviour[prop].apply(this, args);
+            return returnedValue;
+          },
+
+          writable: true
+        });
+      } else throw new Error("Attempt to override non-existant method ".concat(prop));
+    };
+
+    for (var prop of instanceKeys) {
+      _loop3(prop);
+    }
+
+    return clazz;
+  };
+} // Method Decorators
+// Calls fns after method invocation
+
+var after = function after() {
+  for (var _len4 = arguments.length, fns = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+    fns[_key4] = arguments[_key4];
+  }
+
+  return function after(target, name, descriptor) {
+    var method = descriptor.value;
+
+    descriptor.value = function withAfter() {
+      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+        args[_key5] = arguments[_key5];
+      }
+
+      var value = method.apply(this, args);
+
+      for (var fn of fns) {
+        fn.apply(this, args);
+      }
+
+      return value;
+    };
+  };
+}; // Calls fns before method invocation
+
+var before = function before() {
+  for (var _len6 = arguments.length, fns = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
+    fns[_key6] = arguments[_key6];
+  }
+
+  return function before(target, name, descriptor) {
+    var method = descriptor.value;
+
+    descriptor.value = function withBefore() {
+      for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
+        args[_key7] = arguments[_key7];
+      }
+
+      for (var fn of fns) {
+        fn.apply(this, args);
+      }
+
+      return method.apply(this, args);
+    };
+  };
+}; // Calls method if all fns return truthy
+
+var provided = function provided() {
+  for (var _len8 = arguments.length, fns = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
+    fns[_key8] = arguments[_key8];
+  }
+
+  return function provided(target, name, descriptor) {
+    var method = descriptor.value;
+
+    descriptor.value = function withProvided() {
+      for (var _len9 = arguments.length, args = new Array(_len9), _key9 = 0; _key9 < _len9; _key9++) {
+        args[_key9] = arguments[_key9];
+      }
+
+      for (var fn of fns) {
+        if (!fn.apply(this, args)) return;
+      }
+
+      return method.apply(this, args);
+    };
+  };
+}; // Does not call method if any fn returns truthy
+
+var unless = function unless() {
+  for (var _len10 = arguments.length, fns = new Array(_len10), _key10 = 0; _key10 < _len10; _key10++) {
+    fns[_key10] = arguments[_key10];
+  }
+
+  return function unless(target, name, descriptor) {
+    var method = descriptor.value;
+
+    descriptor.value = function withUnless() {
+      for (var _len11 = arguments.length, args = new Array(_len11), _key11 = 0; _key11 < _len11; _key11++) {
+        args[_key11] = arguments[_key11];
+      }
+
+      for (var fn of fns) {
+        if (fn.apply(this, args)) return;
+      }
+
+      return method.apply(this, args);
+    };
+  };
+}; // Wrap a method with a decorator (turns ordinary decorator into ES.later)
+
+var wrapWith = decorator => function wrapWith(target, name, descriptor) {
+  descriptor.value = decorator(descriptor.value);
+}; // Cross-cutting methods "provided method advice"
+
+var aroundAll = function aroundAll(behaviour) {
+  for (var _len12 = arguments.length, methodNames = new Array(_len12 > 1 ? _len12 - 1 : 0), _key12 = 1; _key12 < _len12; _key12++) {
+    methodNames[_key12 - 1] = arguments[_key12];
+  }
+
+  return clazz => {
+    for (var methodName of methodNames) {
+      Object.defineProperty(clazz.prototype, methodName, {
+        value: behaviour(clazz.prototype[methodName]),
+        writable: true
+      });
+    }
+
+    return clazz;
+  };
+};
+var beforeAll = function beforeAll(behaviour) {
+  for (var _len13 = arguments.length, methodNames = new Array(_len13 > 1 ? _len13 - 1 : 0), _key13 = 1; _key13 < _len13; _key13++) {
+    methodNames[_key13 - 1] = arguments[_key13];
+  }
+
+  return clazz => {
+    var _loop4 = function _loop4(methodName) {
+      var method = clazz.prototype[methodName];
+      Object.defineProperty(clazz.prototype, methodName, {
+        value() {
+          for (var _len14 = arguments.length, args = new Array(_len14), _key14 = 0; _key14 < _len14; _key14++) {
+            args[_key14] = arguments[_key14];
+          }
+
+          behaviour.apply(this, args);
+          return method.apply(this, args);
+        },
+
+        writable: true
+      });
+    };
+
+    for (var methodName of methodNames) {
+      _loop4(methodName);
+    }
+
+    return clazz;
+  };
+};
+var afterAll = function afterAll(behaviour) {
+  for (var _len15 = arguments.length, methodNames = new Array(_len15 > 1 ? _len15 - 1 : 0), _key15 = 1; _key15 < _len15; _key15++) {
+    methodNames[_key15 - 1] = arguments[_key15];
+  }
+
+  return clazz => {
+    var _loop5 = function _loop5(methodName) {
+      var method = clazz.prototype[methodName];
+      Object.defineProperty(clazz.prototype, methodName, {
+        value() {
+          for (var _len16 = arguments.length, args = new Array(_len16), _key16 = 0; _key16 < _len16; _key16++) {
+            args[_key16] = arguments[_key16];
+          }
+
+          var returnedValue = method.apply(this, args);
+          behaviour.apply(this, args);
+          return returnedValue;
+        },
+
+        writable: true
+      });
+    };
+
+    for (var methodName of methodNames) {
+      _loop5(methodName);
+    }
+
+    return clazz;
+  };
+};
+var SubclassFactory = behaviour => superclass => ClassMixin(behaviour)(class extends superclass {});
+var FactoryFactory = c => function () {
+  for (var _len17 = arguments.length, args = new Array(_len17), _key17 = 0; _key17 < _len17; _key17++) {
+    args[_key17] = arguments[_key17];
+  }
+
+  return new c(...args);
+};
+
+var LazyCollection = {
+  map(fn) {
+    return Object.assign({
+      [Symbol.iterator]: () => {
+        var iterator = this[Symbol.iterator]();
+        return {
+          next: () => {
+            var {
+              done,
+              value
+            } = iterator.next();
+            return {
+              done,
+              value: done ? undefined : fn(value)
+            };
+          }
+        };
+      }
+    }, LazyCollection);
+  },
+
+  reduce(fn, seed) {
+    var iterator = this[Symbol.iterator]();
+    var iterationResult;
+    var accumulator = seed;
+
+    while (iterationResult = iterator.next(), !iterationResult.done) {
+      accumulator = fn(accumulator, iterationResult.value);
+    }
+
+    return accumulator;
+  },
+
+  filter(fn) {
+    return Object.assign({
+      [Symbol.iterator]: () => {
+        var iterator = this[Symbol.iterator]();
+        return {
+          next: () => {
+            var done, value;
+
+            do {
+              ({
+                done,
+                value
+              } = iterator.next());
+            } while (!done && !fn(value));
+
+            return {
+              done,
+              value
+            };
+          }
+        };
+      }
+    }, LazyCollection);
+  },
+
+  find(fn) {
+    return Object.assign({
+      [Symbol.iterator]: () => {
+        var iterator = this[Symbol.iterator]();
+        return {
+          next: () => {
+            var done, value;
+
+            do {
+              ({
+                done,
+                value
+              } = iterator.next());
+            } while (!done && !fn(value));
+
+            return {
+              done,
+              value
+            };
+          }
+        };
+      }
+    }, LazyCollection);
+  },
+
+  until(fn) {
+    return Object.assign({
+      [Symbol.iterator]: () => {
+        var iterator = this[Symbol.iterator]();
+        return {
+          next: () => {
+            var {
+              done,
+              value
+            } = iterator.next();
+            done = done || fn(value);
+            return {
+              done,
+              value: done ? undefined : value
+            };
+          }
+        };
+      }
+    }, LazyCollection);
+  },
+
+  first() {
+    return this[Symbol.iterator]().next().value;
+  },
+
+  rest() {
+    return Object.assign({
+      [Symbol.iterator]: () => {
+        var iterator = this[Symbol.iterator]();
+        iterator.next();
+        return iterator;
+      }
+    }, LazyCollection);
+  },
+
+  take(numberToTake) {
+    return Object.assign({
+      [Symbol.iterator]: () => {
+        var iterator = this[Symbol.iterator]();
+        var remainingElements = numberToTake;
+        return {
+          next: () => {
+            var {
+              done,
+              value
+            } = iterator.next();
+            done = done || remainingElements-- <= 0;
+            return {
+              done,
+              value: done ? undefined : value
+            };
+          }
+        };
+      }
+    }, LazyCollection);
+  }
+
+};
+var Numbers = Object.assign({
+  *[Symbol.iterator]() {
+    var n = 0;
+
+    while (true) {
+      yield n++;
+    }
+  }
+
+}, LazyCollection);
+var EMPTY = {
+  isEmpty: () => true
+};
+var Pair = function Pair(car) {
+  var cdr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : EMPTY;
+  return Object.assign({
+    car,
+    cdr,
+    isEmpty: () => false,
+
+    [Symbol.iterator]() {
+      var currentPair = this;
+      return {
+        next: () => {
+          if (currentPair.isEmpty()) return {
+            done: true
+          };else {
+            var value = currentPair.car;
+            currentPair = currentPair.cdr;
+            return {
+              done: false,
+              value
+            };
+          }
+        }
+      };
+    }
+
+  }, LazyCollection);
+};
+
+Pair.from = iterable => function iterationToList(iteration) {
+  var {
+    done,
+    value
+  } = iteration.next();
+  return done ? EMPTY : Pair(value, iterationToList(iteration));
+}(iterable[Symbol.iterator]());
+
+var Stack = () => Object.assign({
+  array: [],
+  index: -1,
+
+  push(value) {
+    return this.array[this.index += 1] = value;
+  },
+
+  pop() {
+    var value = this.array[this.index];
+    this.array[this.index] = undefined;
+    if (this.index >= 0) this.index -= 1;
+    return value;
+  },
+
+  isEmpty() {
+    return this.index < 0;
+  },
+
+  [Symbol.iterator]() {
+    var iteractionIndex = this.index;
+    return {
+      next: () => {
+        if (iteractionIndex > this.index) iteractionIndex = this.index;
+        if (iteractionIndex < 0) return {
+          done: true
+        };else return {
+          done: false,
+          value: this.array[iteractionIndex--]
+        };
+      }
+    };
+  }
+
+}, LazyCollection);
+
+Stack.from = function from(iterable) {
+  var stack = this();
+
+  for (var element of iterable) {
+    stack.push(element);
+  }
+
+  return stack;
+};
+
+var lazy = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  LazyCollection: LazyCollection,
+  Numbers: Numbers,
+  Pair: Pair,
+  Stack: Stack
+});
+
+var _value = /*#__PURE__*/new WeakMap();
+
+class Constant {
+  constructor(v) {
+    _classPrivateFieldInitSpec(this, _value, {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldSet(this, _value, Maybe.of(v));
+
+    this.map = () => this;
+  }
+
+  get value() {
+    return _classPrivateFieldGet(this, _value);
+  }
+
+}
+
+var _value2 = /*#__PURE__*/new WeakMap();
+
+class Variable {
+  constructor(v) {
+    _classPrivateFieldInitSpec(this, _value2, {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldSet(this, _value2, Maybe.of(v));
+
+    this.map = fn => new Variable(fn(v));
+  }
+
+  get value() {
+    return _classPrivateFieldGet(this, _value2);
+  }
+
+}
+
+var lens = (getter, setter) => fn => obj => fn(getter(obj)).map(value => setter(value, obj));
+var view = curry((lensAttr, obj) => lensAttr(x => new Constant(x))(obj).value);
+var set$1 = curry((lensAttr, newVal, obj) => lensAttr(() => new Variable(newVal))(obj).value);
+var over = curry((lensAttr, mapfn, obj) => lensAttr(x => new Variable(mapfn(x)))(obj).value);
+var lensProp = p => lens(prop(p), setProp(p));
+
+var lens$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  lens: lens,
+  view: view,
+  set: set$1,
+  over: over,
+  lensProp: lensProp
+});
+
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 var check = function check(it) {
@@ -1713,10 +3294,10 @@ var sharedKey$2 = sharedKey$3;
 var hiddenKeys$3 = hiddenKeys$4;
 var OBJECT_ALREADY_INITIALIZED = 'Object already initialized';
 var WeakMap$1 = global$6.WeakMap;
-var set$1, get, has;
+var set, get, has;
 
 var enforce = function enforce(it) {
-  return has(it) ? get(it) : set$1(it, {});
+  return has(it) ? get(it) : set(it, {});
 };
 
 var getterFor = function getterFor(TYPE) {
@@ -1737,7 +3318,7 @@ if (NATIVE_WEAK_MAP || shared.state) {
   var wmhas = store.has;
   var wmset = store.set;
 
-  set$1 = function set(it, metadata) {
+  set = function set(it, metadata) {
     if (wmhas.call(store, it)) throw new TypeError(OBJECT_ALREADY_INITIALIZED);
     metadata.facade = it;
     wmset.call(store, it, metadata);
@@ -1755,7 +3336,7 @@ if (NATIVE_WEAK_MAP || shared.state) {
   var STATE = sharedKey$2('state');
   hiddenKeys$3[STATE] = true;
 
-  set$1 = function set(it, metadata) {
+  set = function set(it, metadata) {
     if (hasOwn$7(it, STATE)) throw new TypeError(OBJECT_ALREADY_INITIALIZED);
     metadata.facade = it;
     createNonEnumerableProperty$4(it, STATE, metadata);
@@ -1772,7 +3353,7 @@ if (NATIVE_WEAK_MAP || shared.state) {
 }
 
 var internalState = {
-  set: set$1,
+  set: set,
   get: get,
   has: has,
   enforce: enforce,
@@ -2277,7 +3858,7 @@ var getIterator$1 = getIterator$2;
 var getIteratorMethod = getIteratorMethod$2;
 var iteratorClose = iteratorClose$1;
 
-var Result$1 = function Result(stopped, result) {
+var Result = function Result(stopped, result) {
   this.stopped = stopped;
   this.result = result;
 };
@@ -2292,7 +3873,7 @@ var iterate$1 = function iterate(iterable, unboundFunction, options) {
 
   var stop = function stop(condition) {
     if (iterator) iteratorClose(iterator, 'normal', condition);
-    return new Result$1(true, condition);
+    return new Result(true, condition);
   };
 
   var callFn = function callFn(value) {
@@ -2313,10 +3894,10 @@ var iterate$1 = function iterate(iterable, unboundFunction, options) {
     if (isArrayIteratorMethod(iterFn)) {
       for (index = 0, length = lengthOfArrayLike(iterable); length > index; index++) {
         result = callFn(iterable[index]);
-        if (result && result instanceof Result$1) return result;
+        if (result && result instanceof Result) return result;
       }
 
-      return new Result$1(false);
+      return new Result(false);
     }
 
     iterator = getIterator$1(iterable, iterFn);
@@ -2331,10 +3912,10 @@ var iterate$1 = function iterate(iterable, unboundFunction, options) {
       iteratorClose(iterator, 'throw', error);
     }
 
-    if (typeof result == 'object' && result && result instanceof Result$1) return result;
+    if (typeof result == 'object' && result && result instanceof Result) return result;
   }
 
-  return new Result$1(false);
+  return new Result(false);
 };
 
 var global$3 = global$e;
@@ -3429,7 +5010,7 @@ var buffer = curry((count, stream) => {
  * @returns {observable}
  */
 
-var take$1 = curry((numberToTake, stream) => {
+var take = curry((numberToTake, stream) => {
   var taken = 0;
   return new Observable(observer => {
     var subs = stream.subscribe(withNext(observer)(value => {
@@ -3564,7 +5145,7 @@ var ReactiveExtensions = {
   },
 
   take(numberToTake) {
-    return take$1(numberToTake, this);
+    return take(numberToTake, this);
   },
 
   reduce(reducer) {
@@ -3604,7 +5185,7 @@ var rx = /*#__PURE__*/Object.freeze({
   map: map,
   filter: filter,
   buffer: buffer,
-  take: take$1,
+  take: take,
   skip: skip,
   reduce: reduce,
   mapTo: mapTo,
@@ -3612,1548 +5193,6 @@ var rx = /*#__PURE__*/Object.freeze({
   forEach: forEach,
   pluck: pluck,
   ReactiveExtensions: ReactiveExtensions
-});
-
-var _Symbol$toStringTag, _Symbol$toPrimitive, _Symbol$iterator, _Symbol$toPrimitive2, _Symbol$iterator2, _Symbol$toStringTag2, _Symbol$toStringTag3, _Symbol$toStringTag4, _Symbol$iterator3, _Symbol$toStringTag5, _Symbol$iterator4, _Symbol$toStringTag6, _Symbol$iterator5;
-
-function throwError(error) {
-  throw error;
-}
-
-function errorWith(str) {
-  throw new TypeError(str);
-}
-
-var _value$1 = /*#__PURE__*/new WeakMap();
-
-_Symbol$toStringTag = Symbol.toStringTag;
-_Symbol$toPrimitive = Symbol.toPrimitive;
-_Symbol$iterator = Symbol.iterator;
-class Maybe {
-  constructor(v) {
-    _classPrivateFieldInitSpec(this, _value$1, {
-      writable: true,
-      value: void 0
-    });
-
-    _defineProperty(this, _Symbol$toStringTag, 'Maybe');
-
-    _classPrivateFieldSet(this, _value$1, v);
-  }
-
-  get() {
-    var _this$value;
-
-    return (_this$value = this.value) !== null && _this$value !== void 0 ? _this$value : errorWith('Unable to get from a Maybe#Nothing');
-  }
-
-  getOrElse(defaultValue) {
-    var _this$value2;
-
-    return (_this$value2 = this.value) !== null && _this$value2 !== void 0 ? _this$value2 : defaultValue;
-  }
-
-  getOrElseThrow(error) {
-    var _this$value3;
-
-    return (_this$value3 = this.value) !== null && _this$value3 !== void 0 ? _this$value3 : throwError(error);
-  }
-
-  get value() {
-    return _classPrivateFieldGet(this, _value$1);
-  }
-
-  static of(v) {
-    return v == null ? new Nothing(v) : new Just(v);
-  }
-
-  static fromEmpty(v) {
-    return Maybe.of(v).map(x => x.length === 0 ? null : x);
-  }
-
-  [_Symbol$toPrimitive](hint) {
-    switch (hint) {
-      case 'string':
-        return this.toString();
-
-      case 'number':
-      default:
-        return this.get();
-    }
-  }
-
-  *[_Symbol$iterator]() {
-    yield this.isNothing ? new Nothing(_classPrivateFieldGet(this, _value$1)) : undefined;
-    yield this.isJust ? new Just(_classPrivateFieldGet(this, _value$1)) : undefined;
-  }
-
-}
-class Just extends Maybe {
-  get isJust() {
-    return true;
-  }
-
-  get isNothing() {
-    return false;
-  }
-
-  fold() {
-    var fn = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : x => x;
-    return fn(this.value);
-  }
-
-  filter() {
-    var fn = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : x => x;
-    return fn(this.value) ? new Just(a) : new Nothing();
-  }
-
-  map(fn) {
-    return Maybe.of(fn(this.value));
-  }
-
-  flatMap(fn) {
-    return Maybe.of(fn(this.value).merge());
-  }
-
-  ap(Ma) {
-    return Ma.isNothing ? Ma : isFunction(this.value) ? Maybe.of(isFunction(Ma.merge()) ? Ma.merge().call(Ma, this.value) : this.value(Ma.merge())) : Maybe.of(Ma.merge().call(Ma, this.value));
-  }
-
-  merge() {
-    return this.value;
-  }
-
-  toString() {
-    return "Maybe#Just (".concat(this.value, ")");
-  }
-
-  toJSON() {
-    return {
-      type: 'Maybe#Just',
-      value: this.value
-    };
-  }
-
-}
-class Nothing extends Maybe {
-  get isJust() {
-    return false;
-  }
-
-  get isNothing() {
-    return true;
-  }
-
-  map() {
-    return this;
-  }
-
-  flatMap() {
-    return this;
-  }
-
-  ap() {
-    return this;
-  }
-
-  fold() {
-    return this;
-  }
-
-  toString() {
-    return "Maybe#Nothing ()";
-  }
-
-  toJSON() {
-    return {
-      type: 'Maybe#Nothing',
-      value: {}
-    };
-  }
-
-}
-
-var _value2$1 = /*#__PURE__*/new WeakMap();
-
-_Symbol$toPrimitive2 = Symbol.toPrimitive;
-_Symbol$iterator2 = Symbol.iterator;
-class Result {
-  constructor(v) {
-    _classPrivateFieldInitSpec(this, _value2$1, {
-      writable: true,
-      value: void 0
-    });
-
-    _classPrivateFieldSet(this, _value2$1, v);
-  }
-
-  get value() {
-    return _classPrivateFieldGet(this, _value2$1);
-  }
-
-  static of(v) {
-    var error = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'Null argument provided';
-    return v == null ? new Failure(error) : new Success(v);
-  }
-
-  static fromEmpty(a) {
-    return Result.of(a).map(x => x.length === 0 ? null : x);
-  }
-
-  static fromPromise(p) {
-    return p.then(result => new Success(result)).catch(err => new Failure(err.message));
-  }
-
-  [_Symbol$toPrimitive2](hint) {
-    switch (hint) {
-      case 'string':
-        return this.toString();
-
-      case 'number':
-      default:
-        return this.get();
-    }
-  }
-
-  *[_Symbol$iterator2]() {
-    yield this.isFailure ? new Failure(_classPrivateFieldGet(this, _value2$1)) : undefined;
-    yield this.isSuccess ? new Success(_classPrivateFieldGet(this, _value2$1)) : undefined;
-  }
-
-}
-class Failure extends Result {
-  get isSuccess() {
-    return false;
-  }
-
-  get isFailure() {
-    return true;
-  }
-
-  map() {
-    return this;
-  }
-
-  flatMap() {
-    return this;
-  }
-
-  ap() {
-    return this;
-  }
-
-  get() {
-    errorWith('Unable to get from a Result#Failure');
-  }
-
-  merge() {
-    errorWith('Unable to merge from a Result#Failure');
-  }
-
-  getOrElse(defaultValue) {
-    return defaultValue;
-  }
-
-  getOrElseThrow() {
-    throw new Error(this.value);
-  }
-
-  toString() {
-    return "Result#Failure (".concat(this.value, ")");
-  }
-
-  toJSON() {
-    return {
-      type: 'Result#Failure',
-      value: this.value
-    };
-  }
-
-}
-class Success extends Result {
-  get isSuccess() {
-    return true;
-  }
-
-  get isFailure() {
-    return false;
-  }
-
-  map(fn) {
-    return Result.of(fn(this.value));
-  }
-
-  flatMap(fn) {
-    return Result.of(fn(this.value).merge());
-  }
-
-  ap(Rs) {
-    return Rs.isFailure ? Rs : isFunction(this.value) ? Result.of(isFunction(Rs.merge()) ? Rs.merge().call(Rs, this.value) : this.value(Rs.merge())) : Result.of(Rs.merge().call(Rs, this.value));
-  }
-
-  get() {
-    return this.value;
-  }
-
-  getOrElse() {
-    return this.value;
-  }
-
-  getOrElseThrow() {
-    return this.value;
-  }
-
-  merge() {
-    return this.value;
-  }
-
-  toString() {
-    return "Result#Success (".concat(this.value, ")");
-  }
-
-  toJSON() {
-    return {
-      type: 'Result#Success',
-      value: this.value
-    };
-  }
-
-}
-class Try {
-  constructor(fn, msg) {
-    try {
-      return new Success(fn());
-    } catch (e) {
-      return new Failure(msg || e.message);
-    }
-  }
-
-  static of(fn, msg) {
-    return new Try(fn, msg);
-  }
-
-}
-class TryAsync {
-  constructor() {
-    throw new Error('Must use static method of');
-  }
-
-  static of(fn, msg) {
-    return _asyncToGenerator(function* () {
-      try {
-        var result = yield fn();
-        return new Success(result);
-      } catch (e) {
-        return new Failure(msg || e.message);
-      }
-    })();
-  }
-
-}
-_Symbol$toStringTag2 = Symbol.toStringTag;
-class IO {
-  constructor(fn) {
-    _defineProperty(this, _Symbol$toStringTag2, 'IO');
-
-    this.unsafePerformIO = fn;
-  }
-
-  map(fn) {
-    return new IO(compose(fn, this.unsafePerformIO));
-  }
-
-  flatMap(fn) {
-    return this.map(fn).merge();
-  }
-
-  ap(f) {
-    return this.flatMap(fn => f.map(fn));
-  }
-
-  merge() {
-    return new IO(() => this.unsafePerformIO().unsafePerformIO());
-  }
-
-  toString() {
-    return "IO#(".concat(this.unsafePerformIO.name, ")");
-  }
-
-  toJSON() {
-    return {
-      type: 'IO',
-      value: this.unsafePerformIO
-    };
-  }
-
-  static of(x) {
-    return new IO(() => x);
-  }
-
-}
-_Symbol$toStringTag3 = Symbol.toStringTag;
-class IOAsync {
-  constructor(fn) {
-    _defineProperty(this, _Symbol$toStringTag3, 'IOAsync');
-
-    this.unsafePerformIO = fn;
-  }
-
-  map(fn) {
-    var _this = this;
-
-    return _asyncToGenerator(function* () {
-      return new IO(composeAsync(fn, _this.unsafePerformIO));
-    })();
-  }
-
-  flatMap(fn) {
-    var _this2 = this;
-
-    return _asyncToGenerator(function* () {
-      return yield _this2.map(fn).merge();
-    })();
-  }
-
-  merge() {
-    var _this3 = this;
-
-    return _asyncToGenerator(function* () {
-      return new IOAsync( /*#__PURE__*/_asyncToGenerator(function* () {
-        return yield _this3.unsafePerformIO().unsafePerformIO();
-      }));
-    })();
-  }
-
-  toString() {
-    return "IOAsync#(".concat(this.unsafePerformIO.name, ")");
-  }
-
-  toJSON() {
-    return {
-      type: 'IOAsync',
-      value: this.unsafePerformIO
-    };
-  }
-
-  static of(fn) {
-    return new IOAsync( /*#__PURE__*/_asyncToGenerator(function* () {
-      return yield fn;
-    }));
-  }
-
-}
-
-var _left = /*#__PURE__*/new WeakMap();
-
-var _right = /*#__PURE__*/new WeakMap();
-
-_Symbol$toStringTag4 = Symbol.toStringTag;
-_Symbol$iterator3 = Symbol.iterator;
-class Pair$1 {
-  constructor(left, right) {
-    _classPrivateFieldInitSpec(this, _left, {
-      writable: true,
-      value: void 0
-    });
-
-    _classPrivateFieldInitSpec(this, _right, {
-      writable: true,
-      value: void 0
-    });
-
-    _defineProperty(this, _Symbol$toStringTag4, 'Pair');
-
-    _classPrivateFieldSet(this, _left, left);
-
-    _classPrivateFieldSet(this, _right, right);
-  }
-
-  get left() {
-    return _classPrivateFieldGet(this, _left);
-  }
-
-  get right() {
-    return _classPrivateFieldGet(this, _right);
-  }
-
-  get() {
-    return {
-      left: _classPrivateFieldGet(this, _left),
-      right: _classPrivateFieldGet(this, _right)
-    };
-  }
-
-  map(fn) {
-    return new Pair$1(fn(_classPrivateFieldGet(this, _left)), fn(_classPrivateFieldGet(this, _right)));
-  }
-
-  flatMap(fn) {
-    return new Pair$1(...fn(_classPrivateFieldGet(this, _left), _classPrivateFieldGet(this, _right)));
-  }
-
-  toString() {
-    return "Pair {".concat(_classPrivateFieldGet(this, _left), ", ").concat(_classPrivateFieldGet(this, _right), "}");
-  }
-
-  toJSON() {
-    return {
-      type: 'Pair',
-      value: this.get()
-    };
-  }
-
-  *[_Symbol$iterator3]() {
-    yield _classPrivateFieldGet(this, _left);
-    yield _classPrivateFieldGet(this, _right);
-  }
-
-  static of(left, right) {
-    return new Pair$1(left, right);
-  }
-
-  static eq(pairA, pairB) {
-    return pairA.left === pairB.left && pairA.right === pairB.right;
-  }
-
-}
-
-var _left2 = /*#__PURE__*/new WeakMap();
-
-var _middle = /*#__PURE__*/new WeakMap();
-
-var _right2 = /*#__PURE__*/new WeakMap();
-
-_Symbol$toStringTag5 = Symbol.toStringTag;
-_Symbol$iterator4 = Symbol.iterator;
-class Triple {
-  constructor(left, middle, right) {
-    _classPrivateFieldInitSpec(this, _left2, {
-      writable: true,
-      value: void 0
-    });
-
-    _classPrivateFieldInitSpec(this, _middle, {
-      writable: true,
-      value: void 0
-    });
-
-    _classPrivateFieldInitSpec(this, _right2, {
-      writable: true,
-      value: void 0
-    });
-
-    _defineProperty(this, _Symbol$toStringTag5, 'Triple');
-
-    _classPrivateFieldSet(this, _left2, left);
-
-    _classPrivateFieldSet(this, _middle, middle);
-
-    _classPrivateFieldSet(this, _right2, right);
-  }
-
-  get left() {
-    return _classPrivateFieldGet(this, _left2);
-  }
-
-  get middle() {
-    return _classPrivateFieldGet(this, _middle);
-  }
-
-  get right() {
-    return _classPrivateFieldGet(this, _right2);
-  }
-
-  get() {
-    return {
-      left: _classPrivateFieldGet(this, _left2),
-      middle: _classPrivateFieldGet(this, _middle),
-      right: _classPrivateFieldGet(this, _right2)
-    };
-  }
-
-  map(fn) {
-    return new Triple(fn(_classPrivateFieldGet(this, _left2)), fn(_classPrivateFieldGet(this, _middle)), fn(_classPrivateFieldGet(this, _right2)));
-  }
-
-  flatMap(fn) {
-    return new Triple(...fn(_classPrivateFieldGet(this, _left2), _classPrivateFieldGet(this, _middle), _classPrivateFieldGet(this, _right2)));
-  }
-
-  toString() {
-    return "Triple {".concat(_classPrivateFieldGet(this, _left2), ", ").concat(_classPrivateFieldGet(this, _middle), ", ").concat(_classPrivateFieldGet(this, _right2), "}");
-  }
-
-  toJSON() {
-    return {
-      type: 'Triple',
-      value: this.get()
-    };
-  }
-
-  *[_Symbol$iterator4]() {
-    yield _classPrivateFieldGet(this, _left2);
-    yield _classPrivateFieldGet(this, _middle);
-    yield _classPrivateFieldGet(this, _right2);
-  }
-
-  static of(left, middle, right) {
-    return new Triple(left, middle, right);
-  }
-
-  static eq(tripleA, tripleB) {
-    return tripleA.left === tripleB.left && tripleA.middle === tripleB.middle && tripleA.right === tripleB.right;
-  }
-
-}
-
-var _types = /*#__PURE__*/new WeakMap();
-
-_Symbol$toStringTag6 = Symbol.toStringTag;
-_Symbol$iterator5 = Symbol.iterator;
-class Enum {
-  constructor(types) {
-    _classPrivateFieldInitSpec(this, _types, {
-      writable: true,
-      value: new Set()
-    });
-
-    _defineProperty(this, _Symbol$toStringTag6, 'Enum');
-
-    types.forEach(type => _classPrivateFieldGet(this, _types).add(type));
-  }
-
-  has(type) {
-    return _classPrivateFieldGet(this, _types).has(type);
-  }
-
-  toString() {
-    return "Enum [".concat([..._classPrivateFieldGet(this, _types)].join(', '), "]");
-  }
-
-  toJSON() {
-    return {
-      type: 'Enum',
-      value: [..._classPrivateFieldGet(this, _types)]
-    };
-  }
-
-  [_Symbol$iterator5]() {
-    return _classPrivateFieldGet(this, _types)[Symbol.iterator];
-  }
-
-  static of() {
-    for (var _len = arguments.length, types = new Array(_len), _key = 0; _key < _len; _key++) {
-      types[_key] = arguments[_key];
-    }
-
-    return new Enum(types);
-  }
-
-}
-
-function createClient(apiEndpoint) {
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
-    storageKey: "".concat(Math.round(Math.random() * 100000), "_client_key"),
-    toJSON: true
-  };
-
-  function isError(_x) {
-    return _isError.apply(this, arguments);
-  }
-
-  function _isError() {
-    _isError = _asyncToGenerator(function* (res) {
-      if (!res.ok) throw new Error((yield res.text()) || "HTTP response was not ok: ".concat(res.status));
-      return res;
-    });
-    return _isError.apply(this, arguments);
-  }
-
-  function isJson(_x2) {
-    return _isJson.apply(this, arguments);
-  }
-
-  function _isJson() {
-    _isJson = _asyncToGenerator(function* (res) {
-      if (!options.toJSON) return res;
-
-      if (res.headers.has('Content-Type') && res.headers.get('Content-Type').includes('application/json')) {
-        return yield res.json();
-      }
-
-      throw new TypeError('Response is not JSON');
-    });
-    return _isJson.apply(this, arguments);
-  }
-
-  function client(endpoint, method) {
-    var customConfig = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-    var controller = new AbortController();
-    var token = localStorage.getItem(options.storageKey);
-    var headers = {
-      'Content-Type': 'application/json'
-    };
-    if (token) headers.Authorization = "Bearer ".concat(token);
-
-    var config = _objectSpread2(_objectSpread2({
-      signal: controller.signal,
-      method
-    }, customConfig), {}, {
-      headers: _objectSpread2(_objectSpread2({}, headers), customConfig.headers)
-    });
-
-    return {
-      req: fetch("".concat(apiEndpoint).concat(endpoint), config).then(isError).then(isJson),
-      abort: controller.abort.bind(controller)
-    };
-  }
-
-  return {
-    get(url, options) {
-      return client(url, 'GET', options);
-    },
-
-    post(url, body, options) {
-      return client(url, 'POST', _objectSpread2(_objectSpread2({}, options), {}, {
-        body: JSON.stringify(body)
-      }));
-    },
-
-    put(url, body, options) {
-      return client(url, 'PUT', _objectSpread2(_objectSpread2({}, options), {}, {
-        body: JSON.stringify(body)
-      }));
-    },
-
-    delete(url, options) {
-      return client(url, 'DELETE', options);
-    }
-
-  };
-}
-
-/**
- * MapWith
- * @param {function} fn - Mapper function
- * @param {iterable} iterable
- * @returns {function} Generator iterator function
- */
-function* mapWith(fn, iterable) {
-  for (var element of iterable) {
-    yield fn(element);
-  }
-}
-/**
- * MapAllWith
- * @param {function} fn - Mapper function
- * @param {iterable} iterable
- * @returns {function} Generator iterator function that applies mapper to all
- * elements and then yields the result of their individual iteration
- */
-
-function* mapAllWith(fn, iterable) {
-  for (var element of iterable) {
-    yield* fn(element);
-  }
-}
-/**
- * FilterWith
- * @param {function} fn - Filter function
- * @param {iterable} iterable
- * @returns {function} Generator iterator function that filters elements by
- * function fn
- */
-
-function* filterWith(fn, iterable) {
-  for (var element of iterable) {
-    if (fn(element)) yield element;
-  }
-}
-/**
- * Compact
- * @param {iterable} iterable
- * @returns {function} Generator iterator function that removes nullable
- * values
- */
-
-function* compact(iterable) {
-  for (var element of iterable) {
-    if (element != null) yield element;
-  }
-}
-/**
- * UntilWith
- * @param {function} fn - Tester function
- * @param {iterable} iterable
- * @returns {function} Generator iterator function that returns elements until
- * the result of fn(element) is true
- */
-
-function* untilWith(fn, iterable) {
-  for (var element of iterable) {
-    if (fn(element)) break;
-    yield element;
-  }
-}
-/**
- * First
- * @param {iterable} iterable
- * @returns {any} First element of iterable
- */
-
-var first = iterable => iterable[Symbol.iterator]().next().value;
-/**
- * Rest
- * @param {iterable} iterable
- * @returns {function} Generator iterator function skipping the first element
- */
-
-function* rest(iterable) {
-  var iterator = iterable[Symbol.iterator]();
-  iterator.next();
-  yield* iterator;
-}
-/**
- * Take
- * @param {number} numberToTake
- * @param {iterable} iterable
- * @returns {function} Generator iterator function that yields numberToTake
- * number elements from iteratable
- */
-
-function* take(numberToTake, iterable) {
-  var iterator = iterable[Symbol.iterator]();
-
-  for (var i = 0; i < numberToTake; ++i) {
-    var {
-      done,
-      value
-    } = iterator.next();
-    if (!done) yield value;
-  }
-}
-/**
- * Zip
- * @param {iterable} iterables
- * @returns {function} Generator iterator function that yields an array of
- * the combined values of each iterator of iterables
- */
-
-function* zip() {
-  for (var _len = arguments.length, iterables = new Array(_len), _key = 0; _key < _len; _key++) {
-    iterables[_key] = arguments[_key];
-  }
-
-  var iterators = iterables.map(i => i[Symbol.iterator]());
-
-  var _loop = function* _loop() {
-    var pairs = iterators.map(j => j.next());
-    var dones = [];
-    var values = [];
-    pairs.forEach(p => (dones.push(p.done), values.push(p.value)));
-    if (dones.indexOf(true) >= 0) return "break";
-    yield values;
-  };
-
-  while (true) {
-    var _ret = yield* _loop();
-
-    if (_ret === "break") break;
-  }
-}
-/**
- * ZipWith
- * @param {function} zipper - Function to apply to values
- * @param {iterable} iterables - Iterables to zip
- * @returns {function} Generator iterator function that yields the result
- * of applying zipper function to elements of iterables
- */
-
-function* zipWith(zipper) {
-  for (var _len2 = arguments.length, iterables = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-    iterables[_key2 - 1] = arguments[_key2];
-  }
-
-  var iterators = iterables.map(i => i[Symbol.iterator]());
-
-  var _loop2 = function* _loop2() {
-    var pairs = iterators.map(j => j.next());
-    var dones = [];
-    var values = [];
-    pairs.forEach(p => (dones.push(p.done), values.push(p.value)));
-    if (dones.indexOf(true) >= 0) return "break";
-    yield zipper(...values);
-  };
-
-  while (true) {
-    var _ret2 = yield* _loop2();
-
-    if (_ret2 === "break") break;
-  }
-}
-/**
- * ReduceWith
- * @param {function} fn - Reducer function
- * @param {any} seed - Initial value
- * @param {iterable} iterable
- * @returns {any} Result of reducing iterable with reducer
- */
-
-function reduceWith(fn, seed, iterable) {
-  var accumulator = seed;
-
-  for (var element of iterable) {
-    accumulator = fn(accumulator, element);
-  }
-
-  return accumulator;
-}
-/**
- * MemoizeIter
- * @param {function} generator - Iterator function
- * @returns {function} Memoized generator function
- */
-
-function memoizeIter(generator) {
-  var memos = Object.create(null);
-  var iters = Object.create(null);
-  return function* memoize() {
-    for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-      args[_key3] = arguments[_key3];
-    }
-
-    var key = JSON.stringify(args);
-    var i = 0;
-
-    if (memos[key] == null) {
-      memos[key] = [];
-      iters[key] = generator(...args);
-    }
-
-    while (true) {
-      if (i < memos[key].length) {
-        yield memos[key][i++];
-      } else {
-        var {
-          done,
-          value
-        } = iters[key].next();
-        if (done) return;else yield memos[key][i++] = value;
-      }
-    }
-  };
-}
-
-var ClassMixin = function ClassMixin(behaviour) {
-  var sharedBehaviour = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var instanceKeys = Reflect.ownKeys(behaviour);
-  var sharedKeys = Reflect.ownKeys(sharedBehaviour);
-  var typeTag = Symbol('isA');
-
-  function mixin(classs) {
-    for (var property of instanceKeys) {
-      if (!classs.prototype[property]) {
-        Object.defineProperty(classs.prototype, property, {
-          value: behaviour[property],
-          writable: true
-        });
-      }
-    }
-
-    classs.prototype[typeTag] = true;
-    return classs;
-  }
-
-  for (var property of sharedKeys) {
-    Object.defineProperty(mixin, property, {
-      value: sharedBehaviour[property],
-      enumerable: Object.prototype.propertyIsEnumerable.call(sharedBehaviour, property)
-    });
-  }
-
-  Object.defineProperty(mixin, Symbol.hasInstance, {
-    value: instance => !!instance[typeTag]
-  });
-  return mixin;
-}; // Class decorators
-
-function Define(behaviour) {
-  var instanceKeys = Reflect.ownKeys(behaviour);
-  return function define(clazz) {
-    for (var prop of instanceKeys) {
-      if (!clazz.prototype[prop]) {
-        Object.defineProperty(clazz.prototype, prop, {
-          value: behaviour[prop],
-          writable: true
-        });
-      } else throw new Error("Illegal attempt to override ".concat(prop, ", which already exists."));
-    }
-  };
-}
-function Override(behaviour) {
-  var instanceKeys = Reflect.ownKeys(behaviour);
-  return function override(clazz) {
-    var _loop = function _loop(prop) {
-      if (clazz.prototype[prop]) {
-        var overriddenMethodFunction = clazz.prototype[prop];
-        Object.defineProperty(clazz.prototype, prop, {
-          value() {
-            for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-              args[_key] = arguments[_key];
-            }
-
-            return behaviour[prop].call(this, overriddenMethodFunction.bind(this, ...args));
-          },
-
-          writable: true
-        });
-      } else throw new Error("Attempt to override non-existant method".concat(prop));
-    };
-
-    for (var prop of instanceKeys) {
-      _loop(prop);
-    }
-
-    return clazz;
-  };
-}
-function Prepend(behaviour) {
-  var instanceKeys = Reflect.ownKeys(behaviour);
-  return function prepend(clazz) {
-    var _loop2 = function _loop2(prop) {
-      if (clazz.prototype[prop]) {
-        var overriddenMethodFunction = clazz.prototype[prop];
-        Object.defineProperty(clazz.prototype, prop, {
-          value() {
-            for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-              args[_key2] = arguments[_key2];
-            }
-
-            var prependValue = behaviour[prop].apply(this, args);
-
-            if (prependValue === undefined || !!prependValue) {
-              return overriddenMethodFunction.apply(this, args);
-            }
-          },
-
-          writable: true
-        });
-      } else throw new Error("Attempt to override non-existant method ".concat(prop));
-    };
-
-    for (var prop of instanceKeys) {
-      _loop2(prop);
-    }
-
-    return clazz;
-  };
-}
-function Append(behaviour) {
-  var instanceKeys = Reflect.ownKeys(behaviour);
-  return function append(clazz) {
-    var _loop3 = function _loop3(prop) {
-      if (clazz.prototype[prop]) {
-        var overriddenMethodFunction = clazz.prototype[prop];
-        Object.defineProperty(clazz.prototype, prop, {
-          value() {
-            for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-              args[_key3] = arguments[_key3];
-            }
-
-            var returnedValue = overriddenMethodFunction.apply(this, args);
-            behaviour[prop].apply(this, args);
-            return returnedValue;
-          },
-
-          writable: true
-        });
-      } else throw new Error("Attempt to override non-existant method ".concat(prop));
-    };
-
-    for (var prop of instanceKeys) {
-      _loop3(prop);
-    }
-
-    return clazz;
-  };
-} // Method Decorators
-// Calls fns after method invocation
-
-var after = function after() {
-  for (var _len4 = arguments.length, fns = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-    fns[_key4] = arguments[_key4];
-  }
-
-  return function after(target, name, descriptor) {
-    var method = descriptor.value;
-
-    descriptor.value = function withAfter() {
-      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-        args[_key5] = arguments[_key5];
-      }
-
-      var value = method.apply(this, args);
-
-      for (var fn of fns) {
-        fn.apply(this, args);
-      }
-
-      return value;
-    };
-  };
-}; // Calls fns before method invocation
-
-var before = function before() {
-  for (var _len6 = arguments.length, fns = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
-    fns[_key6] = arguments[_key6];
-  }
-
-  return function before(target, name, descriptor) {
-    var method = descriptor.value;
-
-    descriptor.value = function withBefore() {
-      for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
-        args[_key7] = arguments[_key7];
-      }
-
-      for (var fn of fns) {
-        fn.apply(this, args);
-      }
-
-      return method.apply(this, args);
-    };
-  };
-}; // Calls method if all fns return truthy
-
-var provided = function provided() {
-  for (var _len8 = arguments.length, fns = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
-    fns[_key8] = arguments[_key8];
-  }
-
-  return function provided(target, name, descriptor) {
-    var method = descriptor.value;
-
-    descriptor.value = function withProvided() {
-      for (var _len9 = arguments.length, args = new Array(_len9), _key9 = 0; _key9 < _len9; _key9++) {
-        args[_key9] = arguments[_key9];
-      }
-
-      for (var fn of fns) {
-        if (!fn.apply(this, args)) return;
-      }
-
-      return method.apply(this, args);
-    };
-  };
-}; // Does not call method if any fn returns truthy
-
-var unless = function unless() {
-  for (var _len10 = arguments.length, fns = new Array(_len10), _key10 = 0; _key10 < _len10; _key10++) {
-    fns[_key10] = arguments[_key10];
-  }
-
-  return function unless(target, name, descriptor) {
-    var method = descriptor.value;
-
-    descriptor.value = function withUnless() {
-      for (var _len11 = arguments.length, args = new Array(_len11), _key11 = 0; _key11 < _len11; _key11++) {
-        args[_key11] = arguments[_key11];
-      }
-
-      for (var fn of fns) {
-        if (fn.apply(this, args)) return;
-      }
-
-      return method.apply(this, args);
-    };
-  };
-}; // Wrap a method with a decorator (turns ordinary decorator into ES.later)
-
-var wrapWith = decorator => function wrapWith(target, name, descriptor) {
-  descriptor.value = decorator(descriptor.value);
-}; // Cross-cutting methods "provided method advice"
-
-var aroundAll = function aroundAll(behaviour) {
-  for (var _len12 = arguments.length, methodNames = new Array(_len12 > 1 ? _len12 - 1 : 0), _key12 = 1; _key12 < _len12; _key12++) {
-    methodNames[_key12 - 1] = arguments[_key12];
-  }
-
-  return clazz => {
-    for (var methodName of methodNames) {
-      Object.defineProperty(clazz.prototype, methodName, {
-        value: behaviour(clazz.prototype[methodName]),
-        writable: true
-      });
-    }
-
-    return clazz;
-  };
-};
-var beforeAll = function beforeAll(behaviour) {
-  for (var _len13 = arguments.length, methodNames = new Array(_len13 > 1 ? _len13 - 1 : 0), _key13 = 1; _key13 < _len13; _key13++) {
-    methodNames[_key13 - 1] = arguments[_key13];
-  }
-
-  return clazz => {
-    var _loop4 = function _loop4(methodName) {
-      var method = clazz.prototype[methodName];
-      Object.defineProperty(clazz.prototype, methodName, {
-        value() {
-          for (var _len14 = arguments.length, args = new Array(_len14), _key14 = 0; _key14 < _len14; _key14++) {
-            args[_key14] = arguments[_key14];
-          }
-
-          behaviour.apply(this, args);
-          return method.apply(this, args);
-        },
-
-        writable: true
-      });
-    };
-
-    for (var methodName of methodNames) {
-      _loop4(methodName);
-    }
-
-    return clazz;
-  };
-};
-var afterAll = function afterAll(behaviour) {
-  for (var _len15 = arguments.length, methodNames = new Array(_len15 > 1 ? _len15 - 1 : 0), _key15 = 1; _key15 < _len15; _key15++) {
-    methodNames[_key15 - 1] = arguments[_key15];
-  }
-
-  return clazz => {
-    var _loop5 = function _loop5(methodName) {
-      var method = clazz.prototype[methodName];
-      Object.defineProperty(clazz.prototype, methodName, {
-        value() {
-          for (var _len16 = arguments.length, args = new Array(_len16), _key16 = 0; _key16 < _len16; _key16++) {
-            args[_key16] = arguments[_key16];
-          }
-
-          var returnedValue = method.apply(this, args);
-          behaviour.apply(this, args);
-          return returnedValue;
-        },
-
-        writable: true
-      });
-    };
-
-    for (var methodName of methodNames) {
-      _loop5(methodName);
-    }
-
-    return clazz;
-  };
-};
-var SubclassFactory = behaviour => superclass => ClassMixin(behaviour)(class extends superclass {});
-var FactoryFactory = c => function () {
-  for (var _len17 = arguments.length, args = new Array(_len17), _key17 = 0; _key17 < _len17; _key17++) {
-    args[_key17] = arguments[_key17];
-  }
-
-  return new c(...args);
-};
-
-var LazyCollection = {
-  map(fn) {
-    return Object.assign({
-      [Symbol.iterator]: () => {
-        var iterator = this[Symbol.iterator]();
-        return {
-          next: () => {
-            var {
-              done,
-              value
-            } = iterator.next();
-            return {
-              done,
-              value: done ? undefined : fn(value)
-            };
-          }
-        };
-      }
-    }, LazyCollection);
-  },
-
-  reduce(fn, seed) {
-    var iterator = this[Symbol.iterator]();
-    var iterationResult;
-    var accumulator = seed;
-
-    while (iterationResult = iterator.next(), !iterationResult.done) {
-      accumulator = fn(accumulator, iterationResult.value);
-    }
-
-    return accumulator;
-  },
-
-  filter(fn) {
-    return Object.assign({
-      [Symbol.iterator]: () => {
-        var iterator = this[Symbol.iterator]();
-        return {
-          next: () => {
-            var done, value;
-
-            do {
-              ({
-                done,
-                value
-              } = iterator.next());
-            } while (!done && !fn(value));
-
-            return {
-              done,
-              value
-            };
-          }
-        };
-      }
-    }, LazyCollection);
-  },
-
-  find(fn) {
-    return Object.assign({
-      [Symbol.iterator]: () => {
-        var iterator = this[Symbol.iterator]();
-        return {
-          next: () => {
-            var done, value;
-
-            do {
-              ({
-                done,
-                value
-              } = iterator.next());
-            } while (!done && !fn(value));
-
-            return {
-              done,
-              value
-            };
-          }
-        };
-      }
-    }, LazyCollection);
-  },
-
-  until(fn) {
-    return Object.assign({
-      [Symbol.iterator]: () => {
-        var iterator = this[Symbol.iterator]();
-        return {
-          next: () => {
-            var {
-              done,
-              value
-            } = iterator.next();
-            done = done || fn(value);
-            return {
-              done,
-              value: done ? undefined : value
-            };
-          }
-        };
-      }
-    }, LazyCollection);
-  },
-
-  first() {
-    return this[Symbol.iterator]().next().value;
-  },
-
-  rest() {
-    return Object.assign({
-      [Symbol.iterator]: () => {
-        var iterator = this[Symbol.iterator]();
-        iterator.next();
-        return iterator;
-      }
-    }, LazyCollection);
-  },
-
-  take(numberToTake) {
-    return Object.assign({
-      [Symbol.iterator]: () => {
-        var iterator = this[Symbol.iterator]();
-        var remainingElements = numberToTake;
-        return {
-          next: () => {
-            var {
-              done,
-              value
-            } = iterator.next();
-            done = done || remainingElements-- <= 0;
-            return {
-              done,
-              value: done ? undefined : value
-            };
-          }
-        };
-      }
-    }, LazyCollection);
-  }
-
-};
-var Numbers = Object.assign({
-  *[Symbol.iterator]() {
-    var n = 0;
-
-    while (true) {
-      yield n++;
-    }
-  }
-
-}, LazyCollection);
-var EMPTY = {
-  isEmpty: () => true
-};
-var Pair = function Pair(car) {
-  var cdr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : EMPTY;
-  return Object.assign({
-    car,
-    cdr,
-    isEmpty: () => false,
-
-    [Symbol.iterator]() {
-      var currentPair = this;
-      return {
-        next: () => {
-          if (currentPair.isEmpty()) return {
-            done: true
-          };else {
-            var value = currentPair.car;
-            currentPair = currentPair.cdr;
-            return {
-              done: false,
-              value
-            };
-          }
-        }
-      };
-    }
-
-  }, LazyCollection);
-};
-
-Pair.from = iterable => function iterationToList(iteration) {
-  var {
-    done,
-    value
-  } = iteration.next();
-  return done ? EMPTY : Pair(value, iterationToList(iteration));
-}(iterable[Symbol.iterator]());
-
-var Stack = () => Object.assign({
-  array: [],
-  index: -1,
-
-  push(value) {
-    return this.array[this.index += 1] = value;
-  },
-
-  pop() {
-    var value = this.array[this.index];
-    this.array[this.index] = undefined;
-    if (this.index >= 0) this.index -= 1;
-    return value;
-  },
-
-  isEmpty() {
-    return this.index < 0;
-  },
-
-  [Symbol.iterator]() {
-    var iteractionIndex = this.index;
-    return {
-      next: () => {
-        if (iteractionIndex > this.index) iteractionIndex = this.index;
-        if (iteractionIndex < 0) return {
-          done: true
-        };else return {
-          done: false,
-          value: this.array[iteractionIndex--]
-        };
-      }
-    };
-  }
-
-}, LazyCollection);
-
-Stack.from = function from(iterable) {
-  var stack = this();
-
-  for (var element of iterable) {
-    stack.push(element);
-  }
-
-  return stack;
-};
-
-var lazy = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  LazyCollection: LazyCollection,
-  Numbers: Numbers,
-  Pair: Pair,
-  Stack: Stack
-});
-
-var _value = /*#__PURE__*/new WeakMap();
-
-class Constant {
-  constructor(v) {
-    _classPrivateFieldInitSpec(this, _value, {
-      writable: true,
-      value: void 0
-    });
-
-    _classPrivateFieldSet(this, _value, Maybe.of(v));
-
-    this.map = () => this;
-  }
-
-  get value() {
-    return _classPrivateFieldGet(this, _value);
-  }
-
-}
-
-var _value2 = /*#__PURE__*/new WeakMap();
-
-class Variable {
-  constructor(v) {
-    _classPrivateFieldInitSpec(this, _value2, {
-      writable: true,
-      value: void 0
-    });
-
-    _classPrivateFieldSet(this, _value2, Maybe.of(v));
-
-    this.map = fn => new Variable(fn(v));
-  }
-
-  get value() {
-    return _classPrivateFieldGet(this, _value2);
-  }
-
-}
-
-var lens = (getter, setter) => fn => obj => fn(getter(obj)).map(value => setter(value, obj));
-var view = curry((lensAttr, obj) => lensAttr(x => new Constant(x))(obj).value);
-var set = curry((lensAttr, newVal, obj) => lensAttr(() => new Variable(newVal))(obj).value);
-var over = curry((lensAttr, mapfn, obj) => lensAttr(x => new Variable(mapfn(x)))(obj).value);
-var lensProp = p => lens(prop(p), setProp(p));
-
-var lens$1 = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  lens: lens,
-  view: view,
-  set: set,
-  over: over,
-  lensProp: lensProp
 });
 
 var EventEmitter;
@@ -5422,4 +5461,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unless, untilWith, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };

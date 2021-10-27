@@ -776,4 +776,81 @@ describe('Combinators', function () {
       assert.notEqual(combinators.deepCopy(o), o)
     })
   })
+
+  describe('entries', function () {
+    it('should return the key value pairs of an object', function () {
+      const obj = {
+        title: 'My book',
+        available: true,
+        publicationDate: 1987,
+      }
+      assert.deepEqual(combinators.entries(obj), [
+        ['title', 'My book'],
+        ['available', true],
+        ['publicationDate', 1987],
+      ])
+    })
+    it('should return the key value pairs of a map', function () {
+      const m = new Map()
+      m.set('hi', 'there')
+      m.set(1, 2)
+      assert.deepEqual(combinators.entries(m), [
+        ['hi', 'there'],
+        [1, 2],
+      ])
+    })
+    it('should return the values of a set', function () {
+      const s = new Set()
+      s.add('hi')
+      s.add(69)
+      assert.deepEqual(combinators.entries(s), [
+        ['hi', 'hi'],
+        [69, 69],
+      ])
+    })
+  })
+
+  describe('values', function () {
+    it('should return values of an object', function () {
+      const obj = {
+        name: 'kimmy',
+        age: 5,
+      }
+      assert.deepEqual(combinators.values(obj), ['kimmy', 5])
+    })
+    it('should return values of a map', function () {
+      const m = new Map()
+      m.set('name', 'kimmy')
+      m.set(5, 6)
+      assert.deepEqual(combinators.values(m), ['kimmy', 6])
+    })
+    it('should return values of a set', function () {
+      const s = new Set()
+      s.add('cat')
+      s.add('dog')
+      assert.deepEqual(combinators.values(s), ['cat', 'dog'])
+    })
+  })
+
+  describe('keys', function () {
+    it('should get keys of an object', function () {
+      const o = {
+        a: 'b',
+        c: 'd',
+      }
+      assert.deepEqual(combinators.keys(o), ['a', 'c'])
+    })
+    it('should get keys of a map', function () {
+      const m = new Map()
+      m.set('cat', 'dog')
+      m.set(null, 69)
+      assert.deepEqual(combinators.keys(m), ['cat', null])
+    })
+    it('should get "keys" of a set', function () {
+      const s = new Set()
+      s.add(1)
+      s.add(2)
+      assert.deepEqual(combinators.keys(s), [1, 2])
+    })
+  })
 })

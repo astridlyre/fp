@@ -595,6 +595,42 @@ export const reduceRight = curry((reducer, seed, M) => M.reduceRight(reducer, se
 export const pluck = compose(map, prop)
 
 /**
+ * Entries, eagerly get entries of an object or iterable
+ * @param {iterable} {object} Object that implements entries() or is iterable
+ * @returns {array} Array of [key, value] entries
+ */
+export function entries(iterable) {
+  if (iterable.entries && isFunction(iterable.entries)) {
+    return [...iterable.entries()]
+  }
+  return Object.entries(iterable)
+}
+
+/**
+ * Values, eagerly get values of an object or iterable
+ * @param {iterable} {object} Object that implements values() or is iterable
+ * @returns {array} Array of values
+ */
+export function values(iterable) {
+  if (iterable.values && isFunction(iterable.values)) {
+    return [...iterable.values()]
+  }
+  return Object.values(iterable)
+}
+
+/**
+ * Keys, eagerly get keys of an object or iterable
+ * @param {iterable} {object} Object that implements keys() or is iterable
+ * @returns {array} Array of keys
+ */
+export function keys(iterable) {
+  if (iterable.keys && isFunction(iterable.keys)) {
+    return [...iterable.keys()]
+  }
+  return Object.keys(iterable)
+}
+
+/**
  * DeepMap
  * @param {function} fn - Mapper function
  * @returns {function} innerDeepMap - Maps recursively over nested array / tree

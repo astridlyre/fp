@@ -1,5 +1,3 @@
-import { Observable } from './src/rx.js'
-
 export {
   accumulate,
   add,
@@ -28,6 +26,7 @@ export {
   diff,
   divide,
   divideRight,
+  entries,
   eq,
   every,
   filter,
@@ -58,6 +57,7 @@ export {
   isObject,
   isSet,
   isString,
+  keys,
   last,
   len,
   liftA2,
@@ -113,6 +113,7 @@ export {
   transduce,
   tryCatch,
   unary,
+  values,
   zipMap,
 } from './src/combinators.js'
 export {
@@ -132,35 +133,35 @@ export {
 } from './src/maybe.js'
 export { createClient } from './src/fetch.js'
 export {
-  mapWith,
-  mapAllWith,
-  filterWith,
   compact,
-  untilWith,
+  filterWith,
   first,
+  mapAllWith,
+  mapWith,
+  memoizeIter,
+  reduceWith,
   rest,
   take,
+  untilWith,
   zip,
   zipWith,
-  reduceWith,
-  memoizeIter,
 } from './src/iterators.js'
 export {
+  after,
+  afterAll,
+  Append,
+  aroundAll,
+  before,
+  beforeAll,
   ClassMixin,
   Define,
+  FactoryFactory,
   Override,
   Prepend,
-  Append,
-  after,
-  before,
   provided,
+  SubclassFactory,
   unless,
   wrapWith,
-  aroundAll,
-  beforeAll,
-  afterAll,
-  SubclassFactory,
-  FactoryFactory,
 } from './src/classes.js'
 export * as lazy from './src/lazy.js'
 export * as lens from './src/lens.js'
