@@ -511,7 +511,7 @@ export function merge(a, b) {
 }
 
 /**
- * Unique
+ * Unique, get only unique items
  * @param {array} arr - Array to remove non-unique items
  * @returns {array} Array of unique items
  */
@@ -561,6 +561,22 @@ export function aggregate(a, b) {
   }
   return result
 }
+
+/**
+ * GroupBy, group a collection of objects into a multi-dimensional array by key
+ * @param {string} key - Property to group by
+ * @param {array} arr - Array of objects to group
+ * @returns {array} entries grouped by key
+ */
+export const groupBy = curry((key, arr) => {
+  const result = new Map()
+  for (const item of arr) {
+    const group = result.get(item[key]) || []
+    group.push(item)
+    result.set(item[key], group)
+  }
+  return values(result)
+})
 
 /**
  * Stringifying functions

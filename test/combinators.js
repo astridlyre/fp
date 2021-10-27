@@ -943,4 +943,24 @@ describe('Combinators', function () {
       assert.deepEqual(combinators.unique(a, b), [1, 2, 3, 4, 5])
     })
   })
+
+  describe('groupBy', function () {
+    it('should group an array of objects by key', function () {
+      const a = [
+        {
+          name: 'tim',
+          age: 15,
+        },
+        {
+          name: 'tim',
+          age: 5,
+        },
+        {
+          name: 'bob',
+          age: 87,
+        },
+      ]
+      assert.deepEqual(combinators.groupBy('name', a), [[a[0], a[1]], [a[2]]])
+    })
+  })
 })
