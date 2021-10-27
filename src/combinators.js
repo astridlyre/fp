@@ -369,6 +369,67 @@ export const deepPick = curry((paths, a) =>
 )
 
 /**
+ * DiffObject
+ * @param {object} oldObj - Old Object
+ * @param {object} newObj - New Object to diff against oldObj
+ * @returns {object} result - Object of differences between newObj and oldObj
+ */
+export function diffObjects(oldObj, newObj) {
+  if (oldObj === newObj) return {}
+
+  function innerDiffObjects(oldObj, newObj, result) {
+    if (oldObj === newObj) return result
+
+    for (const key of Reflect.ownKeys(newObj)) {
+      if (oldObj[key] === newObj[key]) continue
+
+      if (isArray(newObj[key])) {
+        result[key] = diffArrays(oldObj[key], newObj[key])
+        if (result[key].length === 0) delete result[key]
+      } else if (isObject(newObj[key])) {
+        result[key] = {}
+        innerDiffObjects(oldObj[key], newObj[key], result[key])
+      } else {
+        result[key] = newObj[key]
+      }
+    }
+    return result
+  }
+  return innerDiffObjects(oldObj, newObj, {})
+}
+
+/**
+ * DiffArray
+ * @param {array} oldArr - Array to diff
+ * @param {array} newArr - Array to diff
+ * @returns {array} result - Array of items that have changed
+ * from a to b (one way)
+ */
+export function diffArrays(oldArr, newArr) {
+  const result = []
+  if (oldArr === newArr) return result
+
+  for (let i = 0; i < newArr.length; i++) {
+    if (!(oldArr[i] === newArr[i])) {
+      result.push(diff(oldArr[i], newArr[i]))
+    }
+  }
+  return result
+}
+
+/**
+ * Diff
+ * Only diffs simple objects, arrays and primitives. Maybe I'll extend it to
+ * support Maps and Sets later.
+ * @param {object} a - Object to compare
+ * @param {object} b - Object to compare
+ * @returns {object} c - Object that is difference between a and b
+ */
+export function diff(a, b) {
+  return isArray(b) ? diffArrays(a, b) : isObject(b) ? diffObjects(a, b) : b
+}
+
+/**
  * Stringifying functions
  * Provides helper functions to stringify and parse JSON, along with numbers
  * and strings

@@ -658,4 +658,45 @@ describe('Combinators', function () {
       assert.throws(() => (obj.method = () => {}))
     })
   })
+
+  describe('diff', function () {
+    it('should diff array', function () {
+      const a = [1, 2, 3]
+      const b = [1, 2]
+      const c = [1, 2, 4]
+      assert.deepEqual(combinators.diff(a, b), [])
+      assert.deepEqual(combinators.diff(a, c), [4])
+    })
+    it('should diff objects', function () {
+      const a = {
+        name: 'Jim',
+        age: 16,
+        likes: ['cats', 'dogs'],
+      }
+      const b = {
+        name: 'Jim',
+        age: 17,
+        likes: ['cats', 'dogs'],
+      }
+      const c = {
+        name: 'Jim',
+        age: '15',
+        likes: ['cats', 'birds'],
+      }
+      assert.deepEqual(combinators.diff(a, b), { age: 17 })
+      assert.deepEqual(combinators.diff(a, c), { age: '15', likes: ['birds'] })
+    })
+  })
+
+  describe('deepCopy', function () {
+    it('should deep copy an object', function () {
+      const a = {
+        name: 'Jim',
+        age: 15,
+      }
+      const copy = combinators.deepCopy(a)
+      assert.deepEqual(a, copy)
+      assert.notEqual(a, copy)
+    })
+  })
 })
