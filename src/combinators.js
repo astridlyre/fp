@@ -434,7 +434,7 @@ export const deepPick = curry((paths, a) =>
  * @param {object} newObj - New Object to diff against oldObj
  * @returns {object} result - Object of differences between newObj and oldObj
  */
-export function diffObjects(oldObj, newObj) {
+function diffObjects(oldObj, newObj) {
   if (oldObj === newObj) return {}
 
   function innerDiffObjects(oldObj, newObj, result) {
@@ -465,7 +465,7 @@ export function diffObjects(oldObj, newObj) {
  * @returns {array} result - Array of items that have changed
  * from a to b (one way)
  */
-export function diffArrays(oldArr, newArr) {
+function diffArrays(oldArr, newArr) {
   const result = []
   if (oldArr === newArr) return result
 

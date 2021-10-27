@@ -523,6 +523,14 @@ var setProp$1 = curry((name, value, a) => a && name in a ? _objectSpread2(_objec
 
 var props = curry((names, a) => names.map(n => prop$1(n, a)));
 /**
+ * Pick, returns an object with only the selected property names, shallow
+ * @param {array} names - Array of property names
+ * @param {object} a - Object to get property names from
+ * @returns {object} A new object with only properties names
+ */
+
+var pick = curry((names, a) => names.reduce((result, key) => key in a ? (result[key] = a[key], result) : result, {}));
+/**
  * Invoke, returns a function that takes a context to call function fn with args in
  * @param {function} fn - Function to invoke in new context
  * @param {any} args - Argument for function fn
@@ -550,6 +558,137 @@ var deepProp = curry((path, a) => {
   var [p, ...rest] = path;
   return !rest.length ? prop$1(p, a) : deepProp(rest, prop$1(p, a));
 });
+/**
+ * DeepSetProp, set a property in an object, returns a copy, deep
+ * @param {string} {array} path - A path of properties or an Array of
+ * properties to set
+ * @param {any} value - The value to set
+ * @param {object} a - Object to set new property in
+ * @returns {object} A copy of Object a, with new property set
+ */
+
+var deepSetProp = curry((path, value, a) => {
+  if (!Array.isArray(path)) path = path.split('.');
+
+  function innerDeepSetProp(path, value, obj) {
+    if (path.length === 1) {
+      obj[path[0]] = value;
+      return obj;
+    }
+
+    if (path[0] in obj && isObject$7(obj[path[0]])) {
+      var _newObj = obj[path[0]];
+      return innerDeepSetProp(path.slice(1), value, _newObj);
+    }
+
+    var newObj = {};
+    obj[path[0]] = newObj;
+    return innerDeepSetProp(path.slice(1), value, newObj);
+  }
+
+  var aux = deepCopy(a);
+  return innerDeepSetProp(path, value, aux), aux;
+});
+/**
+ * DeepPick, returns an object with only deep properties paths
+ * @param {array} paths - An array of string paths of property names
+ * @param {object} a - The Object to pick properties from
+ * @returns {object} A copy of Object a with only properties paths
+ */
+
+var deepPick = curry((paths, a) => paths.reduce((result, path) => deepSetProp(path, deepProp(path)(a))(result), {}));
+/**
+ * DiffObject, returns the changed values from newObj that are not in oldObj
+ * @param {object} oldObj - Old Object
+ * @param {object} newObj - New Object to diff against oldObj
+ * @returns {object} result - Object of differences between newObj and oldObj
+ */
+
+function diffObjects(oldObj, newObj) {
+  if (oldObj === newObj) return {};
+
+  function innerDiffObjects(oldObj, newObj, result) {
+    if (oldObj === newObj) return result;
+
+    for (var key of Reflect.ownKeys(newObj)) {
+      if (oldObj[key] === newObj[key]) continue;
+
+      if (isArray(newObj[key])) {
+        result[key] = diffArrays(oldObj[key], newObj[key]);
+        if (result[key].length === 0) delete result[key];
+      } else if (isObject$7(newObj[key])) {
+        result[key] = {};
+        innerDiffObjects(oldObj[key], newObj[key], result[key]);
+      } else {
+        result[key] = newObj[key];
+      }
+    }
+
+    return result;
+  }
+
+  return innerDiffObjects(oldObj, newObj, {});
+}
+/**
+ * DiffArray, returns the changed items from newArr, that are not in oldArr
+ * @param {array} oldArr - Array to diff
+ * @param {array} newArr - Array to diff
+ * @returns {array} result - Array of items that have changed
+ * from a to b (one way)
+ */
+
+
+function diffArrays(oldArr, newArr) {
+  var result = [];
+  if (oldArr === newArr) return result;
+
+  for (var i = 0; i < newArr.length; i++) {
+    if (!(oldArr[i] === newArr[i])) {
+      result.push(diff(oldArr[i], newArr[i]));
+    }
+  }
+
+  return result;
+}
+/**
+ * Diff, get the naive difference between a and b
+ * Only diffs simple objects, arrays and primitives. Maybe I'll extend it to
+ * support Maps and Sets later.
+ * @param {object} a - Object to compare
+ * @param {object} b - Object to compare
+ * @returns {object} c - Object that is difference between a and b
+ */
+
+
+function diff(a, b) {
+  return isArray(b) ? diffArrays(a, b) : isObject$7(b) ? diffObjects(a, b) : b;
+}
+/**
+ * Merge, deep merge a and b
+ * @param {object} a - Object to merge into
+ * @param {object} b - Object with diffs to merge
+ * @return {object} c - Result of merge
+ */
+
+function merge(a, b) {
+  if (!a && b) return b;
+
+  if (isArray(b)) {
+    return b.map((value, i) => merge(a[i], value));
+  }
+
+  if (isObject$7(b)) {
+    var result = deepCopy(a);
+
+    for (var key of Reflect.ownKeys(b)) {
+      result[key] = merge(a[key], b[key]);
+    }
+
+    return result;
+  }
+
+  return b;
+}
 /**
  * Stringifying functions
  * Provides helper functions to stringify and parse JSON, along with numbers
@@ -4998,7 +5137,7 @@ var ReactiveExtensions = {
 };
 Object.assign(Observable$1.prototype, ReactiveExtensions);
 
-var rx = /*#__PURE__*/Object.freeze({
+var rx$1 = /*#__PURE__*/Object.freeze({
   __proto__: null,
   Observable: Observable$1,
   ReadableStream: ReadableStream$1,
@@ -5287,4 +5426,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepProp, demethodize, divide, divideRight, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unless, untilWith, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, replace, rest, roundTo, rx$1 as rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unless, untilWith, withValidation, wrapWith, zip, zipMap, zipWith };
