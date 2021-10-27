@@ -690,7 +690,7 @@ function merge(a, b) {
   return b;
 }
 /**
- * Unique
+ * Unique, get only unique items
  * @param {array} arr - Array to remove non-unique items
  * @returns {array} Array of unique items
  */
@@ -738,6 +738,24 @@ function aggregate(a, b) {
 
   return result;
 }
+/**
+ * GroupBy, group a collection of objects into a multi-dimensional array by key
+ * @param {string} key - Property to group by
+ * @param {array} arr - Array of objects to group
+ * @returns {array} entries grouped by key
+ */
+
+var groupBy = curry((key, arr) => {
+  var result = new Map();
+
+  for (var item of arr) {
+    var group = result.get(item[key]) || [];
+    group.push(item);
+    result.set(item[key], group);
+  }
+
+  return values(result);
+});
 /**
  * Stringifying functions
  * Provides helper functions to stringify and parse JSON, along with numbers
@@ -5532,4 +5550,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };

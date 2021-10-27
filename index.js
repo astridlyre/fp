@@ -43,6 +43,7 @@ export {
   fromJSON,
   FunctionalMixin,
   getOrElseThrow,
+  groupBy,
   head,
   identity,
   immutable,
