@@ -912,7 +912,7 @@ describe('Combinators', function () {
         },
       }
       assert.deepEqual(combinators.aggregate(a, b), {
-        a: [1, 2],
+        a: 2,
         b: 2,
         c: {
           d: 4,
@@ -931,7 +931,7 @@ describe('Combinators', function () {
       }
       assert.deepEqual(combinators.aggregate(a, b), {
         title: 'my book',
-        authors: ['astrid', 'liz'],
+        authors: 'liz',
       })
     })
   })
@@ -1025,6 +1025,56 @@ describe('Combinators', function () {
         tim: { name: 'tim' },
         bob: { name: 'bob' },
       })
+    })
+  })
+
+  describe('deepJoin', function () {
+    it('should deep join two arrays', function () {
+      const a = [
+        {
+          isbn: '978-0812981605',
+          title: '7 Habits of Highly Effective People',
+          available: true,
+        },
+        {
+          isbn: '978-1982137274',
+          title: 'The Power of Habit',
+          available: false,
+        },
+      ]
+      const b = [
+        {
+          isbn: '978-0812981605',
+          title: '7 Habits of Highly Effective People',
+          subtitle: 'Powerful Lessons in Personal Change',
+          number_of_pages: 432,
+        },
+        {
+          isbn: '978-1982137274',
+          title: 'The Power of Habit',
+          subtitle: 'Why We Do What We Do in Life and Business',
+          subjects: ['Social Aspects', 'Habit', 'Change (Psychology)'],
+        },
+      ]
+
+      const expected = [
+        {
+          available: true,
+          isbn: '978-0812981605',
+          number_of_pages: 432,
+          subtitle: 'Powerful Lessons in Personal Change',
+          title: '7 Habits of Highly Effective People',
+        },
+        {
+          available: false,
+          isbn: '978-1982137274',
+          subjects: ['Social Aspects', 'Habit', 'Change (Psychology)'],
+          subtitle: 'Why We Do What We Do in Life and Business',
+          title: 'The Power of Habit',
+        },
+      ]
+
+      assert.deepEqual(combinators.deepJoin('isbn', 'isbn', a, b), expected)
     })
   })
 })

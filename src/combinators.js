@@ -565,21 +565,10 @@ export function aggregate(a, b) {
     // If both are objects, aggregate them
     else if (isObject(aVal) && isObject(bVal)) {
       result[key] = aggregate(aVal, bVal)
-    }
-
-    // If a but not b, deepCopy a
-    else if (aVal && !bVal) {
+    } else if (bVal === undefined) {
       result[key] = deepCopy(aVal)
-    }
-
-    // If b but not a, deepCopy b
-    else if (bVal && !aVal) {
+    } else {
       result[key] = deepCopy(bVal)
-    }
-
-    // Otherwise aggregate results in an array
-    else {
-      result[key] = [deepCopy(aVal), deepCopy(bVal)]
     }
   }
   return result
@@ -609,6 +598,20 @@ export const groupBy = curry((key, arr) => {
 export const keyBy = curry((key, arr) =>
   arr.reduce((result, item) => ((result[item[key]] = item), result), {})
 )
+
+/**
+ * deepJoin, deep join two arrays on keyA and keyB
+ * @param {string} keyA
+ * @param {string} keyB
+ * @param {array} array a
+ * @param {array} array b
+ * @returns {object} The result of keying both arrays
+ */
+export const deepJoin = curry((keyA, keyB, a, b) => {
+  const objA = keyBy(keyA, a)
+  const objB = keyBy(keyB, b)
+  return values(aggregate(objA, objB))
+})
 
 /**
  * Stringifying functions

@@ -18,6 +18,7 @@ export {
   constant,
   curry,
   debounce,
+  deepJoin,
   deepCopy,
   deepFreeze,
   deepMap,
