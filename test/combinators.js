@@ -1077,4 +1077,44 @@ describe('Combinators', function () {
       assert.deepEqual(combinators.deepJoin('isbn', 'isbn', a, b), expected)
     })
   })
+
+  describe('deepEqual', function () {
+    it('should check for deep equality', function () {
+      const a = {
+        a: 1,
+        b: 2,
+        c: {
+          d: 3,
+        },
+      }
+      const b = {
+        a: 1,
+        b: 2,
+        c: {
+          d: 3,
+        },
+      }
+      assert.equal(combinators.deepEqual(a, b), true)
+      const c = {
+        a: 1,
+        b: 2,
+        c: {
+          d: 4,
+        },
+      }
+      assert.equal(combinators.deepEqual(b, c), false)
+      const d = {
+        a: '1',
+        b: 2,
+      }
+      assert.equal(combinators.deepEqual(d, c), false)
+      assert.equal(combinators.deepEqual(null, null), true)
+      assert.equal(combinators.deepEqual('hello', 'hello'), true)
+      assert.equal(combinators.deepEqual(new Set(['hi']), new Set(['hi'])), true)
+      assert.equal(
+        combinators.deepEqual(new Map([['hey', 'hi']]), new Map([['hey', 'hi']])),
+        true
+      )
+    })
+  })
 })

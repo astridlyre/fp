@@ -1444,6 +1444,87 @@ Object.deepFreeze = Object.deepFreeze || deepFreeze;
  */
 
 var immutable = compose(Object.seal, Object.deepFreeze);
+/**
+ * DeepEqual
+ * @param {any} a
+ * @param {any} b
+ */
+
+function deepEqual(a, b) {
+  if (a === b) return true;
+
+  if (a && b && isObject$7(a) && isObject$7(b)) {
+    if (a.constructor !== b.constructor) return false;
+
+    var length, i, _keys;
+
+    if (isArray(a)) {
+      length = a.length;
+      if (length != b.length) return false;
+
+      for (i = length; i-- !== 0;) {
+        if (!deepEqual(a[i], b[i])) return false;
+      }
+
+      return true;
+    }
+
+    if (isMap(a) && isMap(b)) {
+      if (a.size !== b.size) return false;
+
+      for (i of a.entries()) {
+        if (!b.has(i[0])) return false;
+      }
+
+      for (i of a.entries()) {
+        if (!deepEqual(i[1], b.get(i[0]))) return false;
+      }
+
+      return true;
+    }
+
+    if (isSet(a) && isSet(b)) {
+      if (a.size !== b.size) return false;
+
+      for (i of a.entries()) {
+        if (!b.has(i[0])) return false;
+      }
+
+      return true;
+    }
+
+    if (ArrayBuffer.isView(a) && ArrayBuffer.isView(b)) {
+      length = a.length;
+      if (length != b.length) return false;
+
+      for (i = length; i-- !== 0;) {
+        if (a[i] !== b[i]) return false;
+      }
+
+      return true;
+    }
+
+    if (a.constructor === RegExp) return a.source === b.source && a.flags === b.flags;
+    if (a.valueOf !== Object.prototype.valueOf) return a.valueOf() === b.valueOf();
+    if (a.toString !== Object.prototype.toString) return a.toString() === b.toString();
+    _keys = Object.keys(a);
+    length = _keys.length;
+    if (length !== Object.keys(b).length) return false;
+
+    for (i = length; i-- !== 0;) {
+      if (!Object.prototype.hasOwnProperty.call(b, _keys[i])) return false;
+    }
+
+    for (i = length; i-- !== 0;) {
+      var key = _keys[i];
+      if (!deepEqual(a[key], b[key])) return false;
+    }
+
+    return true;
+  }
+
+  return a !== a && b !== b;
+}
 
 var _Symbol$toStringTag, _Symbol$toPrimitive, _Symbol$iterator, _Symbol$toPrimitive2, _Symbol$iterator2, _Symbol$toStringTag2, _Symbol$toStringTag3, _Symbol$toStringTag4, _Symbol$iterator3, _Symbol$toStringTag5, _Symbol$iterator4, _Symbol$toStringTag6, _Symbol$iterator5;
 
@@ -5526,7 +5607,7 @@ var withValidation = curry((validator, fn) => data => {
   return fn(data);
 });
 
-var mapKey = Symbol('map key');
+var handlersKey = Symbol('handlers key');
 var dispatchKey = Symbol('dispatch key');
 var NO_ARGS = 'MULTI:NO_ARGS';
 /**
@@ -5553,47 +5634,57 @@ class Multi {
   }
 
   static method(key, handler) {
+    if (handler === undefined) {
+      return [NO_ARGS, key];
+    }
+
     return [key, handler];
   }
 
   static extend(MM) {
-    var store = new Map();
-
-    for (var [key, val] of MM[mapKey]) {
-      store.set(key, val);
-    }
-
     for (var _len2 = arguments.length, methods = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
       methods[_key2 - 1] = arguments[_key2];
     }
 
-    return new Multi(MM[dispatchKey], methods, store);
+    return new Multi(MM[dispatchKey], methods, MM[handlersKey].slice());
   }
 
   constructor(dispatch, methods) {
-    var store = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Map();
+    var store = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
     this[dispatchKey] = dispatch;
-    this[mapKey] = store;
-    methods.forEach(_ref => {
-      var [key, handler] = _ref;
-      return this[mapKey].set(JSON.stringify(key), handler);
-    });
+    this[handlersKey] = store;
+
+    for (var pair of methods) {
+      if (pair[0] === NO_ARGS) {
+        this[handlersKey].push(pair);
+      } else {
+        this[handlersKey] = [pair].concat(this[handlersKey]);
+      }
+    }
   }
 
   call() {
+    var handler;
+
     for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
       args[_key3] = arguments[_key3];
     }
 
-    var handler = this[mapKey].get(args.length === 0 ? NO_ARGS : JSON.stringify(this[dispatchKey](...args)));
+    for (var [key, method] of this[handlersKey]) {
+      if (isFunction(key) && key(...args) || deepEqual(this[dispatchKey](...args), key)) {
+        handler = method;
+        break;
+      }
+    }
+
     if (!handler) throw new TypeError("No handlers for args (".concat(JSON.stringify(args), ")"));
     return isFunction(handler) ? handler(...args) : handler;
   }
 
   map(fn) {
-    return new Multi(this[dispatchKey], entries(this[mapKey]).map(_ref2 => {
-      var [key, handler] = _ref2;
-      return [JSON.parse(key), function () {
+    return new Multi(this[dispatchKey], this[handlersKey].map(_ref => {
+      var [key, handler] = _ref;
+      return [key, function () {
         return fn(handler(...arguments));
       }];
     }));
@@ -5676,4 +5767,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Multi, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Multi, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
