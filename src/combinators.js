@@ -512,21 +512,26 @@ export function merge(a, b) {
 
 /**
  * AggregateOn, combine many objects into one with aggregated keys
+ * TODO: Try to improve the algorithm
  * @param {string} key to Aggregate
- * @param {object} Object a
- * @param {object} Objeft b
+ * @param {object} Objects to aggregate
  * @returns {object} Result of Aggregating on key
  */
-export const aggregateOn = curry((keyMap, a, b) => {
-  const result = merge(a, b)
-  for (const [oldKey, newKey] of entries(keyMap)) {
-    result[newKey] = isArray(a[oldKey])
-      ? a[oldKey].concat(b[oldKey])
-      : [a[oldKey]].concat(b[oldKey])
-    delete result[oldKey]
+export function aggregateOn(keyMap, ...objects) {
+  let result = {}
+
+  for (const current of objects) {
+    result = merge(result, current)
+    for (const [oldKey, newKey] of entries(keyMap)) {
+      if (!current[oldKey]) continue
+      result[newKey] = result[newKey]
+        ? unique(result[newKey], current[oldKey])
+        : unique(result[oldKey], current[oldKey])
+      delete result[oldKey]
+    }
   }
   return result
-})
+}
 
 /**
  * Unique, get only unique items

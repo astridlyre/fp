@@ -3,6 +3,7 @@ export {
   add,
   addRight,
   aggregate,
+  aggregateOn,
   append,
   apply,
   arity,

@@ -991,6 +991,30 @@ describe('Combinators', function () {
           publicationDates: [2008, 1987],
         }
       )
+      assert.deepEqual(combinators.aggregateOn({ author: 'authors' }, a), {
+        title: 'my book',
+        authors: ['tim'],
+        publication_date: 2008,
+      })
+    })
+
+    it('should group object keys of an object into an array', function () {
+      const a = {
+        b: {
+          e: 'f',
+        },
+        a: 1,
+      }
+      const b = {
+        b: {
+          c: 'd',
+        },
+        a: 1,
+      }
+      assert.deepEqual(combinators.aggregateOn({ b: 'bs' }, a, b), {
+        bs: [{ e: 'f' }, { c: 'd' }],
+        a: 1,
+      })
     })
   })
 })

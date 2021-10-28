@@ -690,14 +690,41 @@ function merge(a, b) {
   return b;
 }
 /**
+ * AggregateOn, combine many objects into one with aggregated keys
+ * TODO: Try to improve the algorithm
+ * @param {string} key to Aggregate
+ * @param {object} Objects to aggregate
+ * @returns {object} Result of Aggregating on key
+ */
+
+function aggregateOn(keyMap) {
+  var result = {};
+
+  for (var _len13 = arguments.length, objects = new Array(_len13 > 1 ? _len13 - 1 : 0), _key13 = 1; _key13 < _len13; _key13++) {
+    objects[_key13 - 1] = arguments[_key13];
+  }
+
+  for (var current of objects) {
+    result = merge(result, current);
+
+    for (var [oldKey, newKey] of entries(keyMap)) {
+      if (!current[oldKey]) continue;
+      result[newKey] = result[newKey] ? unique(result[newKey], current[oldKey]) : unique(result[oldKey], current[oldKey]);
+      delete result[oldKey];
+    }
+  }
+
+  return result;
+}
+/**
  * Unique, get only unique items
  * @param {array} arr - Array to remove non-unique items
  * @returns {array} Array of unique items
  */
 
 var unique = function unique() {
-  for (var _len13 = arguments.length, items = new Array(_len13), _key13 = 0; _key13 < _len13; _key13++) {
-    items[_key13] = arguments[_key13];
+  for (var _len14 = arguments.length, items = new Array(_len14), _key14 = 0; _key14 < _len14; _key14++) {
+    items[_key14] = arguments[_key14];
   }
 
   return Array.from(new Set(items.flat()));
@@ -908,8 +935,8 @@ var deepMap = fn => function innerDeepMap(tree) {
 };
 
 var composeM2 = (f, g) => function innerComposeM2() {
-  for (var _len14 = arguments.length, args = new Array(_len14), _key14 = 0; _key14 < _len14; _key14++) {
-    args[_key14] = arguments[_key14];
+  for (var _len15 = arguments.length, args = new Array(_len15), _key15 = 0; _key15 < _len15; _key15++) {
+    args[_key15] = arguments[_key15];
   }
 
   return g.apply(this, args).flatMap(f);
@@ -922,8 +949,8 @@ var composeM2 = (f, g) => function innerComposeM2() {
 
 
 var composeM = function composeM() {
-  for (var _len15 = arguments.length, Ms = new Array(_len15), _key15 = 0; _key15 < _len15; _key15++) {
-    Ms[_key15] = arguments[_key15];
+  for (var _len16 = arguments.length, Ms = new Array(_len16), _key16 = 0; _key16 < _len16; _key16++) {
+    Ms[_key16] = arguments[_key16];
   }
 
   return Ms.reduce(composeM2);
@@ -935,8 +962,8 @@ var apply = curry((fn, F) => map$1.call(F, fn));
 
 var composeAsync2 = (f, g) => /*#__PURE__*/function () {
   var _innerComposeAsync = _asyncToGenerator(function* () {
-    for (var _len16 = arguments.length, args = new Array(_len16), _key16 = 0; _key16 < _len16; _key16++) {
-      args[_key16] = arguments[_key16];
+    for (var _len17 = arguments.length, args = new Array(_len17), _key17 = 0; _key17 < _len17; _key17++) {
+      args[_key17] = arguments[_key17];
     }
 
     return yield f.call(this, yield g.call(this, ...args));
@@ -956,8 +983,8 @@ var composeAsync2 = (f, g) => /*#__PURE__*/function () {
 
 
 var composeAsync = function composeAsync() {
-  for (var _len17 = arguments.length, fns = new Array(_len17), _key17 = 0; _key17 < _len17; _key17++) {
-    fns[_key17] = arguments[_key17];
+  for (var _len18 = arguments.length, fns = new Array(_len18), _key18 = 0; _key18 < _len18; _key18++) {
+    fns[_key18] = arguments[_key18];
   }
 
   return fns.reduce(composeAsync2);
@@ -969,8 +996,8 @@ var composeAsync = function composeAsync() {
  */
 
 var pipeAsync = function pipeAsync() {
-  for (var _len18 = arguments.length, fns = new Array(_len18), _key18 = 0; _key18 < _len18; _key18++) {
-    fns[_key18] = arguments[_key18];
+  for (var _len19 = arguments.length, fns = new Array(_len19), _key19 = 0; _key19 < _len19; _key19++) {
+    fns[_key19] = arguments[_key19];
   }
 
   return fns.reduceRight(composeAsync2);
@@ -1055,8 +1082,8 @@ var every = curry((f, arr) => arr.every(f));
 var some = curry((f, arr) => arr.some(f));
 var find = curry((f, arr) => arr.find(f));
 var sum = function sum() {
-  for (var _len19 = arguments.length, args = new Array(_len19), _key19 = 0; _key19 < _len19; _key19++) {
-    args[_key19] = arguments[_key19];
+  for (var _len20 = arguments.length, args = new Array(_len20), _key20 = 0; _key20 < _len20; _key20++) {
+    args[_key20] = arguments[_key20];
   }
 
   return args.reduce((x, y) => x + y, 0);
@@ -1079,8 +1106,8 @@ var partition = (arr, a, b) => arr.reduce((acc, cv) => a(cv) ? (acc[0].push(cv),
  */
 
 var zipMap = function zipMap(f) {
-  for (var _len20 = arguments.length, iters = new Array(_len20 > 1 ? _len20 - 1 : 0), _key20 = 1; _key20 < _len20; _key20++) {
-    iters[_key20 - 1] = arguments[_key20];
+  for (var _len21 = arguments.length, iters = new Array(_len21 > 1 ? _len21 - 1 : 0), _key21 = 1; _key21 < _len21; _key21++) {
+    iters[_key21 - 1] = arguments[_key21];
   }
 
   var min = Math.min(...pluck$1('length')(iters));
@@ -1176,8 +1203,8 @@ function once(fn) {
   var done = false;
   var result;
   return function once() {
-    for (var _len21 = arguments.length, args = new Array(_len21), _key21 = 0; _key21 < _len21; _key21++) {
-      args[_key21] = arguments[_key21];
+    for (var _len22 = arguments.length, args = new Array(_len22), _key22 = 0; _key22 < _len22; _key22++) {
+      args[_key22] = arguments[_key22];
     }
 
     return !done ? (done = true, result = fn.apply(this, args), result) : result;
@@ -1197,8 +1224,8 @@ function memoize(fn) {
   var isPrimitive = x => typeof x === 'number' || typeof x === 'string' || typeof x === 'boolean';
 
   return function memoize() {
-    for (var _len22 = arguments.length, args = new Array(_len22), _key22 = 0; _key22 < _len22; _key22++) {
-      args[_key22] = arguments[_key22];
+    for (var _len23 = arguments.length, args = new Array(_len23), _key23 = 0; _key23 < _len23; _key23++) {
+      args[_key23] = arguments[_key23];
     }
 
     var key = args.length === 1 && isPrimitive(args[0]) ? args[0] : toKey(args);
@@ -1283,8 +1310,8 @@ function FunctionalMixin(behaviour) {
 }
 
 var detectCollision = function detectCollision() {
-  for (var _len23 = arguments.length, descriptors = new Array(_len23), _key23 = 0; _key23 < _len23; _key23++) {
-    descriptors[_key23] = arguments[_key23];
+  for (var _len24 = arguments.length, descriptors = new Array(_len24), _key24 = 0; _key24 < _len24; _key24++) {
+    descriptors[_key24] = arguments[_key24];
   }
 
   return descriptors.flatMap(Object.keys).reduce(sortReducer, []).reduce(collisionReducer, []).forEach(c => console.log("[WARN] Collision found: ".concat(c)));
@@ -1305,8 +1332,8 @@ var isDescriptor = obj => obj && (obj.state || obj.methods); // extend Object
 if (typeof Object.impl !== 'function') {
   Object.defineProperty(Object, 'impl', {
     value: function value() {
-      for (var _len24 = arguments.length, mixins = new Array(_len24), _key24 = 0; _key24 < _len24; _key24++) {
-        mixins[_key24] = arguments[_key24];
+      for (var _len25 = arguments.length, mixins = new Array(_len25), _key25 = 0; _key25 < _len25; _key25++) {
+        mixins[_key25] = arguments[_key25];
       }
 
       return target => {
@@ -1333,8 +1360,8 @@ if (typeof Object.mixin !== 'function') {
         base = _objectSpread2(_objectSpread2(_objectSpread2({}, base.state), base.methods), base.interop);
       }
 
-      for (var _len25 = arguments.length, mixins = new Array(_len25 > 1 ? _len25 - 1 : 0), _key25 = 1; _key25 < _len25; _key25++) {
-        mixins[_key25 - 1] = arguments[_key25];
+      for (var _len26 = arguments.length, mixins = new Array(_len26 > 1 ? _len26 - 1 : 0), _key26 = 1; _key26 < _len26; _key26++) {
+        mixins[_key26 - 1] = arguments[_key26];
       }
 
       detectCollision(base, ...mixins);
@@ -5550,4 +5577,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
