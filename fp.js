@@ -5526,6 +5526,89 @@ var withValidation = curry((validator, fn) => data => {
   return fn(data);
 });
 
+var mapKey = Symbol('map key');
+var dispatchKey = Symbol('dispatch key');
+var NO_ARGS = 'MULTI:NO_ARGS';
+/**
+ * multi, create a multimethod function
+ * @param {function} dispatch - Optional custom dispatch function
+ * @param {function} method - Method functions (args, handler)
+ * @returns {function} dispatch function
+ */
+
+class Multi {
+  static of() {
+    var dispatch = defaultDispatch;
+
+    for (var _len = arguments.length, methods = new Array(_len), _key = 0; _key < _len; _key++) {
+      methods[_key] = arguments[_key];
+    }
+
+    if (isFunction(methods[0])) {
+      dispatch = methods[0];
+      methods.splice(0, 1);
+    }
+
+    return new Multi(dispatch, methods);
+  }
+
+  static method(key, handler) {
+    return [key, handler];
+  }
+
+  static extend(MM) {
+    var store = new Map();
+
+    for (var [key, val] of MM[mapKey]) {
+      store.set(key, val);
+    }
+
+    for (var _len2 = arguments.length, methods = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+      methods[_key2 - 1] = arguments[_key2];
+    }
+
+    return new Multi(MM[dispatchKey], methods, store);
+  }
+
+  constructor(dispatch, methods) {
+    var store = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : new Map();
+    this[dispatchKey] = dispatch;
+    this[mapKey] = store;
+    methods.forEach(_ref => {
+      var [key, handler] = _ref;
+      return this[mapKey].set(JSON.stringify(key), handler);
+    });
+  }
+
+  call() {
+    for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+      args[_key3] = arguments[_key3];
+    }
+
+    var handler = this[mapKey].get(args.length === 0 ? NO_ARGS : JSON.stringify(this[dispatchKey](...args)));
+    if (!handler) throw new TypeError("No handlers for args (".concat(JSON.stringify(args), ")"));
+    return isFunction(handler) ? handler(...args) : handler;
+  }
+
+  map(fn) {
+    return new Multi(this[dispatchKey], entries(this[mapKey]).map(_ref2 => {
+      var [key, handler] = _ref2;
+      return [JSON.parse(key), function () {
+        return fn(handler(...arguments));
+      }];
+    }));
+  }
+
+}
+
+function defaultDispatch() {
+  for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+    args[_key4] = arguments[_key4];
+  }
+
+  return args.length === 0 ? NO_ARGS : args.length === 1 ? args[0] : args;
+}
+
 ReadableStream.from = function from(iterator) {
   return new ReadableStream({
     pull(controller) {
@@ -5593,4 +5676,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Multi, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
