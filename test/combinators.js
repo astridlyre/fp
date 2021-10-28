@@ -1017,4 +1017,14 @@ describe('Combinators', function () {
       })
     })
   })
+
+  describe('keyBy', function () {
+    it('should convert array to map', function () {
+      const arr = [{ name: 'tim' }, { name: 'bob' }]
+      assert.deepEqual(combinators.keyBy('name', arr), {
+        tim: { name: 'tim' },
+        bob: { name: 'bob' },
+      })
+    })
+  })
 })

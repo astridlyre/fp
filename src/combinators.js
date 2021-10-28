@@ -592,14 +592,23 @@ export function aggregate(a, b) {
  * @returns {array} entries grouped by key
  */
 export const groupBy = curry((key, arr) => {
-  const result = new Map()
+  const result = {}
   for (const item of arr) {
-    const group = result.get(item[key]) || []
-    group.push(item)
-    result.set(item[key], group)
+    ;(result[item[key]] || (result[item[key]] = [])).push(item)
   }
   return values(result)
 })
+
+/**
+ * KeyBy, convert array into object, assumes each key is unique otherwise the
+ * last object wins
+ * @param {string} key - Property to key by
+ * @param {array} arr - Array of objects to key
+ * @returns {object} Array arr mapped to an object by key
+ */
+export const keyBy = curry((key, arr) =>
+  arr.reduce((result, item) => ((result[item[key]] = item), result), {})
+)
 
 /**
  * Stringifying functions

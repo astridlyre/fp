@@ -60,6 +60,7 @@ export {
   isObject,
   isSet,
   isString,
+  keyBy,
   keys,
   last,
   len,
