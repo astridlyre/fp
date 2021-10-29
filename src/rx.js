@@ -1,4 +1,4 @@
-import { curry } from './combinators.js'
+import { curry, last } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable, ReadableStream } = globalThis
 
@@ -118,6 +118,34 @@ export const throttle = curry((limit, stream) => {
             }
           }, limit - (Date.now() - lastRan))
         }
+      })
+    )
+    return () => subs.unsubscribe()
+  })
+})
+
+/**
+ * Debounce
+ * @param {number} time to aggregate events for
+ * @param {observable} stream - stream to debounce
+ * @returns {observable}
+ */
+export const debounce = curry((limit, stream) => {
+  const stack = []
+  let lastInterval = 0
+  let lastEvent = 0
+  return new Observable(observer => {
+    const subs = stream.subscribe(
+      withNext(observer)(value => {
+        stack.push(value)
+        lastEvent = Date.now()
+        clearTimeout(lastInterval)
+        lastInterval = setTimeout(() => {
+          if (Date.now() - lastEvent >= limit) {
+            observer.next(last(stack))
+            stack.length = 0
+          }
+        }, limit - (Date.now() - lastEvent))
       })
     )
     return () => subs.unsubscribe()
@@ -326,6 +354,20 @@ export const pluck = curry(
     })
 )
 
+/**
+ * Interval
+ * @param {number} time of interval
+ * @param {any} optional value to emit
+ * @returns {observable}
+ */
+export const interval = curry(
+  (time, value) =>
+    new Observable(observer => {
+      const id = setInterval(() => observer.next(value), time)
+      return () => clearInterval(id)
+    })
+)
+
 export const ReactiveExtensions = {
   filter(predicate) {
     return filter(predicate, this)
@@ -359,6 +401,12 @@ export const ReactiveExtensions = {
   },
   pluck(key) {
     return pluck(key, this)
+  },
+  interval(time, value) {
+    return interval(time, value)
+  },
+  debounce(limit) {
+    return debounce(limit, this)
   },
 }
 
