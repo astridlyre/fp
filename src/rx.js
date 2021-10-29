@@ -441,6 +441,14 @@ const _switch = stream =>
     return () => sub.unsubscribe()
   })
 
+/**
+ * MergeMap
+ * @param {function} fn - Mapping function
+ * @param {observable} stream
+ * @returns {observable}
+ */
+export const mergeMap = curry((fn, stream) => map(fn, stream).switch())
+
 const p = {
   enumerable: false,
   writable: false,
@@ -524,6 +532,9 @@ export const ReactiveExtensions = {
   },
   switch() {
     return _switch(this)
+  },
+  mergeMap(fn) {
+    return mergeMap(fn, this)
   },
 }
 

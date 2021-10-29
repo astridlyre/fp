@@ -213,5 +213,19 @@ describe('Observable', function () {
           },
         })
     })
+
+    it('should mergeMap', function (done) {
+      const values = []
+      const streamA = Observable.from([1, 2, 3])
+      streamA
+        .mergeMap(x => Observable.from([x + x]))
+        .subscribe({
+          next: value => values.push(value),
+          complete: () => {
+            assert.deepEqual(values, [2])
+            done()
+          },
+        })
+    })
   })
 })

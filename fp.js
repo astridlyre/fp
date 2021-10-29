@@ -5509,7 +5509,15 @@ var _switch = stream => new Observable(observer => {
 
   return () => sub.unsubscribe();
 });
+/**
+ * MergeMap
+ * @param {function} fn - Mapping function
+ * @param {observable} stream
+ * @returns {observable}
+ */
 
+
+var mergeMap = curry((fn, stream) => map(fn, stream).switch());
 var p = {
   enumerable: false,
   writable: false,
@@ -5610,6 +5618,10 @@ var ReactiveExtensions = {
 
   switch() {
     return _switch(this);
+  },
+
+  mergeMap(fn) {
+    return mergeMap(fn, this);
   }
 
 };
@@ -5636,6 +5648,7 @@ var rx = /*#__PURE__*/Object.freeze({
   concat: concat,
   combine: combine,
   merge: merge,
+  mergeMap: mergeMap,
   ReactiveExtensions: ReactiveExtensions
 });
 
