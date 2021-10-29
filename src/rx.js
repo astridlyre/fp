@@ -332,12 +332,12 @@ export const interval = (time, value) => {
 }
 
 /**
- * Combine, merge two streams one to one
+ * Combine, merge two streams one-to-one, preserving order of each stream
  * @param {observable} Stream a
  * @param {observable} Stream b
  * @returns {observable} Combined output of stream a and b, one to one
  */
-export const combine = curry((streamA, streamB) => {
+export const concat = curry((streamA, streamB) => {
   let done = 0
   const store = {
     a: [],
@@ -366,12 +366,12 @@ export const combine = curry((streamA, streamB) => {
 })
 
 /**
- * CombineLatest, combine the latest output of each stream
+ * combine, combine the latest output of each stream
  * @param {observable} Stream a
  * @param {observable} Stream b
  * @returns {observable} Latest combined output of stream a and b
  */
-export const combineLatest = curry((streamA, streamB) => {
+export const combine = curry((streamA, streamB) => {
   let done = 0
   const store = {
     a: [],
@@ -433,8 +433,8 @@ const p = {
 Object.defineProperties(Observable, {
   listen: { value: listen$, ...p },
   interval: { value: interval, ...p },
+  concat: { value: concat, ...p },
   combine: { value: combine, ...p },
-  combineLatest: { value: combineLatest, ...p },
   merge: { value: merge, ...p },
   fromEvent: {
     value: curry(
@@ -496,11 +496,11 @@ export const ReactiveExtensions = {
   debounce(limit) {
     return debounce(limit, this)
   },
+  concat(stream) {
+    return concat(this, stream)
+  },
   combine(stream) {
     return combine(this, stream)
-  },
-  combineLatest(stream) {
-    return combineLatest(this, stream)
   },
   merge(stream) {
     return merge(this, stream)

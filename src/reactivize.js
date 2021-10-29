@@ -1,33 +1,22 @@
 import { Observable } from './rx.js'
 
-let EventEmitter
+export let EventEmitter
 if (typeof process != 'undefined' && typeof process.versions != 'undefined') {
   ;({ EventEmitter } = await import('events'))
 } else {
-  class DefaultMap extends Map {
-    #defaultValue
-    constructor(defaultValue, ...args) {
-      super(...args)
-      this.#defaultValue = defaultValue
-    }
-    get(key) {
-      const value = super.get(key)
-      return value === undefined ? this.#defaultValue : value
-    }
-  }
   EventEmitter = class EventEmitter {
-    #events = new DefaultMap([])
+    #events = Object.create(null)
 
     getListeners(event) {
-      return this.#events.get(event)
+      return this.#events[event] || []
     }
     addListener(event, listener, options = {}) {
-      const listeners = this.#events.get(event)
+      const listeners = this.#events[event] || []
       if (options.once) {
-        this.#events.set(event, listeners.concat({ listener, once: true }))
+        this.#events[event] = listeners.concat({ listener, once: true })
         return this
       }
-      this.#events.set(event, listeners.concat({ listener }))
+      this.#events[event] = listeners.concat({ listener })
       return this
     }
     addOnceListener(event, listener) {
@@ -37,18 +26,15 @@ if (typeof process != 'undefined' && typeof process.versions != 'undefined') {
       return this.addListener(event, listener, options)
     }
     removeListener(event, listener) {
-      const listeners = this.#events.get(event)
-      this.#events.set(
-        event,
-        listeners.filter(l => l.listener !== listener)
-      )
+      const listeners = this.#events[event] || []
+      this.#events[event] = listeners.filter(l => l.listener !== listener)
       return this
     }
     removeAllListeners(...events) {
-      events.forEach(event => this.#events.delete(event))
+      events.forEach(event => delete this.#events[event])
     }
     emit(event, ...args) {
-      const listeners = this.#events.get(event)
+      const listeners = this.#events[event] || []
       listeners.forEach(
         ({ listener, once }) => (
           once && this.removeListener(event, listener), listener(...args)
@@ -108,5 +94,3 @@ export const reactivize = obj => {
   }
   return Object.assign(pushProxy, observable)
 }
-
-export { EventEmitter }

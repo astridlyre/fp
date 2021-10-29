@@ -5378,13 +5378,13 @@ var interval = (time, value) => {
   });
 };
 /**
- * Combine, merge two streams one to one
+ * Combine, merge two streams one-to-one, preserving order of each stream
  * @param {observable} Stream a
  * @param {observable} Stream b
  * @returns {observable} Combined output of stream a and b, one to one
  */
 
-var combine = curry((streamA, streamB) => {
+var concat = curry((streamA, streamB) => {
   var done = 0;
   var store = {
     a: [],
@@ -5421,13 +5421,13 @@ var combine = curry((streamA, streamB) => {
   });
 });
 /**
- * CombineLatest, combine the latest output of each stream
+ * combine, combine the latest output of each stream
  * @param {observable} Stream a
  * @param {observable} Stream b
  * @returns {observable} Latest combined output of stream a and b
  */
 
-var combineLatest = curry((streamA, streamB) => {
+var combine = curry((streamA, streamB) => {
   var done = 0;
   var store = {
     a: [],
@@ -5500,11 +5500,11 @@ Object.defineProperties(Observable, {
   interval: _objectSpread2({
     value: interval
   }, p),
+  concat: _objectSpread2({
+    value: concat
+  }, p),
   combine: _objectSpread2({
     value: combine
-  }, p),
-  combineLatest: _objectSpread2({
-    value: combineLatest
   }, p),
   merge: _objectSpread2({
     value: merge
@@ -5574,12 +5574,12 @@ var ReactiveExtensions = {
     return debounce(limit, this);
   },
 
-  combine(stream) {
-    return combine(this, stream);
+  concat(stream) {
+    return concat(this, stream);
   },
 
-  combineLatest(stream) {
-    return combineLatest(this, stream);
+  combine(stream) {
+    return combine(this, stream);
   },
 
   merge(stream) {
@@ -5607,8 +5607,8 @@ var rx = /*#__PURE__*/Object.freeze({
   forEach: forEach,
   pluck: pluck,
   interval: interval,
+  concat: concat,
   combine: combine,
-  combineLatest: combineLatest,
   merge: merge,
   ReactiveExtensions: ReactiveExtensions
 });
@@ -5622,61 +5622,33 @@ if (typeof process != 'undefined' && typeof process.versions != 'undefined') {
 } else {
   var _events;
 
-  var _defaultValue = /*#__PURE__*/new WeakMap();
-
-  class DefaultMap extends Map {
-    constructor(defaultValue) {
-      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-        args[_key - 1] = arguments[_key];
-      }
-
-      super(...args);
-
-      _classPrivateFieldInitSpec(this, _defaultValue, {
-        writable: true,
-        value: void 0
-      });
-
-      _classPrivateFieldSet(this, _defaultValue, defaultValue);
-    }
-
-    get(key) {
-      var value = super.get(key);
-      return value === undefined ? _classPrivateFieldGet(this, _defaultValue) : value;
-    }
-
-  }
-
   EventEmitter = (_events = /*#__PURE__*/new WeakMap(), class EventEmitter {
     constructor() {
       _classPrivateFieldInitSpec(this, _events, {
         writable: true,
-        value: new DefaultMap([])
+        value: Object.create(null)
       });
     }
 
     getListeners(event) {
-      return _classPrivateFieldGet(this, _events).get(event);
+      return _classPrivateFieldGet(this, _events)[event] || [];
     }
 
     addListener(event, listener) {
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-      var listeners = _classPrivateFieldGet(this, _events).get(event);
+      var listeners = _classPrivateFieldGet(this, _events)[event] || [];
 
       if (options.once) {
-        _classPrivateFieldGet(this, _events).set(event, listeners.concat({
+        _classPrivateFieldGet(this, _events)[event] = listeners.concat({
           listener,
           once: true
-        }));
-
+        });
         return this;
       }
 
-      _classPrivateFieldGet(this, _events).set(event, listeners.concat({
+      _classPrivateFieldGet(this, _events)[event] = listeners.concat({
         listener
-      }));
-
+      });
       return this;
     }
 
@@ -5691,28 +5663,25 @@ if (typeof process != 'undefined' && typeof process.versions != 'undefined') {
     }
 
     removeListener(event, listener) {
-      var listeners = _classPrivateFieldGet(this, _events).get(event);
-
-      _classPrivateFieldGet(this, _events).set(event, listeners.filter(l => l.listener !== listener));
-
+      var listeners = _classPrivateFieldGet(this, _events)[event] || [];
+      _classPrivateFieldGet(this, _events)[event] = listeners.filter(l => l.listener !== listener);
       return this;
     }
 
     removeAllListeners() {
-      for (var _len2 = arguments.length, events = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        events[_key2] = arguments[_key2];
+      for (var _len = arguments.length, events = new Array(_len), _key = 0; _key < _len; _key++) {
+        events[_key] = arguments[_key];
       }
 
-      events.forEach(event => _classPrivateFieldGet(this, _events).delete(event));
+      events.forEach(event => delete _classPrivateFieldGet(this, _events)[event]);
     }
 
     emit(event) {
-      for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-        args[_key3 - 1] = arguments[_key3];
+      for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        args[_key2 - 1] = arguments[_key2];
       }
 
-      var listeners = _classPrivateFieldGet(this, _events).get(event);
-
+      var listeners = _classPrivateFieldGet(this, _events)[event] || [];
       listeners.forEach(_ref => {
         var {
           listener,
@@ -5740,8 +5709,8 @@ var reactivize = obj => {
   var emitter = new EventEmitter();
   var pushProxy = new Proxy(obj, {
     get() {
-      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-        args[_key4] = arguments[_key4];
+      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
       }
 
       var [target, key] = args;
@@ -5749,8 +5718,8 @@ var reactivize = obj => {
       if (key === 'push') {
         var pushRef = target[key];
         return function () {
-          for (var _len5 = arguments.length, capturedArgs = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-            capturedArgs[_key5] = arguments[_key5];
+          for (var _len4 = arguments.length, capturedArgs = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+            capturedArgs[_key4] = arguments[_key4];
           }
 
           var result = pushRef.call(target, ...capturedArgs);

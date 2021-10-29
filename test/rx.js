@@ -1,7 +1,7 @@
+import { EventEmitter } from '../src/reactivize.js'
 import { Observable } from '../src/rx.js'
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
-import { EventEmitter } from 'events'
 
 describe('Observable', function () {
   describe('fromGenerator', function () {
@@ -127,11 +127,11 @@ describe('Observable', function () {
         })
     })
 
-    it('should combine streams', function (done) {
+    it('should concat streams', function (done) {
       const values = []
       const streamA = Observable.from([1, 2, 3])
       const streamB = Observable.from(['a', 'b', 'c'])
-      streamA.combine(streamB).subscribe({
+      streamA.concat(streamB).subscribe({
         next: value => values.push(value),
         complete: () => {
           assert.deepEqual(values, [
@@ -148,7 +148,7 @@ describe('Observable', function () {
       const values = []
       const streamA = Observable.from([1, 2, 3])
       const streamB = Observable.from(['a', 'b', 'c'])
-      streamA.combineLatest(streamB).subscribe({
+      streamA.combine(streamB).subscribe({
         next: value => values.push(value),
         complete: () => {
           assert.deepEqual(values, [[3, 'a']])
