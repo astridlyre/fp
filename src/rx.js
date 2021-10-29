@@ -1,4 +1,4 @@
-import { curry, last, values } from './combinators.js'
+import { curry, last, values, once, compose } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable, ReadableStream } = globalThis
 
@@ -192,7 +192,7 @@ export const take = curry((numberToTake, stream) => {
   return new Observable(observer => {
     const subs = stream.subscribe(
       withNext(observer)(value => {
-        if (taken++ === numberToTake) return observer.complete()
+        if (taken++ >= numberToTake) return observer.complete()
         observer.next(value)
       })
     )
@@ -416,6 +416,27 @@ export const merge = (...streams) => {
   })
 }
 
+/**
+ * Switch, switch to a mapped Observable
+ * @param {observable}
+ * @returns {observable}
+ */
+const _switch = stream =>
+  new Observable(observer => {
+    let sub = stream.subscribe({
+      next: nextObs => once(queueMicrotask(() => innerSwitch(nextObs))),
+    })
+    function innerSwitch(nextObs) {
+      sub.unsubscribe()
+      sub = nextObs.subscribe({
+        next: value => observer.next(value),
+        error: observer.error.bind(observer),
+        complete: () => observer.complete(),
+      })
+    }
+    return () => sub.unsubscribe()
+  })
+
 const p = {
   enumerable: false,
   writable: false,
@@ -496,6 +517,9 @@ export const ReactiveExtensions = {
   },
   merge(stream) {
     return merge(this, stream)
+  },
+  switch() {
+    return _switch(this)
   },
 }
 

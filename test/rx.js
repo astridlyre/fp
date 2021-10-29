@@ -178,5 +178,21 @@ describe('Observable', function () {
         },
       })
     })
+
+    it('should switch streams', function (done) {
+      const values = []
+      const streamA = Observable.from([1, 2, 3])
+      const streamB = Observable.from(['a', 'b', 'c'])
+      streamA
+        .map(() => streamB)
+        .switch()
+        .subscribe({
+          next: value => values.push(value),
+          complete: () => {
+            assert.deepEqual(values, ['a', 'b', 'c'])
+            done()
+          },
+        })
+    })
   })
 })

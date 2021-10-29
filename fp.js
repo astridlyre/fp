@@ -5248,7 +5248,7 @@ var take = curry((numberToTake, stream) => {
   var taken = 0;
   return new Observable(observer => {
     var subs = stream.subscribe(withNext(observer)(value => {
-      if (taken++ === numberToTake) return observer.complete();
+      if (taken++ >= numberToTake) return observer.complete();
       observer.next(value);
     }));
     return () => subs.unsubscribe();
@@ -5476,6 +5476,29 @@ var merge = function merge() {
     return () => subscriptions.forEach(subs => subs.unsubscribe());
   });
 };
+/**
+ * Switch, switch to a mapped Observable
+ * @param {observable}
+ * @returns {observable}
+ */
+
+var _switch = stream => new Observable(observer => {
+  var sub = stream.subscribe({
+    next: nextObs => once(queueMicrotask(() => innerSwitch(nextObs)))
+  });
+
+  function innerSwitch(nextObs) {
+    sub.unsubscribe();
+    sub = nextObs.subscribe({
+      next: value => observer.next(value),
+      error: observer.error.bind(observer),
+      complete: () => observer.complete()
+    });
+  }
+
+  return () => sub.unsubscribe();
+});
+
 var p = {
   enumerable: false,
   writable: false,
@@ -5572,6 +5595,10 @@ var ReactiveExtensions = {
 
   merge(stream) {
     return merge(this, stream);
+  },
+
+  switch() {
+    return _switch(this);
   }
 
 };
