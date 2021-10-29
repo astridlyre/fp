@@ -4,12 +4,8 @@ export const { Observable, ReadableStream } = globalThis
 
 const withNext = observer => next => ({
   next,
-  error(e) {
-    observer.error(e)
-  },
-  complete() {
-    observer.complete()
-  },
+  error: observer.error.bind(observer),
+  complete: observer.complete.bind(observer),
 })
 
 if (
@@ -133,19 +129,15 @@ export const throttle = curry((limit, stream) => {
 export const debounce = curry((limit, stream) => {
   const stack = []
   let lastInterval = 0
-  let lastEvent = 0
   return new Observable(observer => {
     const subs = stream.subscribe(
       withNext(observer)(value => {
         stack.push(value)
-        lastEvent = Date.now()
         clearTimeout(lastInterval)
         lastInterval = setTimeout(() => {
-          if (Date.now() - lastEvent >= limit) {
-            observer.next(last(stack))
-            stack.length = 0
-          }
-        }, limit - (Date.now() - lastEvent))
+          observer.next(last(stack))
+          stack.length = 0
+        }, limit)
       })
     )
     return () => subs.unsubscribe()
@@ -360,13 +352,49 @@ export const pluck = curry(
  * @param {any} optional value to emit
  * @returns {observable}
  */
-export const interval = curry(
-  (time, value) =>
-    new Observable(observer => {
-      const id = setInterval(() => observer.next(value), time)
-      return () => clearInterval(id)
+Observable.interval = function interval(time, value) {
+  return new Observable(observer => {
+    const id = setInterval(() => observer.next(value), time)
+    return () => {
+      clearInterval(id)
+      observer.complete()
+    }
+  })
+}
+
+/**
+ * Combine
+ * @param {observable} Stream a
+ * @param {observable} Stream b
+ * @returns {observable} Combined output of stream a and b
+ */
+export const combine = curry((streamA, streamB) => {
+  let done = 0
+  const store = {
+    a: [],
+    b: [],
+  }
+  function pushResults(event, observer) {
+    store[event.stream].unshift(event.value)
+    if (store.a.length && store.b.length) {
+      const next = [store.a.pop(), store.b.pop()]
+      observer.next(next)
+    }
+  }
+  return new Observable(observer => {
+    const streamASub = streamA.subscribe({
+      next: value => pushResults({ stream: 'a', value }, observer),
+      error: observer.error.bind(observer),
+      complete: () => ++done === 2 && observer.complete(),
     })
-)
+    const streamBSub = streamB.subscribe({
+      next: value => pushResults({ stream: 'b', value }, observer),
+      error: observer.error.bind(observer),
+      complete: () => ++done === 2 && observer.complete(),
+    })
+    return () => (streamASub.unsubscribe(), streamBSub.unsubscribe())
+  })
+})
 
 export const ReactiveExtensions = {
   filter(predicate) {
@@ -402,11 +430,11 @@ export const ReactiveExtensions = {
   pluck(key) {
     return pluck(key, this)
   },
-  interval(time, value) {
-    return interval(time, value)
-  },
   debounce(limit) {
     return debounce(limit, this)
+  },
+  combine(stream) {
+    return combine(this, stream)
   },
 }
 

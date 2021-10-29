@@ -2,7 +2,7 @@
 
 My little functional programming library. Just a few functions I don't like
 re-writing. I am slowly adding tests, run with `npm run test` and you should see
-131 tests passing.
+151 tests passing.
 
 Features:
 
