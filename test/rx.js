@@ -144,6 +144,19 @@ describe('Observable', function () {
       })
     })
 
+    it('should combine latest streams', function (done) {
+      const values = []
+      const streamA = Observable.from([1, 2, 3])
+      const streamB = Observable.from(['a', 'b', 'c'])
+      streamA.combineLatest(streamB).subscribe({
+        next: value => values.push(value),
+        complete: () => {
+          assert.deepEqual(values, [[3, 'a']])
+          done()
+        },
+      })
+    })
+
     it('should output an interval', function (done) {
       const values = []
       let num = 1

@@ -5079,15 +5079,8 @@ var {
 
 var withNext = observer => next => ({
   next,
-
-  error(e) {
-    observer.error(e);
-  },
-
-  complete() {
-    observer.complete();
-  }
-
+  error: observer.error.bind(observer),
+  complete: observer.complete.bind(observer)
 });
 
 if (Observable.fromGenerator === undefined || typeof Observable.fromGenerator !== 'function') {
@@ -5120,29 +5113,6 @@ if (Observable.fromGenerator === undefined || typeof Observable.fromGenerator !=
       configurable: false
     });
   }
-}
-
-if (Observable.fromEvent === undefined || typeof Observable.fromEvent !== 'function') {
-  Object.defineProperty(Observable, 'fromEvent', {
-    value: curry((emitter, event, handler) => new Observable(observer => {
-      emitter.on(event, function () {
-        return observer.next(handler(...arguments));
-      });
-      emitter.on('end', observer.complete.bind(observer));
-      emitter.on('error', observer.error.bind(observer));
-    })),
-    enumerable: false,
-    writable: false,
-    configurable: false
-  });
-}
-
-if (Observable.fromPromise === undefined || typeof Observable.fromPromise !== 'function') {
-  Object.defineProperty(Observable, 'fromPromise', {
-    value: promise => new Observable(observer => {
-      promise.then(value => observer.next(value)).catch(err => observer.error(err)).finally(() => observer.complete());
-    })
-  });
 }
 /**
  * Listen$
@@ -5198,18 +5168,14 @@ var throttle = curry((limit, stream) => {
 var debounce = curry((limit, stream) => {
   var stack = [];
   var lastInterval = 0;
-  var lastEvent = 0;
   return new Observable(observer => {
     var subs = stream.subscribe(withNext(observer)(value => {
       stack.push(value);
-      lastEvent = Date.now();
       clearTimeout(lastInterval);
       lastInterval = setTimeout(() => {
-        if (Date.now() - lastEvent >= limit) {
-          observer.next(last(stack));
-          stack.length = 0;
-        }
-      }, limit - (Date.now() - lastEvent));
+        observer.next(last(stack));
+        stack.length = 0;
+      }, limit);
     }));
     return () => subs.unsubscribe();
   });
@@ -5402,10 +5368,136 @@ var pluck = curry((key, stream) => new Observable(observer => {
  * @returns {observable}
  */
 
-var interval = curry((time, value) => new Observable(observer => {
-  var id = setInterval(() => observer.next(value), time);
-  return () => clearInterval(id);
-}));
+var interval = (time, value) => {
+  return new Observable(observer => {
+    var id = setInterval(() => observer.next(value), time);
+    return () => {
+      clearInterval(id);
+      observer.complete();
+    };
+  });
+};
+/**
+ * Combine, merge two streams one to one
+ * @param {observable} Stream a
+ * @param {observable} Stream b
+ * @returns {observable} Combined output of stream a and b, one to one
+ */
+
+var combine = curry((streamA, streamB) => {
+  var done = 0;
+  var store = {
+    a: [],
+    b: []
+  };
+
+  function pushResults(event, observer) {
+    store[event.stream].unshift(event.value);
+
+    if (store.a.length && store.b.length) {
+      var next = [store.a.pop(), store.b.pop()];
+      observer.next(next);
+    }
+  }
+
+  return new Observable(observer => {
+    var streamASub = streamA.subscribe({
+      next: value => pushResults({
+        stream: 'a',
+        value
+      }, observer),
+      error: observer.error.bind(observer),
+      complete: () => ++done === 2 && observer.complete()
+    });
+    var streamBSub = streamB.subscribe({
+      next: value => pushResults({
+        stream: 'b',
+        value
+      }, observer),
+      error: observer.error.bind(observer),
+      complete: () => ++done === 2 && observer.complete()
+    });
+    return () => (streamASub.unsubscribe(), streamBSub.unsubscribe());
+  });
+});
+/**
+ * CombineLatest, combine the latest output of each stream
+ * @param {observable} Stream a
+ * @param {observable} Stream b
+ * @returns {observable} Latest combined output of stream a and b
+ */
+
+var combineLatest = curry((streamA, streamB) => {
+  var done = 0;
+  var store = {
+    a: [],
+    b: []
+  };
+
+  function pushResults(event, observer) {
+    store[event.stream].push(event.value);
+
+    if (store.a.length && store.b.length) {
+      var next = [store.a.pop(), store.b.pop()];
+      observer.next(next);
+      store.a.length = 0;
+      store.b.length = 0;
+    }
+  }
+
+  return new Observable(observer => {
+    var streamASub = streamA.subscribe({
+      next: value => pushResults({
+        stream: 'a',
+        value
+      }, observer),
+      error: observer.error.bind(observer),
+      complete: () => ++done === 2 && observer.complete()
+    });
+    var streamBSub = streamB.subscribe({
+      next: value => pushResults({
+        stream: 'b',
+        value
+      }, observer),
+      error: observer.error.bind(observer),
+      complete: () => ++done === 2 && observer.complete()
+    });
+    return () => (streamASub.unsubscribe(), streamBSub.unsubscribe());
+  });
+});
+var p = {
+  enumerable: false,
+  writable: false,
+  configurable: false
+};
+Object.defineProperties(Observable, {
+  listen: _objectSpread2({
+    value: listen$
+  }, p),
+  interval: _objectSpread2({
+    value: interval
+  }, p),
+  combine: _objectSpread2({
+    value: combine
+  }, p),
+  combineLatest: _objectSpread2({
+    value: combineLatest
+  }, p),
+  fromEvent: _objectSpread2({
+    value: curry((emitter, event, handler) => new Observable(observer => {
+      emitter.on(event, function () {
+        return observer.next(handler(...arguments));
+      });
+      emitter.on('end', observer.complete.bind(observer));
+      emitter.on('error', observer.error.bind(observer));
+    }))
+  }, p),
+  fromPromise: _objectSpread2({
+    value: promise => new Observable(observer => {
+      promise.then(value => observer.next(value)).catch(err => observer.error(err)).finally(() => observer.complete());
+    })
+  }, p)
+});
 var ReactiveExtensions = {
   filter(predicate) {
     return filter(predicate, this);
@@ -5452,12 +5544,16 @@ var ReactiveExtensions = {
     return pluck(key, this);
   },
 
-  interval(time, value) {
-    return interval(time, value);
-  },
-
   debounce(limit) {
     return debounce(limit, this);
+  },
+
+  combine(stream) {
+    return combine(this, stream);
+  },
+
+  combineLatest(stream) {
+    return combineLatest(this, stream);
   }
 
 };
@@ -5481,6 +5577,8 @@ var rx = /*#__PURE__*/Object.freeze({
   forEach: forEach,
   pluck: pluck,
   interval: interval,
+  combine: combine,
+  combineLatest: combineLatest,
   ReactiveExtensions: ReactiveExtensions
 });
 

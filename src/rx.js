@@ -45,37 +45,6 @@ if (
   }
 }
 
-if (Observable.fromEvent === undefined || typeof Observable.fromEvent !== 'function') {
-  Object.defineProperty(Observable, 'fromEvent', {
-    value: curry(
-      (emitter, event, handler) =>
-        new Observable(observer => {
-          emitter.on(event, (...args) => observer.next(handler(...args)))
-          emitter.on('end', observer.complete.bind(observer))
-          emitter.on('error', observer.error.bind(observer))
-        })
-    ),
-    enumerable: false,
-    writable: false,
-    configurable: false,
-  })
-}
-
-if (
-  Observable.fromPromise === undefined ||
-  typeof Observable.fromPromise !== 'function'
-) {
-  Object.defineProperty(Observable, 'fromPromise', {
-    value: promise =>
-      new Observable(observer => {
-        promise
-          .then(value => observer.next(value))
-          .catch(err => observer.error(err))
-          .finally(() => observer.complete())
-      }),
-  })
-}
-
 /**
  * Listen$
  * @param {string} eventName - Event to listen on
@@ -352,7 +321,7 @@ export const pluck = curry(
  * @param {any} optional value to emit
  * @returns {observable}
  */
-Observable.interval = function interval(time, value) {
+export const interval = (time, value) => {
   return new Observable(observer => {
     const id = setInterval(() => observer.next(value), time)
     return () => {
@@ -363,10 +332,10 @@ Observable.interval = function interval(time, value) {
 }
 
 /**
- * Combine
+ * Combine, merge two streams one to one
  * @param {observable} Stream a
  * @param {observable} Stream b
- * @returns {observable} Combined output of stream a and b
+ * @returns {observable} Combined output of stream a and b, one to one
  */
 export const combine = curry((streamA, streamB) => {
   let done = 0
@@ -394,6 +363,76 @@ export const combine = curry((streamA, streamB) => {
     })
     return () => (streamASub.unsubscribe(), streamBSub.unsubscribe())
   })
+})
+
+/**
+ * CombineLatest, combine the latest output of each stream
+ * @param {observable} Stream a
+ * @param {observable} Stream b
+ * @returns {observable} Latest combined output of stream a and b
+ */
+export const combineLatest = curry((streamA, streamB) => {
+  let done = 0
+  const store = {
+    a: [],
+    b: [],
+  }
+  function pushResults(event, observer) {
+    store[event.stream].push(event.value)
+    if (store.a.length && store.b.length) {
+      const next = [store.a.pop(), store.b.pop()]
+      observer.next(next)
+      store.a.length = 0
+      store.b.length = 0
+    }
+  }
+  return new Observable(observer => {
+    const streamASub = streamA.subscribe({
+      next: value => pushResults({ stream: 'a', value }, observer),
+      error: observer.error.bind(observer),
+      complete: () => ++done === 2 && observer.complete(),
+    })
+    const streamBSub = streamB.subscribe({
+      next: value => pushResults({ stream: 'b', value }, observer),
+      error: observer.error.bind(observer),
+      complete: () => ++done === 2 && observer.complete(),
+    })
+    return () => (streamASub.unsubscribe(), streamBSub.unsubscribe())
+  })
+})
+
+const p = {
+  enumerable: false,
+  writable: false,
+  configurable: false,
+}
+
+Object.defineProperties(Observable, {
+  listen: { value: listen$, ...p },
+  interval: { value: interval, ...p },
+  combine: { value: combine, ...p },
+  combineLatest: { value: combineLatest, ...p },
+  fromEvent: {
+    value: curry(
+      (emitter, event, handler) =>
+        new Observable(observer => {
+          emitter.on(event, (...args) => observer.next(handler(...args)))
+          emitter.on('end', observer.complete.bind(observer))
+          emitter.on('error', observer.error.bind(observer))
+        })
+    ),
+    ...p,
+  },
+  fromPromise: {
+    value: promise =>
+      new Observable(observer => {
+        promise
+          .then(value => observer.next(value))
+          .catch(err => observer.error(err))
+          .finally(() => observer.complete())
+      }),
+    ...p,
+  },
 })
 
 export const ReactiveExtensions = {
@@ -435,6 +474,9 @@ export const ReactiveExtensions = {
   },
   combine(stream) {
     return combine(this, stream)
+  },
+  combineLatest(stream) {
+    return combineLatest(this, stream)
   },
 }
 
