@@ -368,6 +368,22 @@ var isSet = s => s instanceof Set;
 
 var isMap = m => m instanceof Map;
 /**
+ * IsClass
+ * @param {object} {function} obj - Function to test if is class
+ * @returns {boolean}
+ */
+
+function isClass(obj) {
+  var isCtorClass = obj.constructor && obj.constructor.toString().substring(0, 5) === 'class';
+
+  if (obj.prototype === undefined) {
+    return isCtorClass;
+  }
+
+  var isPrototypeCtorClass = obj.prototype.constructor && obj.prototype.constructor.toString && obj.prototype.constructor.toString().substring(0, 5) === 'class';
+  return isCtorClass || isPrototypeCtorClass;
+}
+/**
  * Tap, run a side effect fn and then return x
  * @param {function} fn - Side effect to run
  * @param {any} x - Value to return
@@ -5607,49 +5623,82 @@ var withValidation = curry((validator, fn) => data => {
   return fn(data);
 });
 
+class NoHandlerError {
+  constructor(message) {
+    Error.call(this, message);
+    Error.captureStackTrace(this);
+    this.args = args;
+  }
+
+} // Helper functions
+
+
 var handlersKey = Symbol('handlers key');
 var dispatchKey = Symbol('dispatch key');
 var DEFAULT_DISPATCH = 'MULTI:DEFAULT_DISPATCH';
+
+var defaultDispatch = function defaultDispatch() {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  return args.length === 1 ? args[0] : args;
+};
+
+var extractDispatchAndMethods = methods => isFunction(methods[0]) ? [methods[0], methods.slice(1)] : [defaultDispatch, methods];
+
+var initialHandler = handlers => last(handlers)[0] === DEFAULT_DISPATCH ? last(handlers)[1] : null;
+/**
+ * Method, create a method inside a call to multi()
+ * @param {function} {any} key / function key
+ * @param {function} {any} handler / value to return)
+ * @returns {array} [key, handler]
+ */
+
+
+function method(key, handler) {
+  if (handler === undefined) {
+    return [DEFAULT_DISPATCH, key];
+  }
+
+  return [key, handler];
+}
 /**
  * multi, create a multimethod function
  * @param {function} dispatch - Optional custom dispatch function
- * @param {function} method - Method functions (args, handler)
+ * @param {function} initialMethods - Method functions (args, handler)
  * @returns {function} dispatch function
  */
 
 function multi() {
+  // multiMethod function takes variable arguments and returns the result of
+  // calling any handler that can handle the arguments
   function multiMethod() {
-    var handler = last(multiMethod[handlersKey])[0] === DEFAULT_DISPATCH ? last(multiMethod[handlersKey])[1] : null;
+    var handler = initialHandler(multiMethod[handlersKey]);
 
-    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      args[_key2] = arguments[_key2];
+    for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+      args[_key3] = arguments[_key3];
     }
 
     for (var [key, _method] of multiMethod[handlersKey]) {
-      if (isFunction(key) && key(...args) || deepEqual(multiMethod[dispatchKey](...args), key)) {
+      if (isFunction(key) && args[0].constructor === key || isFunction(key) && !isClass(key) && key(...args) || deepEqual(multiMethod[dispatchKey](...args), key)) {
         handler = _method;
         break;
       }
     }
 
-    if (!handler) {
-      throw new TypeError("No handlers for args (".concat((JSON.stringify(args), '  '), ")"));
+    if (handler) {
+      return isFunction(handler) ? handler(...args) : handler;
     }
 
-    return isFunction(handler) ? handler(...args) : handler;
+    throw new NoHandlerError("No handlers for args (".concat(JSON.stringify(args), ")"));
   }
 
-  var dispatch = defaultDispatch;
-
-  for (var _len = arguments.length, methods = new Array(_len), _key = 0; _key < _len; _key++) {
-    methods[_key] = arguments[_key];
+  for (var _len2 = arguments.length, initialMethods = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    initialMethods[_key2] = arguments[_key2];
   }
 
-  if (isFunction(methods[0])) {
-    dispatch = methods[0];
-    methods.splice(0, 1);
-  }
-
+  var [dispatch, methods] = extractDispatchAndMethods(initialMethods);
   multiMethod[dispatchKey] = dispatch;
   multiMethod[handlersKey] = methods;
 
@@ -5674,28 +5723,12 @@ function multi() {
 }
 
 multi.extend = function extend(multiMethod) {
-  for (var _len3 = arguments.length, methods = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-    methods[_key3 - 1] = arguments[_key3];
+  for (var _len4 = arguments.length, methods = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+    methods[_key4 - 1] = arguments[_key4];
   }
 
   return multi(multiMethod[dispatchKey], ...methods.concat(multiMethod[handlersKey]));
 };
-
-function method(key, handler) {
-  if (handler === undefined) {
-    return [DEFAULT_DISPATCH, key];
-  }
-
-  return [key, handler];
-}
-
-function defaultDispatch() {
-  for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-    args[_key4] = arguments[_key4];
-  }
-
-  return args.length === 1 ? args[0] : args;
-}
 
 ReadableStream.from = function from(iterator) {
   return new ReadableStream({
