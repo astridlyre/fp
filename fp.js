@@ -3034,12 +3034,17 @@ Stack.from = function from(iterable) {
   return stack;
 };
 
+function Lazy(target) {
+  return Object.assign(target, LazyCollection);
+}
+
 var lazy = /*#__PURE__*/Object.freeze({
   __proto__: null,
   LazyCollection: LazyCollection,
   Numbers: Numbers,
   Pair: Pair,
-  Stack: Stack
+  Stack: Stack,
+  Lazy: Lazy
 });
 
 var _value = /*#__PURE__*/new WeakMap();

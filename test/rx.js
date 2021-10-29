@@ -194,5 +194,24 @@ describe('Observable', function () {
           },
         })
     })
+
+    it('should switch streams async', function (done) {
+      const values2 = []
+      const stream1 = new Observable(observer => {
+        setTimeout(() => observer.next(), 10)
+        setTimeout(() => observer.complete(), 20)
+      })
+      const stream2 = Observable.from([1, 2, 3, 4])
+      stream1
+        .map(() => stream2)
+        .switch()
+        .subscribe({
+          next: value => values2.push(value),
+          complete: () => {
+            assert.deepEqual(values2, [1, 2, 3, 4])
+            done()
+          },
+        })
+    })
   })
 })

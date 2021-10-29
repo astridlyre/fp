@@ -193,3 +193,7 @@ Stack.from = function from(iterable) {
   }
   return stack
 }
+
+export function Lazy(target) {
+  return Object.assign(target, LazyCollection)
+}
