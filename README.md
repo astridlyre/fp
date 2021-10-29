@@ -10,3 +10,197 @@ Features:
 - Some ADTs such as `Maybe`, `Result`, and `IO`
 - A simple reactive library for `Observable`, including methods like `map`,
   `filter`, and `reduce`.
+
+## Install
+
+`npm install @ebflat9/fp`
+
+## Examples
+
+```javascript
+import * as fp from '@ebflat9/fp'
+
+// identity x => x
+fp.identity(1) // 1
+
+// constant x => _ => x
+const one = fp.constant(1) // () => 1
+one() // 1
+
+// flip2, flips the order of arguments
+const fn = (a, b) => `${a}${b}`
+fp.flip(fn)('hello', 'world') // 'worldhello'
+
+// unary, convert a function to one taking a single argument
+const fn = (...args) => [...args]
+fp.unary(fn)(1, 2, 3) // [1]
+
+// demethodize, convert a method to a regular function
+const toUpperCase = demethodize(String.prototype.toUpperCase)
+toUpperCase('hi') // 'HI'
+
+// deepProp, get a prop using a path
+const obj = {
+  a: {
+    b: {
+      c: {
+        d: 1,
+      },
+    },
+  },
+}
+fp.deepProp('a.b.c.d', obj) // 1
+
+// deepSetProp, set a prop using a path (returns a copy)
+const obj = {
+  a: {
+    b: 2,
+  },
+}
+fp.deepSetProp('a.b', 3)(obj) // { a: { b: 3 } }
+
+// deepPick, pick only keys from paths in an object
+const obj = {
+  a: {
+    b: {
+      c: 'hi',
+    },
+    e: 'world',
+  },
+  h: 'sup',
+}
+fp.deepPick(['a.b.c', 'a.e'])(obj) // { a: { b: { c: 'hi' }, e: 'world' } }
+
+// rename, using a keymap, rename the keys in an object
+const obj = {
+  title: 'My book',
+  publication_date: 1987,
+}
+fp.rename({ publication_date: 'publicationDate' }, obj)
+// {title: 'My book', publicationDate: 1987 }
+
+// aggregateOn, combine all properties from two objects into one, rightmost object
+// wins in case of duplicate properties, keymap properties are combined into an
+// array of unique values.
+const a = {
+  title: 'my book',
+  author: 'tim',
+  publication_date: 2008,
+}
+const b = {
+  title: 'my book',
+  publication_date: 1987,
+  author: 'dave',
+}
+fp.aggregateOn({ author: 'authors', publication_date: 'publicationDates' }, a, b)
+// { title: 'my book', authors: ['tim', 'dave'], publicationDates: [2008, 1987] }
+
+// groupBy, partition an array of objects into groups by key
+const a = [
+  {
+    name: 'tim',
+    age: 15,
+  },
+  {
+    name: 'tim',
+    age: 5,
+  },
+  {
+    name: 'bob',
+    age: 87,
+  },
+]
+fp.groupBy('name', a)
+// [[{name: 'tim', age: 15}, {name: 'tim', age: 5}], [{name: 'bob', age: 87}]]
+
+// keyBy, convert an array to an object
+const arr = [{ name: 'tim' }, { name: 'bob' }]
+fp.keyBy('name', arr) // { tim: { name: 'tim' }, bob: {name: 'bob' } }
+
+// deepJoin, combine two arrays
+const a = [
+  {
+    isbn: '978-0812981605',
+    title: '7 Habits of Highly Effective People',
+    available: true,
+  },
+  {
+    isbn: '978-1982137274',
+    title: 'The Power of Habit',
+    available: false,
+  },
+]
+const b = [
+  {
+    isbn: '978-0812981605',
+    title: '7 Habits of Highly Effective People',
+    subtitle: 'Powerful Lessons in Personal Change',
+    number_of_pages: 432,
+  },
+  {
+    isbn: '978-1982137274',
+    title: 'The Power of Habit',
+    subtitle: 'Why We Do What We Do in Life and Business',
+    subjects: ['Social Aspects', 'Habit', 'Change (Psychology)'],
+  },
+]
+fp.deepJoin('isbn', 'isbn', a, b)
+/* [
+ * {
+ *   available: true,
+ *   isbn: '978-0812981605',
+ *   number_of_pages: 432,
+ *   subtitle: 'Powerful Lessons in Personal Change',
+ *   title: '7 Habits of Highly Effective People',
+ * },
+ * {
+ *   available: false,
+ *   isbn: '978-1982137274',
+ *   subjects: ['Social Aspects', 'Habit', 'Change (Psychology)'],
+ *   subtitle: 'Why We Do What We Do in Life and Business',
+ *   title: 'The Power of Habit',
+ *  },
+ *]
+ */
+
+// multiMethod
+const store = {
+  todos: [],
+  add(todo) {
+    this.todos.push({ text: todo, id: this.todos.length + 1 })
+    return this
+  },
+  remove(id) {
+    this.todos = this.todos.filter(td => td.id !== id)
+    return this
+  },
+}
+const dispatch = fp.multi(
+  (action, store) => action.type,
+  fp.method('ADD_TODO', (action, store) => store.add(action.text)),
+  fp.method('REMOVE_TODO', (action, store) => store.remove(action.id))
+)
+dispatch({ type: 'ADD_TODO', text: 'Hello world' }, store)
+// store.todos = [{ text: 'Hello world', id: 1 }]
+dispatch({ type: 'REMOVE_TODO', id: 1 }, store)
+// store.todos = []
+
+// mapping a multiMethod
+const a = fp.multi(fp.method('a', () => 'b'))
+const upper = a.map(s => s.toUpperCase())
+upper('a') // 'B'
+
+// use functions as keys
+const router = fp.multi(
+  fp.method(req => ['GET'].includes(req.method) && req.url === '/', 'OK'),
+  fp.method(
+    req => ['GET', 'POST'].includes(req.method) && req.url === '/users',
+    [{ id: 1, name: 'John' }]
+  ),
+  fp.method('Unknown endpoint')
+)
+router({ method: 'GET', url: '/' }) // 'OK'
+```
+
+There are many more functions available. Check out the tests for further
+clarification.

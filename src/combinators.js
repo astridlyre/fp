@@ -202,6 +202,24 @@ export const isSet = s => s instanceof Set
 export const isMap = m => m instanceof Map
 
 /**
+ * IsClass
+ * @param {object} {function} obj - Function to test if is class
+ * @returns {boolean}
+ */
+export function isClass(obj) {
+  const isCtorClass =
+    obj.constructor && obj.constructor.toString().substring(0, 5) === 'class'
+  if (obj.prototype === undefined) {
+    return isCtorClass
+  }
+  const isPrototypeCtorClass =
+    obj.prototype.constructor &&
+    obj.prototype.constructor.toString &&
+    obj.prototype.constructor.toString().substring(0, 5) === 'class'
+  return isCtorClass || isPrototypeCtorClass
+}
+
+/**
  * Tap, run a side effect fn and then return x
  * @param {function} fn - Side effect to run
  * @param {any} x - Value to return

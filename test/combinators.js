@@ -47,6 +47,7 @@ describe('Combinators', function () {
     it('unary', function () {
       const fn = (a, b) => `${a} ${b}`
       assert.equal(combinators.unary(fn)('hello', 'world'), 'hello undefined')
+      assert.deepEqual(combinators.unary((...args) => [...args])(1, 2, 3), [1])
     })
 
     it('binary', function () {
