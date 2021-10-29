@@ -699,18 +699,18 @@ function diff(a, b) {
  * @return {object} c - Result of merge
  */
 
-function merge(a, b) {
+function merge$1(a, b) {
   if (!a && b) return b;
 
   if (isArray(b)) {
-    return b.map((value, i) => merge(a[i], value));
+    return b.map((value, i) => merge$1(a[i], value));
   }
 
   if (isObject$7(b)) {
     var result = deepCopy(a);
 
     for (var key of Reflect.ownKeys(b)) {
-      result[key] = merge(a[key], b[key]);
+      result[key] = merge$1(a[key], b[key]);
     }
 
     return result;
@@ -734,7 +734,7 @@ function aggregateOn(keyMap) {
   }
 
   for (var current of objects) {
-    result = merge(result, current);
+    result = merge$1(result, current);
 
     for (var [oldKey, newKey] of entries(keyMap)) {
       if (!current[oldKey]) continue;
@@ -5465,6 +5465,29 @@ var combineLatest = curry((streamA, streamB) => {
     return () => (streamASub.unsubscribe(), streamBSub.unsubscribe());
   });
 });
+/**
+ * Merge, interleave two streams
+ * @param {observable} Stream a
+ * @param {observable} Stream b
+ * @returns {observable} Interleaving stream of a and b
+ */
+
+var merge = curry((streamA, streamB) => {
+  var done = 0;
+  return new Observable(observer => {
+    var streamASub = streamA.subscribe({
+      next: value => observer.next(value),
+      error: observer.error.bind(observer),
+      complete: () => ++done === 2 && observer.complete()
+    });
+    var streamBSub = streamB.subscribe({
+      next: value => observer.next(value),
+      error: observer.error.bind(observer),
+      complete: () => ++done === 2 && observer.complete()
+    });
+    return () => (streamASub.unsubscribe(), streamBSub.unsubscribe());
+  });
+});
 var p = {
   enumerable: false,
   writable: false,
@@ -5482,6 +5505,9 @@ Object.defineProperties(Observable, {
   }, p),
   combineLatest: _objectSpread2({
     value: combineLatest
+  }, p),
+  merge: _objectSpread2({
+    value: merge
   }, p),
   fromEvent: _objectSpread2({
     value: curry((emitter, event, handler) => new Observable(observer => {
@@ -5554,6 +5580,10 @@ var ReactiveExtensions = {
 
   combineLatest(stream) {
     return combineLatest(this, stream);
+  },
+
+  merge(stream) {
+    return merge(this, stream);
   }
 
 };
@@ -5579,6 +5609,7 @@ var rx = /*#__PURE__*/Object.freeze({
   interval: interval,
   combine: combine,
   combineLatest: combineLatest,
+  merge: merge,
   ReactiveExtensions: ReactiveExtensions
 });
 
@@ -5955,4 +5986,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge$1 as merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };

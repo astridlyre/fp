@@ -169,5 +169,18 @@ describe('Observable', function () {
         done()
       }, 50)
     })
+
+    it('should merge streams', function (done) {
+      const values = []
+      const streamA = Observable.from([1, 2, 3])
+      const streamB = Observable.from(['a', 'b', 'c'])
+      Observable.merge(streamA, streamB).subscribe({
+        next: value => values.push(value),
+        complete: () => {
+          assert.deepEqual(values, [1, 2, 3, 'a', 'b', 'c'])
+          done()
+        },
+      })
+    })
   })
 })

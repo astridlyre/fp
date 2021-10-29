@@ -401,6 +401,29 @@ export const combineLatest = curry((streamA, streamB) => {
   })
 })
 
+/**
+ * Merge, interleave two streams
+ * @param {observable} Stream a
+ * @param {observable} Stream b
+ * @returns {observable} Interleaving stream of a and b
+ */
+export const merge = curry((streamA, streamB) => {
+  let done = 0
+  return new Observable(observer => {
+    const streamASub = streamA.subscribe({
+      next: value => observer.next(value),
+      error: observer.error.bind(observer),
+      complete: () => ++done === 2 && observer.complete(),
+    })
+    const streamBSub = streamB.subscribe({
+      next: value => observer.next(value),
+      error: observer.error.bind(observer),
+      complete: () => ++done === 2 && observer.complete(),
+    })
+    return () => (streamASub.unsubscribe(), streamBSub.unsubscribe())
+  })
+})
+
 const p = {
   enumerable: false,
   writable: false,
@@ -412,6 +435,7 @@ Object.defineProperties(Observable, {
   interval: { value: interval, ...p },
   combine: { value: combine, ...p },
   combineLatest: { value: combineLatest, ...p },
+  merge: { value: merge, ...p },
   fromEvent: {
     value: curry(
       (emitter, event, handler) =>
@@ -477,6 +501,9 @@ export const ReactiveExtensions = {
   },
   combineLatest(stream) {
     return combineLatest(this, stream)
+  },
+  merge(stream) {
+    return merge(this, stream)
   },
 }
 
