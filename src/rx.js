@@ -98,17 +98,21 @@ export const throttle = curry((limit, stream) => {
 export const debounce = curry((limit, stream) => {
   const stack = []
   let lastInterval = 0
+  let wantsComplete = false
   return new Observable(observer => {
-    const subs = stream.subscribe(
-      withNext(observer)(value => {
+    const subs = stream.subscribe({
+      next: value => {
         stack.push(value)
         clearTimeout(lastInterval)
         lastInterval = setTimeout(() => {
           observer.next(last(stack))
           stack.length = 0
+          if (wantsComplete) observer.complete()
         }, limit)
-      })
-    )
+      },
+      error: observer.error.bind(observer),
+      complete: () => (wantsComplete = true),
+    })
     return () => subs.unsubscribe()
   })
 })

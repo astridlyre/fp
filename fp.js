@@ -5173,15 +5173,21 @@ var throttle = curry((limit, stream) => {
 var debounce = curry((limit, stream) => {
   var stack = [];
   var lastInterval = 0;
+  var wantsComplete = false;
   return new Observable(observer => {
-    var subs = stream.subscribe(withNext(observer)(value => {
-      stack.push(value);
-      clearTimeout(lastInterval);
-      lastInterval = setTimeout(() => {
-        observer.next(last(stack));
-        stack.length = 0;
-      }, limit);
-    }));
+    var subs = stream.subscribe({
+      next: value => {
+        stack.push(value);
+        clearTimeout(lastInterval);
+        lastInterval = setTimeout(() => {
+          observer.next(last(stack));
+          stack.length = 0;
+          if (wantsComplete) observer.complete();
+        }, limit);
+      },
+      error: observer.error.bind(observer),
+      complete: () => wantsComplete = true
+    });
     return () => subs.unsubscribe();
   });
 });
