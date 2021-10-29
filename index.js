@@ -54,6 +54,7 @@ export {
   invoke,
   isArray,
   isBoolean,
+  isEmpty,
   isFunction,
   isInstanceOf,
   isMap,

@@ -205,14 +205,14 @@ export const filter = curry(
  * @returns {observable}
  */
 export const buffer = curry((count, stream) => {
-  const _internalStorage = []
+  const internalStorage = []
   return new Observable(observer => {
     const subs = stream.subscribe(
       withNext(observer)(value => {
-        _internalStorage.push(value)
-        if (_internalStorage.length >= count) {
-          observer.next(_internalStorage.slice())
-          _internalStorage.length = 0
+        internalStorage.push(value)
+        if (internalStorage.length >= count) {
+          observer.next(internalStorage.slice())
+          internalStorage.length = 0
         }
       })
     )

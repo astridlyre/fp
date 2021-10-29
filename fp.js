@@ -368,6 +368,19 @@ var isSet = s => s instanceof Set;
 
 var isMap = m => m instanceof Map;
 /**
+ * IsEmpty
+ * @param {any} x
+ * @returns {boolean}
+ */
+
+function isEmpty(x) {
+  if (x === '' || x == null || isArray(x) && x.length === 0 || !isClass(x) && (isSet(x) || isMap(x) || isObject$7(x)) && values(x).length === 0 || Number.isNaN(x)) {
+    return true;
+  }
+
+  return false;
+}
+/**
  * IsClass
  * @param {object} {function} obj - Function to test if is class
  * @returns {boolean}
@@ -1271,7 +1284,7 @@ function memoize(fn) {
  * a function to debounce
  */
 
-var debounce = delay => {
+var debounce$1 = delay => {
   var pending = false;
   return function debounce(fn) {
     if (pending) clearTimeout(pending);
@@ -5176,6 +5189,32 @@ var throttle = curry((limit, stream) => {
   });
 });
 /**
+ * Debounce
+ * @param {number} time to aggregate events for
+ * @param {observable} stream - stream to debounce
+ * @returns {observable}
+ */
+
+var debounce = curry((limit, stream) => {
+  var stack = [];
+  var lastInterval = 0;
+  var lastEvent = 0;
+  return new Observable(observer => {
+    var subs = stream.subscribe(withNext(observer)(value => {
+      stack.push(value);
+      lastEvent = Date.now();
+      clearTimeout(lastInterval);
+      lastInterval = setTimeout(() => {
+        if (Date.now() - lastEvent >= limit) {
+          observer.next(last(stack));
+          stack.length = 0;
+        }
+      }, limit - (Date.now() - lastEvent));
+    }));
+    return () => subs.unsubscribe();
+  });
+});
+/**
  * Map
  * @param {function} fn - Mapper function
  * @parma {observable} stream - Stream to map
@@ -5219,14 +5258,14 @@ var filter = curry((predicate, stream) => new Observable(observer => {
  */
 
 var buffer = curry((count, stream) => {
-  var _internalStorage = [];
+  var internalStorage = [];
   return new Observable(observer => {
     var subs = stream.subscribe(withNext(observer)(value => {
-      _internalStorage.push(value);
+      internalStorage.push(value);
 
-      if (_internalStorage.length >= count) {
-        observer.next(_internalStorage.slice());
-        _internalStorage.length = 0;
+      if (internalStorage.length >= count) {
+        observer.next(internalStorage.slice());
+        internalStorage.length = 0;
       }
     }));
     return () => subs.unsubscribe();
@@ -5356,6 +5395,17 @@ var pluck = curry((key, stream) => new Observable(observer => {
   var subs = stream.subscribe(withNext(observer)(obj => observer.next(obj[key])));
   return () => subs.unsubscribe();
 }));
+/**
+ * Interval
+ * @param {number} time of interval
+ * @param {any} optional value to emit
+ * @returns {observable}
+ */
+
+var interval = curry((time, value) => new Observable(observer => {
+  var id = setInterval(() => observer.next(value), time);
+  return () => clearInterval(id);
+}));
 var ReactiveExtensions = {
   filter(predicate) {
     return filter(predicate, this);
@@ -5400,6 +5450,14 @@ var ReactiveExtensions = {
 
   pluck(key) {
     return pluck(key, this);
+  },
+
+  interval(time, value) {
+    return interval(time, value);
+  },
+
+  debounce(limit) {
+    return debounce(limit, this);
   }
 
 };
@@ -5411,6 +5469,7 @@ var rx = /*#__PURE__*/Object.freeze({
   ReadableStream: ReadableStream$1,
   listen$: listen$,
   throttle: throttle,
+  debounce: debounce,
   map: map,
   filter: filter,
   buffer: buffer,
@@ -5421,6 +5480,7 @@ var rx = /*#__PURE__*/Object.freeze({
   _do: _do,
   forEach: forEach,
   pluck: pluck,
+  interval: interval,
   ReactiveExtensions: ReactiveExtensions
 });
 
@@ -5797,4 +5857,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };

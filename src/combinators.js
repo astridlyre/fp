@@ -202,6 +202,24 @@ export const isSet = s => s instanceof Set
 export const isMap = m => m instanceof Map
 
 /**
+ * IsEmpty
+ * @param {any} x
+ * @returns {boolean}
+ */
+export function isEmpty(x) {
+  if (
+    x === '' ||
+    x == null ||
+    (isArray(x) && x.length === 0) ||
+    (!isClass(x) && (isSet(x) || isMap(x) || isObject(x)) && values(x).length === 0) ||
+    Number.isNaN(x)
+  ) {
+    return true
+  }
+  return false
+}
+
+/**
  * IsClass
  * @param {object} {function} obj - Function to test if is class
  * @returns {boolean}

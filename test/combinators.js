@@ -1118,4 +1118,51 @@ describe('Combinators', function () {
       )
     })
   })
+
+  describe('isEmpty', function () {
+    it('should check empty string', function () {
+      const strA = ''
+      const strB = 'hi'
+      assert.equal(combinators.isEmpty(strA), true)
+      assert.equal(combinators.isEmpty(strB), false)
+    })
+    it('should check empty array', function () {
+      const arrA = []
+      const arrB = [1]
+      assert.equal(combinators.isEmpty(arrA), true)
+      assert.equal(combinators.isEmpty(arrB), false)
+    })
+    it('should check empty object', function () {
+      const objA = {}
+      const objB = { hi: 'there' }
+      assert.equal(combinators.isEmpty(objA), true)
+      assert.equal(combinators.isEmpty(objB), false)
+    })
+    it('should check empty set', function () {
+      const setA = new Set()
+      const setB = new Set(['hi'])
+      assert.equal(combinators.isEmpty(setA), true)
+      assert.equal(combinators.isEmpty(setB), false)
+    })
+    it('should check empty map', function () {
+      const mapA = new Map()
+      const mapB = new Map([['hi', 'there']])
+      assert.equal(combinators.isEmpty(mapA), true)
+      assert.equal(combinators.isEmpty(mapB), false)
+    })
+    it('should check null and undefined', function () {
+      assert.equal(combinators.isEmpty(null), true)
+      assert.equal(combinators.isEmpty(undefined), true)
+    })
+    it('should check NaN', function () {
+      assert.equal(combinators.isEmpty(NaN), true)
+      assert.equal(combinators.isEmpty(0), false)
+    })
+    it('should check class', function () {
+      assert.equal(combinators.isEmpty(new (class Dog {})()), false)
+    })
+    it('should combine with not', function () {
+      assert.equal(combinators.compose(combinators.isEmpty, combinators.not)(''), false)
+    })
+  })
 })
