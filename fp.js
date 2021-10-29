@@ -5609,7 +5609,7 @@ var withValidation = curry((validator, fn) => data => {
 
 var handlersKey = Symbol('handlers key');
 var dispatchKey = Symbol('dispatch key');
-var NO_ARGS = 'MULTI:NO_ARGS';
+var DEFAULT_DISPATCH = 'MULTI:DEFAULT_DISPATCH';
 /**
  * multi, create a multimethod function
  * @param {function} dispatch - Optional custom dispatch function
@@ -5635,7 +5635,7 @@ class Multi {
 
   static method(key, handler) {
     if (handler === undefined) {
-      return [NO_ARGS, key];
+      return [DEFAULT_DISPATCH, key];
     }
 
     return [key, handler];
@@ -5655,7 +5655,7 @@ class Multi {
     this[handlersKey] = store;
 
     for (var pair of methods) {
-      if (pair[0] === NO_ARGS) {
+      if (pair[0] === DEFAULT_DISPATCH) {
         this[handlersKey].push(pair);
       } else {
         this[handlersKey] = [pair].concat(this[handlersKey]);
@@ -5664,7 +5664,7 @@ class Multi {
   }
 
   call() {
-    var handler;
+    var handler = last(this[handlersKey])[0] === DEFAULT_DISPATCH ? last(this[handlersKey])[1] : null;
 
     for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
       args[_key3] = arguments[_key3];
@@ -5677,7 +5677,10 @@ class Multi {
       }
     }
 
-    if (!handler) throw new TypeError("No handlers for args (".concat(JSON.stringify(args), ")"));
+    if (!handler) {
+      throw new TypeError("No handlers for args (".concat((JSON.stringify(args), '  '), ")"));
+    }
+
     return isFunction(handler) ? handler(...args) : handler;
   }
 
@@ -5697,7 +5700,7 @@ function defaultDispatch() {
     args[_key4] = arguments[_key4];
   }
 
-  return args.length === 0 ? NO_ARGS : args.length === 1 ? args[0] : args;
+  return args.length === 1 ? args[0] : args;
 }
 
 ReadableStream.from = function from(iterator) {
