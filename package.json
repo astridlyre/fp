@@ -1,6 +1,6 @@
 {
   "name": "@ebflat9/fp",
-  "version": "1.1.46",
+  "version": "1.1.47",
   "description": "my fp utils",
   "main": "index.js",
   "type": "module",

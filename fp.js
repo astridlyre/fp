@@ -5617,62 +5617,17 @@ var DEFAULT_DISPATCH = 'MULTI:DEFAULT_DISPATCH';
  * @returns {function} dispatch function
  */
 
-class Multi {
-  static of() {
-    var dispatch = defaultDispatch;
+function multi() {
+  function multiMethod() {
+    var handler = last(multiMethod[handlersKey])[0] === DEFAULT_DISPATCH ? last(multiMethod[handlersKey])[1] : null;
 
-    for (var _len = arguments.length, methods = new Array(_len), _key = 0; _key < _len; _key++) {
-      methods[_key] = arguments[_key];
+    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
     }
 
-    if (isFunction(methods[0])) {
-      dispatch = methods[0];
-      methods.splice(0, 1);
-    }
-
-    return new Multi(dispatch, methods);
-  }
-
-  static method(key, handler) {
-    if (handler === undefined) {
-      return [DEFAULT_DISPATCH, key];
-    }
-
-    return [key, handler];
-  }
-
-  static extend(MM) {
-    for (var _len2 = arguments.length, methods = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-      methods[_key2 - 1] = arguments[_key2];
-    }
-
-    return new Multi(MM[dispatchKey], methods, MM[handlersKey].slice());
-  }
-
-  constructor(dispatch, methods) {
-    var store = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-    this[dispatchKey] = dispatch;
-    this[handlersKey] = store;
-
-    for (var pair of methods) {
-      if (pair[0] === DEFAULT_DISPATCH) {
-        this[handlersKey].push(pair);
-      } else {
-        this[handlersKey] = [pair].concat(this[handlersKey]);
-      }
-    }
-  }
-
-  call() {
-    var handler = last(this[handlersKey])[0] === DEFAULT_DISPATCH ? last(this[handlersKey])[1] : null;
-
-    for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-      args[_key3] = arguments[_key3];
-    }
-
-    for (var [key, method] of this[handlersKey]) {
-      if (isFunction(key) && key(...args) || deepEqual(this[dispatchKey](...args), key)) {
-        handler = method;
+    for (var [key, _method] of multiMethod[handlersKey]) {
+      if (isFunction(key) && key(...args) || deepEqual(multiMethod[dispatchKey](...args), key)) {
+        handler = _method;
         break;
       }
     }
@@ -5684,15 +5639,54 @@ class Multi {
     return isFunction(handler) ? handler(...args) : handler;
   }
 
-  map(fn) {
-    return new Multi(this[dispatchKey], this[handlersKey].map(_ref => {
+  var dispatch = defaultDispatch;
+
+  for (var _len = arguments.length, methods = new Array(_len), _key = 0; _key < _len; _key++) {
+    methods[_key] = arguments[_key];
+  }
+
+  if (isFunction(methods[0])) {
+    dispatch = methods[0];
+    methods.splice(0, 1);
+  }
+
+  multiMethod[dispatchKey] = dispatch;
+  multiMethod[handlersKey] = methods;
+
+  for (var pair of methods) {
+    if (pair[0] === DEFAULT_DISPATCH) {
+      multiMethod[handlersKey].push(pair);
+    } else {
+      multiMethod[handlersKey] = [pair].concat(multiMethod[handlersKey]);
+    }
+  }
+
+  multiMethod.map = function map(fn) {
+    return multi(multiMethod[dispatchKey], ...multiMethod[handlersKey].map(_ref => {
       var [key, handler] = _ref;
       return [key, function () {
         return fn(handler(...arguments));
       }];
     }));
+  };
+
+  return multiMethod;
+}
+
+multi.extend = function extend(multiMethod) {
+  for (var _len3 = arguments.length, methods = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+    methods[_key3 - 1] = arguments[_key3];
   }
 
+  return multi(multiMethod[dispatchKey], ...methods.concat(multiMethod[handlersKey]));
+};
+
+function method(key, handler) {
+  if (handler === undefined) {
+    return [DEFAULT_DISPATCH, key];
+  }
+
+  return [key, handler];
 }
 
 function defaultDispatch() {
@@ -5770,4 +5764,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Multi, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
