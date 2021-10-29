@@ -134,11 +134,7 @@ describe('Observable', function () {
       streamA.concat(streamB).subscribe({
         next: value => values.push(value),
         complete: () => {
-          assert.deepEqual(values, [
-            [1, 'a'],
-            [2, 'b'],
-            [3, 'c'],
-          ])
+          assert.deepEqual(values, [1, 'a', 2, 'b', 3, 'c'])
           done()
         },
       })
@@ -151,7 +147,7 @@ describe('Observable', function () {
       streamA.combine(streamB).subscribe({
         next: value => values.push(value),
         complete: () => {
-          assert.deepEqual(values, [[3, 'a']])
+          assert.deepEqual(values, [3, 'a'])
           done()
         },
       })

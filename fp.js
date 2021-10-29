@@ -5384,42 +5384,37 @@ var interval = (time, value) => {
  * @returns {observable} Combined output of stream a and b, one to one
  */
 
-var concat = curry((streamA, streamB) => {
+var concat = function concat() {
+  for (var _len = arguments.length, streams = new Array(_len), _key = 0; _key < _len; _key++) {
+    streams[_key] = arguments[_key];
+  }
+
   var done = 0;
-  var store = {
-    a: [],
-    b: []
-  };
+  var store = Object.fromEntries(streams.map((_, i) => [i, []]));
+  var buffers = values(store);
 
   function pushResults(event, observer) {
     store[event.stream].unshift(event.value);
 
-    if (store.a.length && store.b.length) {
-      var next = [store.a.pop(), store.b.pop()];
-      observer.next(next);
+    if (buffers.every(buffer => buffer.length > 0)) {
+      buffers.forEach(buffer => {
+        observer.next(buffer.pop());
+      });
     }
   }
 
   return new Observable(observer => {
-    var streamASub = streamA.subscribe({
+    var subscriptions = streams.map((stream, i) => stream.subscribe({
       next: value => pushResults({
-        stream: 'a',
+        stream: i,
         value
       }, observer),
       error: observer.error.bind(observer),
-      complete: () => ++done === 2 && observer.complete()
-    });
-    var streamBSub = streamB.subscribe({
-      next: value => pushResults({
-        stream: 'b',
-        value
-      }, observer),
-      error: observer.error.bind(observer),
-      complete: () => ++done === 2 && observer.complete()
-    });
-    return () => (streamASub.unsubscribe(), streamBSub.unsubscribe());
+      complete: () => ++done === streams.length && observer.complete()
+    }));
+    return () => subscriptions.forEach(subs => subs.unsubscribe());
   });
-});
+};
 /**
  * combine, combine the latest output of each stream
  * @param {observable} Stream a
@@ -5427,44 +5422,38 @@ var concat = curry((streamA, streamB) => {
  * @returns {observable} Latest combined output of stream a and b
  */
 
-var combine = curry((streamA, streamB) => {
+var combine = function combine() {
+  for (var _len2 = arguments.length, streams = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    streams[_key2] = arguments[_key2];
+  }
+
   var done = 0;
-  var store = {
-    a: [],
-    b: []
-  };
+  var store = Object.fromEntries(streams.map((_, i) => [i, []]));
+  var buffers = values(store);
 
   function pushResults(event, observer) {
     store[event.stream].push(event.value);
 
-    if (store.a.length && store.b.length) {
-      var next = [store.a.pop(), store.b.pop()];
-      observer.next(next);
-      store.a.length = 0;
-      store.b.length = 0;
+    if (buffers.every(buffer => buffer.length)) {
+      buffers.forEach(buffer => {
+        observer.next(buffer.pop());
+        buffer.length = 0;
+      });
     }
   }
 
   return new Observable(observer => {
-    var streamASub = streamA.subscribe({
+    var subscriptions = streams.map((stream, i) => stream.subscribe({
       next: value => pushResults({
-        stream: 'a',
+        stream: i,
         value
       }, observer),
       error: observer.error.bind(observer),
-      complete: () => ++done === 2 && observer.complete()
-    });
-    var streamBSub = streamB.subscribe({
-      next: value => pushResults({
-        stream: 'b',
-        value
-      }, observer),
-      error: observer.error.bind(observer),
-      complete: () => ++done === 2 && observer.complete()
-    });
-    return () => (streamASub.unsubscribe(), streamBSub.unsubscribe());
+      complete: () => ++done === streams.length && observer.complete()
+    }));
+    return () => subscriptions.forEach(subs => subs.unsubscribe());
   });
-});
+};
 /**
  * Merge, interleave two streams
  * @param {observable} Stream a
@@ -5472,22 +5461,21 @@ var combine = curry((streamA, streamB) => {
  * @returns {observable} Interleaving stream of a and b
  */
 
-var merge = curry((streamA, streamB) => {
+var merge = function merge() {
+  for (var _len3 = arguments.length, streams = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+    streams[_key3] = arguments[_key3];
+  }
+
   var done = 0;
   return new Observable(observer => {
-    var streamASub = streamA.subscribe({
+    var subscriptions = streams.map(stream => stream.subscribe({
       next: value => observer.next(value),
       error: observer.error.bind(observer),
-      complete: () => ++done === 2 && observer.complete()
-    });
-    var streamBSub = streamB.subscribe({
-      next: value => observer.next(value),
-      error: observer.error.bind(observer),
-      complete: () => ++done === 2 && observer.complete()
-    });
-    return () => (streamASub.unsubscribe(), streamBSub.unsubscribe());
+      complete: () => ++done === streams.length && observer.complete()
+    }));
+    return () => subscriptions.forEach(subs => subs.unsubscribe());
   });
-});
+};
 var p = {
   enumerable: false,
   writable: false,

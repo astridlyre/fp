@@ -1,4 +1,4 @@
-import { curry, last } from './combinators.js'
+import { curry, last, values } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable, ReadableStream } = globalThis
 
@@ -337,33 +337,31 @@ export const interval = (time, value) => {
  * @param {observable} Stream b
  * @returns {observable} Combined output of stream a and b, one to one
  */
-export const concat = curry((streamA, streamB) => {
+export const concat = (...streams) => {
   let done = 0
-  const store = {
-    a: [],
-    b: [],
-  }
+  const store = Object.fromEntries(streams.map((_, i) => [i, []]))
+  const buffers = values(store)
+
   function pushResults(event, observer) {
     store[event.stream].unshift(event.value)
-    if (store.a.length && store.b.length) {
-      const next = [store.a.pop(), store.b.pop()]
-      observer.next(next)
+    if (buffers.every(buffer => buffer.length > 0)) {
+      buffers.forEach(buffer => {
+        observer.next(buffer.pop())
+      })
     }
   }
+
   return new Observable(observer => {
-    const streamASub = streamA.subscribe({
-      next: value => pushResults({ stream: 'a', value }, observer),
-      error: observer.error.bind(observer),
-      complete: () => ++done === 2 && observer.complete(),
-    })
-    const streamBSub = streamB.subscribe({
-      next: value => pushResults({ stream: 'b', value }, observer),
-      error: observer.error.bind(observer),
-      complete: () => ++done === 2 && observer.complete(),
-    })
-    return () => (streamASub.unsubscribe(), streamBSub.unsubscribe())
+    const subscriptions = streams.map((stream, i) =>
+      stream.subscribe({
+        next: value => pushResults({ stream: i, value }, observer),
+        error: observer.error.bind(observer),
+        complete: () => ++done === streams.length && observer.complete(),
+      })
+    )
+    return () => subscriptions.forEach(subs => subs.unsubscribe())
   })
-})
+}
 
 /**
  * combine, combine the latest output of each stream
@@ -371,35 +369,32 @@ export const concat = curry((streamA, streamB) => {
  * @param {observable} Stream b
  * @returns {observable} Latest combined output of stream a and b
  */
-export const combine = curry((streamA, streamB) => {
+export const combine = (...streams) => {
   let done = 0
-  const store = {
-    a: [],
-    b: [],
-  }
+  const store = Object.fromEntries(streams.map((_, i) => [i, []]))
+  const buffers = values(store)
+
   function pushResults(event, observer) {
     store[event.stream].push(event.value)
-    if (store.a.length && store.b.length) {
-      const next = [store.a.pop(), store.b.pop()]
-      observer.next(next)
-      store.a.length = 0
-      store.b.length = 0
+    if (buffers.every(buffer => buffer.length)) {
+      buffers.forEach(buffer => {
+        observer.next(buffer.pop())
+        buffer.length = 0
+      })
     }
   }
+
   return new Observable(observer => {
-    const streamASub = streamA.subscribe({
-      next: value => pushResults({ stream: 'a', value }, observer),
-      error: observer.error.bind(observer),
-      complete: () => ++done === 2 && observer.complete(),
-    })
-    const streamBSub = streamB.subscribe({
-      next: value => pushResults({ stream: 'b', value }, observer),
-      error: observer.error.bind(observer),
-      complete: () => ++done === 2 && observer.complete(),
-    })
-    return () => (streamASub.unsubscribe(), streamBSub.unsubscribe())
+    const subscriptions = streams.map((stream, i) =>
+      stream.subscribe({
+        next: value => pushResults({ stream: i, value }, observer),
+        error: observer.error.bind(observer),
+        complete: () => ++done === streams.length && observer.complete(),
+      })
+    )
+    return () => subscriptions.forEach(subs => subs.unsubscribe())
   })
-})
+}
 
 /**
  * Merge, interleave two streams
@@ -407,22 +402,19 @@ export const combine = curry((streamA, streamB) => {
  * @param {observable} Stream b
  * @returns {observable} Interleaving stream of a and b
  */
-export const merge = curry((streamA, streamB) => {
+export const merge = (...streams) => {
   let done = 0
   return new Observable(observer => {
-    const streamASub = streamA.subscribe({
-      next: value => observer.next(value),
-      error: observer.error.bind(observer),
-      complete: () => ++done === 2 && observer.complete(),
-    })
-    const streamBSub = streamB.subscribe({
-      next: value => observer.next(value),
-      error: observer.error.bind(observer),
-      complete: () => ++done === 2 && observer.complete(),
-    })
-    return () => (streamASub.unsubscribe(), streamBSub.unsubscribe())
+    const subscriptions = streams.map(stream =>
+      stream.subscribe({
+        next: value => observer.next(value),
+        error: observer.error.bind(observer),
+        complete: () => ++done === streams.length && observer.complete(),
+      })
+    )
+    return () => subscriptions.forEach(subs => subs.unsubscribe())
   })
-})
+}
 
 const p = {
   enumerable: false,
