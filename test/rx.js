@@ -230,5 +230,20 @@ describe('Observable', function () {
           },
         })
     })
+
+    it('should mergeMap another mergeMap', function (done) {
+      const values = []
+      Observable.interval(5)
+        .take(1)
+        .mergeMap(() => Observable.of('hi', 'hello'))
+        .mergeMap(value => Observable.of(value + 'there'))
+        .subscribe({
+          next: value => values.push(value),
+          complete: () => {
+            assert.deepEqual(values, ['hithere', 'hellothere'])
+            done()
+          },
+        })
+    })
   })
 })

@@ -558,7 +558,7 @@ var props = curry((names, a) => names.map(n => prop$1(n, a)));
  * @returns {object} A new object with only properties names
  */
 
-var pick = curry((names, a) => names.reduce((result, key) => key in a ? (result[key] = a[key], result) : result, {}));
+var pick$1 = curry((names, a) => names.reduce((result, key) => key in a ? (result[key] = a[key], result) : result, {}));
 /**
  * Invoke, returns a function that takes a context to call function fn with args in
  * @param {function} fn - Function to invoke in new context
@@ -907,7 +907,7 @@ var reduceRight = curry((reducer, seed, M) => M.reduceRight(reducer, seed));
  * @returns {array}
  */
 
-var pluck$1 = compose(map$1, prop$1);
+var pluck = compose(map$1, prop$1);
 /**
  * Entries, eagerly get entries of an object or iterable
  * @param {iterable} {object} Object that implements entries() or is iterable
@@ -1155,11 +1155,11 @@ var zipMap = function zipMap(f) {
     iters[_key21 - 1] = arguments[_key21];
   }
 
-  var min = Math.min(...pluck$1('length')(iters));
+  var min = Math.min(...pluck('length')(iters));
   var result = [];
 
   for (var i = 0; i < min; i++) {
-    result.push(f(...pluck$1(i)(iters)));
+    result.push(f(...pluck(i)(iters)));
   }
 
   return result;
@@ -5362,14 +5362,14 @@ var forEach = curry((fn, stream) => {
   };
 });
 /**
- * Pluck, pick keys from objects of stream
+ * Pick, pick keys from objects of stream
  * @param {string} key
  * @param {observable} stream
  * @returns {observable}
  */
 
-var pluck = curry((key, stream) => new Observable(observer => {
-  var subs = stream.subscribe(withNext(observer)(obj => observer.next(obj[key])));
+var pick = curry((keys, stream) => new Observable(observer => {
+  var subs = stream.subscribe(withNext(observer)(obj => observer.next(deepPick(keys, obj))));
   return () => subs.unsubscribe();
 }));
 /**
@@ -5573,8 +5573,8 @@ var ReactiveExtensions = {
     return _do(fn, this);
   },
 
-  pluck(key) {
-    return pluck(key, this);
+  pick(key) {
+    return pick(key, this);
   },
 
   debounce(limit) {
@@ -5616,7 +5616,7 @@ var rx = /*#__PURE__*/Object.freeze({
   mapTo: mapTo,
   _do: _do,
   forEach: forEach,
-  pluck: pluck,
+  pick: pick,
   interval: interval,
   combine: combine,
   merge: merge,
@@ -5966,4 +5966,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge$1 as merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick, pipe, pipeAsync, pluck$1 as pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge$1 as merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick$1 as pick, pipe, pipeAsync, pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };

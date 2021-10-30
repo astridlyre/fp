@@ -1,4 +1,4 @@
-import { curry, last, values } from './combinators.js'
+import { curry, last, values, deepPick } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable, ReadableStream } = globalThis
 
@@ -306,15 +306,17 @@ export const forEach = curry((fn, stream) => {
 })
 
 /**
- * Pluck, pick keys from objects of stream
+ * Pick, pick keys from objects of stream
  * @param {string} key
  * @param {observable} stream
  * @returns {observable}
  */
-export const pluck = curry(
-  (key, stream) =>
+export const pick = curry(
+  (keys, stream) =>
     new Observable(observer => {
-      const subs = stream.subscribe(withNext(observer)(obj => observer.next(obj[key])))
+      const subs = stream.subscribe(
+        withNext(observer)(obj => observer.next(deepPick(keys, obj)))
+      )
       return () => subs.unsubscribe()
     })
 )
@@ -504,8 +506,8 @@ export const ReactiveExtensions = {
   do(fn) {
     return _do(fn, this)
   },
-  pluck(key) {
-    return pluck(key, this)
+  pick(key) {
+    return pick(key, this)
   },
   debounce(limit) {
     return debounce(limit, this)
