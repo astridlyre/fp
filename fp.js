@@ -5382,48 +5382,11 @@ var pluck = curry((key, stream) => new Observable(observer => {
 var interval = (time, value) => {
   return new Observable(observer => {
     var id = setInterval(() => observer.next(value), time);
+    observer.next(value);
     return () => {
-      clearInterval(id);
       observer.complete();
+      clearInterval(id);
     };
-  });
-};
-/**
- * Combine, merge two streams one-to-one, preserving order of each stream
- * @param {observable} Stream a
- * @param {observable} Stream b
- * @returns {observable} Combined output of stream a and b, one to one
- */
-
-var concat = function concat() {
-  for (var _len = arguments.length, streams = new Array(_len), _key = 0; _key < _len; _key++) {
-    streams[_key] = arguments[_key];
-  }
-
-  var done = 0;
-  var store = Object.fromEntries(streams.map((_, i) => [i, []]));
-  var buffers = values(store);
-
-  function pushResults(event, observer) {
-    store[event.stream].unshift(event.value);
-
-    if (buffers.every(buffer => buffer.length > 0)) {
-      buffers.forEach(buffer => {
-        observer.next(buffer.pop());
-      });
-    }
-  }
-
-  return new Observable(observer => {
-    var subscriptions = streams.map((stream, i) => stream.subscribe({
-      next: value => pushResults({
-        stream: i,
-        value
-      }, observer),
-      error: observer.error.bind(observer),
-      complete: () => ++done === streams.length && observer.complete()
-    }));
-    return () => subscriptions.forEach(subs => subs.unsubscribe());
   });
 };
 /**
@@ -5434,8 +5397,8 @@ var concat = function concat() {
  */
 
 var combine = function combine() {
-  for (var _len2 = arguments.length, streams = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    streams[_key2] = arguments[_key2];
+  for (var _len = arguments.length, streams = new Array(_len), _key = 0; _key < _len; _key++) {
+    streams[_key] = arguments[_key];
   }
 
   var done = 0;
@@ -5473,8 +5436,8 @@ var combine = function combine() {
  */
 
 var merge = function merge() {
-  for (var _len3 = arguments.length, streams = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-    streams[_key3] = arguments[_key3];
+  for (var _len2 = arguments.length, streams = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    streams[_key2] = arguments[_key2];
   }
 
   var done = 0;
@@ -5494,20 +5457,24 @@ var merge = function merge() {
  */
 
 var _switch = stream => new Observable(observer => {
-  var sub = stream.subscribe({
-    next: nextObs => once(queueMicrotask(() => innerSwitch(nextObs)))
+  var done = false;
+  var prevSubs = [];
+  var subs = stream.subscribe({
+    next: nextStream => queueMicrotask(() => {
+      if (!done) {
+        prevSubs.push(() => subs.unsubscribe());
+        subs = nextStream.subscribe({
+          next: value => observer.next(value),
+          complete: () => observer.complete()
+        });
+      }
+    })
   });
-
-  function innerSwitch(nextObs) {
-    sub.unsubscribe();
-    sub = nextObs.subscribe({
-      next: value => observer.next(value),
-      error: observer.error.bind(observer),
-      complete: () => observer.complete()
-    });
-  }
-
-  return () => sub.unsubscribe();
+  return () => {
+    done = true;
+    prevSubs.forEach(f => f());
+    subs.unsubscribe();
+  };
 });
 /**
  * MergeMap
@@ -5517,7 +5484,20 @@ var _switch = stream => new Observable(observer => {
  */
 
 
-var mergeMap = curry((fn, stream) => map(fn, stream).switch());
+var mergeMap = curry((fn, stream) => new Observable(observer => {
+  var initialSub = stream.subscribe({
+    next: value => handleNext(fn(value)),
+    complete: () => observer.complete()
+  });
+
+  function handleNext(nextObs) {
+    nextObs.subscribe({
+      next: value => observer.next(value)
+    });
+  }
+
+  return () => initialSub.unsubscribe();
+}));
 var p = {
   enumerable: false,
   writable: false,
@@ -5529,9 +5509,6 @@ Object.defineProperties(Observable, {
   }, p),
   interval: _objectSpread2({
     value: interval
-  }, p),
-  concat: _objectSpread2({
-    value: concat
   }, p),
   combine: _objectSpread2({
     value: combine
@@ -5604,10 +5581,6 @@ var ReactiveExtensions = {
     return debounce(limit, this);
   },
 
-  concat(stream) {
-    return concat(this, stream);
-  },
-
   combine(stream) {
     return combine(this, stream);
   },
@@ -5645,7 +5618,6 @@ var rx = /*#__PURE__*/Object.freeze({
   forEach: forEach,
   pluck: pluck,
   interval: interval,
-  concat: concat,
   combine: combine,
   merge: merge,
   mergeMap: mergeMap,

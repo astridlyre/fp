@@ -1,4 +1,4 @@
-import { curry, last, values, once, compose } from './combinators.js'
+import { curry, last, values } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable, ReadableStream } = globalThis
 
@@ -328,42 +328,11 @@ export const pluck = curry(
 export const interval = (time, value) => {
   return new Observable(observer => {
     const id = setInterval(() => observer.next(value), time)
+    observer.next(value)
     return () => {
-      clearInterval(id)
       observer.complete()
+      clearInterval(id)
     }
-  })
-}
-
-/**
- * Combine, merge two streams one-to-one, preserving order of each stream
- * @param {observable} Stream a
- * @param {observable} Stream b
- * @returns {observable} Combined output of stream a and b, one to one
- */
-export const concat = (...streams) => {
-  let done = 0
-  const store = Object.fromEntries(streams.map((_, i) => [i, []]))
-  const buffers = values(store)
-
-  function pushResults(event, observer) {
-    store[event.stream].unshift(event.value)
-    if (buffers.every(buffer => buffer.length > 0)) {
-      buffers.forEach(buffer => {
-        observer.next(buffer.pop())
-      })
-    }
-  }
-
-  return new Observable(observer => {
-    const subscriptions = streams.map((stream, i) =>
-      stream.subscribe({
-        next: value => pushResults({ stream: i, value }, observer),
-        error: observer.error.bind(observer),
-        complete: () => ++done === streams.length && observer.complete(),
-      })
-    )
-    return () => subscriptions.forEach(subs => subs.unsubscribe())
   })
 }
 
@@ -427,18 +396,25 @@ export const merge = (...streams) => {
  */
 const _switch = stream =>
   new Observable(observer => {
-    let sub = stream.subscribe({
-      next: nextObs => once(queueMicrotask(() => innerSwitch(nextObs))),
+    let done = false
+    let prevSubs = []
+    let subs = stream.subscribe({
+      next: nextStream =>
+        queueMicrotask(() => {
+          if (!done) {
+            prevSubs.push(() => subs.unsubscribe())
+            subs = nextStream.subscribe({
+              next: value => observer.next(value),
+              complete: () => observer.complete(),
+            })
+          }
+        }),
     })
-    function innerSwitch(nextObs) {
-      sub.unsubscribe()
-      sub = nextObs.subscribe({
-        next: value => observer.next(value),
-        error: observer.error.bind(observer),
-        complete: () => observer.complete(),
-      })
+    return () => {
+      done = true
+      prevSubs.forEach(f => f())
+      subs.unsubscribe()
     }
-    return () => sub.unsubscribe()
   })
 
 /**
@@ -447,7 +423,21 @@ const _switch = stream =>
  * @param {observable} stream
  * @returns {observable}
  */
-export const mergeMap = curry((fn, stream) => map(fn, stream).switch())
+export const mergeMap = curry(
+  (fn, stream) =>
+    new Observable(observer => {
+      const initialSub = stream.subscribe({
+        next: value => handleNext(fn(value)),
+        complete: () => observer.complete(),
+      })
+      function handleNext(nextObs) {
+        nextObs.subscribe({
+          next: value => observer.next(value),
+        })
+      }
+      return () => initialSub.unsubscribe()
+    })
+)
 
 const p = {
   enumerable: false,
@@ -458,7 +448,6 @@ const p = {
 Object.defineProperties(Observable, {
   listen: { value: listen$, ...p },
   interval: { value: interval, ...p },
-  concat: { value: concat, ...p },
   combine: { value: combine, ...p },
   merge: { value: merge, ...p },
   fromEvent: {
@@ -520,9 +509,6 @@ export const ReactiveExtensions = {
   },
   debounce(limit) {
     return debounce(limit, this)
-  },
-  concat(stream) {
-    return concat(this, stream)
   },
   combine(stream) {
     return combine(this, stream)

@@ -127,19 +127,6 @@ describe('Observable', function () {
         })
     })
 
-    it('should concat streams', function (done) {
-      const values = []
-      const streamA = Observable.from([1, 2, 3])
-      const streamB = Observable.from(['a', 'b', 'c'])
-      streamA.concat(streamB).subscribe({
-        next: value => values.push(value),
-        complete: () => {
-          assert.deepEqual(values, [1, 'a', 2, 'b', 3, 'c'])
-          done()
-        },
-      })
-    })
-
     it('should combine latest streams', function (done) {
       const values = []
       const streamA = Observable.from([1, 2, 3])
@@ -156,14 +143,15 @@ describe('Observable', function () {
     it('should output an interval', function (done) {
       const values = []
       let num = 1
-      const sub = Observable.interval(10).subscribe({
-        next: () => values.push(num++),
-      })
-      setTimeout(() => {
-        sub.unsubscribe()
-        assert.deepEqual(values, [1, 2, 3, 4])
-        done()
-      }, 50)
+      Observable.interval(10)
+        .take(5)
+        .subscribe({
+          next: () => values.push(num++),
+          complete: () => {
+            assert.deepEqual(values, [1, 2, 3, 4, 5])
+            done()
+          },
+        })
     })
 
     it('should merge streams', function (done) {
@@ -222,7 +210,22 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, [2])
+            assert.deepEqual(values, [2, 4, 6])
+            done()
+          },
+        })
+    })
+
+    it('should mergeMap async', function (done) {
+      let n = 1
+      const values = []
+      const streamA = Observable.interval(5).take(4)
+      streamA
+        .mergeMap(() => Observable.from(['a', n++]))
+        .subscribe({
+          next: value => values.push(value),
+          complete: () => {
+            assert.deepEqual(values, ['a', 1, 'a', 2, 'a', 3, 'a', 4])
             done()
           },
         })
