@@ -482,5 +482,21 @@ describe('Observable', function () {
           },
         })
     })
+
+    it('should perform cleanup function with finally', function (done) {
+      const values = []
+      new Observable(observer => {
+        observer.next('hi')
+        throw new Error('test')
+      })
+        .finally(() => values.push('there'))
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            assert.deepEqual(values, ['hi', 'there'])
+            done()
+          },
+        })
+    })
   })
 })

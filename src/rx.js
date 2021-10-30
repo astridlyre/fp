@@ -8,6 +8,7 @@ import { combine } from './rx/combine.js'
 import { debounce } from './rx/debounce.js'
 import { distinct } from './rx/distinct.js'
 import { effect } from './rx/effect.js'
+import { finallyEffect } from './rx/finally.js'
 import { filter } from './rx/filter.js'
 import { forEach } from './rx/forEach.js'
 import { interval } from './rx/interval.js'
@@ -174,6 +175,9 @@ export const ReactiveExtensions = {
   retry(config) {
     return retry(config, this)
   },
+  finally(fn) {
+    return finallyEffect(fn, this)
+  },
 }
 Object.assign(Observable.prototype, ReactiveExtensions)
 
@@ -186,6 +190,7 @@ export {
   distinct,
   effect,
   filter,
+  finallyEffect,
   forEach,
   interval,
   listen,
