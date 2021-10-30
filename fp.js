@@ -5687,6 +5687,18 @@ var zip = function zip() {
     streams[_key] = arguments[_key];
   }
 
+  var zipper = function zipper() {
+    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    return args;
+  };
+
+  if (isFunction(head(streams))) {
+    zipper = streams.shift();
+  }
+
   var done = 0;
   var store = Object.fromEntries(streams.map((_, i) => [i, []]));
   var buffers = values(store);
@@ -5695,7 +5707,11 @@ var zip = function zip() {
     buffers[event.n].unshift(event.value);
 
     if (buffers.every(buffer => buffer.length > 0)) {
-      observer.next(buffers.map(buffer => buffer.pop()));
+      try {
+        observer.next(zipper(...buffers.map(buffer => buffer.pop())));
+      } catch (err) {
+        observer.error(err);
+      }
     }
   }
 
@@ -5875,12 +5891,16 @@ var ReactiveExtensions = {
     return until(fn, this);
   },
 
-  zip() {
-    for (var _len2 = arguments.length, streams = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      streams[_key2] = arguments[_key2];
+  zip(zipper) {
+    for (var _len2 = arguments.length, streams = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+      streams[_key2 - 1] = arguments[_key2];
     }
 
-    return zip(this, ...streams);
+    if (!isFunction(zipper)) {
+      return zip(this, zipper, ...streams);
+    }
+
+    return zip(zipper, this, ...streams);
   },
 
   retry(config) {

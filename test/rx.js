@@ -425,6 +425,22 @@ describe('Observable', function () {
         })
     })
 
+    it('should allow custom zipper function', function (done) {
+      const values = []
+      Observable.from([1, 2, 3])
+        .zip(
+          (...args) => args.reduce((acc, cv) => acc + cv, 0),
+          Observable.from([2, 3, 4])
+        )
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            assert.deepEqual(values, [3, 5, 7])
+            done()
+          },
+        })
+    })
+
     it('should retry', function (done) {
       const values = []
       let n = 0

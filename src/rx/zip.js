@@ -1,4 +1,4 @@
-import { values } from '../combinators.js'
+import { isFunction, head, values } from '../combinators.js'
 
 /**
  * Zip
@@ -6,6 +6,11 @@ import { values } from '../combinators.js'
  * @returns {observable} One-to-one zipped streams
  */
 export const zip = (...streams) => {
+  let zipper = (...args) => args
+  if (isFunction(head(streams))) {
+    zipper = streams.shift()
+  }
+
   let done = 0
   const store = Object.fromEntries(streams.map((_, i) => [i, []]))
   const buffers = values(store)
@@ -13,7 +18,11 @@ export const zip = (...streams) => {
   function pushValue(event, observer) {
     buffers[event.n].unshift(event.value)
     if (buffers.every(buffer => buffer.length > 0)) {
-      observer.next(buffers.map(buffer => buffer.pop()))
+      try {
+        observer.next(zipper(...buffers.map(buffer => buffer.pop())))
+      } catch (err) {
+        observer.error(err)
+      }
     }
   }
 

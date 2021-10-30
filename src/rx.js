@@ -1,4 +1,4 @@
-import { curry, entries } from './combinators.js'
+import { curry, entries, isFunction } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable, ReadableStream } = globalThis
 import { buffer } from './rx/buffer.js'
@@ -165,8 +165,11 @@ export const ReactiveExtensions = {
   until(fn) {
     return until(fn, this)
   },
-  zip(...streams) {
-    return zip(this, ...streams)
+  zip(zipper, ...streams) {
+    if (!isFunction(zipper)) {
+      return zip(this, zipper, ...streams)
+    }
+    return zip(zipper, this, ...streams)
   },
   retry(config) {
     return retry(config, this)
