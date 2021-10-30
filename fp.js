@@ -2936,6 +2936,31 @@ var LazyCollection = {
         };
       }
     }, LazyCollection);
+  },
+
+  drop(numberToDrop) {
+    return Object.assign({
+      [Symbol.iterator]: () => {
+        var iterator = this[Symbol.iterator]();
+
+        while (numberToDrop-- > 0) {
+          iterator.next();
+        }
+
+        return {
+          next: () => {
+            var {
+              done,
+              value
+            } = iterator.next();
+            return {
+              done,
+              value: done ? undefined : value
+            };
+          }
+        };
+      }
+    });
   }
 
 };
@@ -5115,12 +5140,12 @@ var buffer = curry((count, stream) => {
 var catchError = curry((handler, stream) => {
   var sub = [];
   return new Observable(observer => {
-    retry(handler, stream, sub, observer);
+    retry$1(handler, stream, sub, observer);
     return () => sub.pop().unsubscribe();
   });
 });
 
-function retry(handler, stream, sub, observer) {
+function retry$1(handler, stream, sub, observer) {
   stream.subscribe({
     next: value => observer.next(value),
     error: err => {
@@ -5128,7 +5153,7 @@ function retry(handler, stream, sub, observer) {
         var capture = handler(err, stream);
 
         if (capture === stream) {
-          return retry(handler, stream, sub, observer);
+          return retry$1(handler, stream, sub, observer);
         }
 
         observer.next(capture);
@@ -5492,6 +5517,49 @@ var reduce = curry((reducer, initialValue, stream) => {
   });
 });
 
+// linear time increase.
+
+var defaultConfig = {
+  method: 'expo',
+  delay: 200,
+  retries: 3
+};
+/**
+ * Retry
+ * @param {object} {number}
+ * Configuration object { method: 'linear' | 'expo', retries: n }
+ * @param {observable} Stream to retry incase of errors
+ * @returns {observable}
+ */
+
+var retry = curry((config, stream) => {
+  if (isNumber(config)) {
+    config = Object.assign(defaultConfig, {
+      retries: config
+    });
+  } else {
+    config = Object.assign(defaultConfig, config);
+  }
+
+  var sub = [];
+  return new Observable(observer => {
+    retryInner(stream, observer, sub, config, 1);
+    return () => sub.map(s => s.unsubscribe());
+  });
+});
+
+function retryInner(stream, observer, sub, config, i) {
+  return sub.push(stream.subscribe({
+    next: value => observer.next(value),
+    error: () => {
+      if (i <= config.retries) {
+        return setTimeout(() => retryInner(stream, observer, sub, config, i + 1), retryInner(stream, observer, sub, config, i + 1), config.method === 'expo' ? Math.pow(config.delay, i) : config.delay * i);
+      }
+    },
+    complete: () => observer.complete()
+  }));
+}
+
 /**
  * Skip
  * @param {number} count - Number of items to skip
@@ -5699,11 +5767,17 @@ Object.defineProperties(Observable$1, {
   }, p),
   fromEvent: _objectSpread2({
     value: curry((emitter, event, handler) => new Observable$1(observer => {
-      emitter.on(event, function () {
+      var group = new Map([[event, function () {
         return observer.next(handler(...arguments));
+      }], ['error', observer.error.bind(observer)], ['end', observer.complete.bind(observer)]]);
+      entries(group).forEach(_ref => {
+        var [event, handler] = _ref;
+        return emitter.on(event, handler);
       });
-      emitter.on('end', observer.complete.bind(observer));
-      emitter.on('error', observer.error.bind(observer));
+      return () => entries(group).forEach(_ref2 => {
+        var [event, handler] = _ref2;
+        return emitter.removeListener(event, handler);
+      });
     }))
   }, p),
   fromPromise: _objectSpread2({
@@ -5805,6 +5879,10 @@ var ReactiveExtensions = {
     }
 
     return zip(this, ...streams);
+  },
+
+  retry(config) {
+    return retry(config, this);
   }
 
 };
@@ -5832,6 +5910,7 @@ var rx = /*#__PURE__*/Object.freeze({
   flatMap: flatMap,
   pick: pick,
   reduce: reduce,
+  retry: retry,
   skip: skip,
   switchStream: switchStream,
   take: take,

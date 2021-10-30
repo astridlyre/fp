@@ -96,6 +96,26 @@ export function* take(numberToTake, iterable) {
 }
 
 /**
+ * Drop
+ * @param {number} numberToDrop
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function that yields elements once
+ * numberToDrop elements have been dropped
+ */
+export function* drop(numberToDrop, iterable) {
+  if (numberToDrop >= iterable.length) return
+  const iterator = iterable[Symbol.iterator]()
+  let i = 0
+  while (i++ < numberToDrop) {
+    iterator.next()
+  }
+  do {
+    const { done, value } = iterator.next()
+    if (!done) yield value
+  } while (++i <= iterable.length)
+}
+
+/**
  * Zip
  * @param {iterable} iterables
  * @returns {function} Generator iterator function that yields an array of

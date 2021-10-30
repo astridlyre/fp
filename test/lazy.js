@@ -49,5 +49,10 @@ describe('Lazy', function () {
       const col = Numbers
       assert.deepEqual([...col.take(3)], [0, 1, 2])
     })
+
+    it('should drop', function () {
+      const col = Lazy([1, 2, 3, 4, 5])
+      assert.deepEqual([...col.drop(4)], [5])
+    })
   })
 })

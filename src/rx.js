@@ -1,4 +1,4 @@
-import { curry } from './combinators.js'
+import { curry, entries } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable, ReadableStream } = globalThis
 import { buffer } from './rx/buffer.js'
@@ -78,9 +78,16 @@ Object.defineProperties(Observable, {
     value: curry(
       (emitter, event, handler) =>
         new Observable(observer => {
-          emitter.on(event, (...args) => observer.next(handler(...args)))
-          emitter.on('end', observer.complete.bind(observer))
-          emitter.on('error', observer.error.bind(observer))
+          const group = new Map([
+            [event, (...args) => observer.next(handler(...args))],
+            ['error', observer.error.bind(observer)],
+            ['end', observer.complete.bind(observer)],
+          ])
+          entries(group).forEach(([event, handler]) => emitter.on(event, handler))
+          return () =>
+            entries(group).forEach(([event, handler]) =>
+              emitter.removeListener(event, handler)
+            )
         })
     ),
     ...p,

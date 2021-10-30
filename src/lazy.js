@@ -112,6 +112,20 @@ export const LazyCollection = {
       LazyCollection
     )
   },
+  drop(numberToDrop) {
+    return Object.assign({
+      [Symbol.iterator]: () => {
+        const iterator = this[Symbol.iterator]()
+        while (numberToDrop-- > 0) iterator.next()
+        return {
+          next: () => {
+            let { done, value } = iterator.next()
+            return { done, value: done ? undefined : value }
+          },
+        }
+      },
+    })
+  },
 }
 
 export const Numbers = Object.assign(

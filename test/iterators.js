@@ -90,4 +90,16 @@ describe('iterators', function () {
       assert.deepEqual(result, 'HELLOWORLD')
     })
   })
+  describe('drop', function () {
+    it('should skip first n elements', function () {
+      const arr = [1, 2, 3, 4, 5, 6]
+      const result = iterators.drop(4, arr)
+      assert.deepEqual([...result], [5, 6])
+    })
+    it('should skip all, returning empty', function () {
+      const arr = [1, 2, 3]
+      const result = iterators.drop(3, arr)
+      assert.deepEqual([...result], [])
+    })
+  })
 })
