@@ -5077,156 +5077,12 @@ handlePrototype(DOMTokenListPrototype, 'DOMTokenList');
 var path = path$2;
 path.Observable;
 
-var {
-  Observable,
-  ReadableStream: ReadableStream$1
-} = globalThis;
-
 var withNext = observer => next => ({
   next,
   error: observer.error.bind(observer),
   complete: observer.complete.bind(observer)
 });
 
-if (Observable.fromGenerator === undefined || typeof Observable.fromGenerator !== 'function') {
-  if (ReadableStream$1 === undefined) {
-    var {
-      Readable
-    } = await import('stream');
-    Object.defineProperty(Observable, 'fromGenerator', {
-      value(generator) {
-        return new Observable(observer => {
-          Readable.from(generator).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
-        });
-      },
-
-      enumerable: false,
-      writable: false,
-      configurable: false
-    });
-  } else {
-    await Promise.resolve().then(function () { return webStreams; });
-    Object.defineProperty(Observable, 'fromGenerator', {
-      value(generator) {
-        return new Observable(observer => {
-          ReadableStream$1.from(generator).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
-        });
-      },
-
-      enumerable: false,
-      writable: false,
-      configurable: false
-    });
-  }
-}
-/**
- * Listen$
- * @param {string} eventName - Event to listen on
- * @param {HTMLElement} element
- * @returns {observable}
- */
-
-
-var listen$ = curry((eventName, element) => {
-  return new Observable(observer => {
-    var handler = event => observer.next(event);
-
-    element.addEventListener(eventName, handler, true);
-    return () => element.removeEventListener(eventName, handler, true);
-  });
-});
-/**
- * Throttle
- * @param {number} limit - Delay between function calls
- * @param {observable} stream - Stream to throttle to
- * @returns {observable}
- */
-
-var throttle = curry((limit, stream) => {
-  var lastRan = 0;
-  var lastInterval = 0;
-  return new Observable(observer => {
-    var subs = stream.subscribe(withNext(observer)(value => {
-      if (!lastRan) {
-        observer.next(value);
-        lastRan = Date.now();
-      } else {
-        clearTimeout(lastInterval);
-        lastInterval = setTimeout(() => {
-          if (Date.now() - lastRan >= limit) {
-            observer.next(value);
-            lastRan = Date.now();
-          }
-        }, limit - (Date.now() - lastRan));
-      }
-    }));
-    return () => subs.unsubscribe();
-  });
-});
-/**
- * Debounce
- * @param {number} time to aggregate events for
- * @param {observable} stream - stream to debounce
- * @returns {observable}
- */
-
-var debounce = curry((limit, stream) => {
-  var stack = [];
-  var lastInterval = 0;
-  var wantsComplete = false;
-  return new Observable(observer => {
-    var subs = stream.subscribe({
-      next: value => {
-        stack.push(value);
-        clearTimeout(lastInterval);
-        lastInterval = setTimeout(() => {
-          observer.next(last(stack));
-          stack.length = 0;
-          if (wantsComplete) observer.complete();
-        }, limit);
-      },
-      error: observer.error.bind(observer),
-      complete: () => wantsComplete = true
-    });
-    return () => subs.unsubscribe();
-  });
-});
-/**
- * Map
- * @param {function} fn - Mapper function
- * @parma {observable} stream - Stream to map
- * @returns {observable}
- */
-
-var map = curry((fn, stream) => new Observable(observer => {
-  var subs = stream.subscribe(withNext(observer)(value => {
-    try {
-      observer.next(fn(value));
-    } catch (err) {
-      observer.error(err);
-    }
-  }));
-  return () => subs.unsubscribe();
-}));
-/**
- * Filter
- * @param {function} predicate - Filter function
- * @param {observable} stream - Stream to filter
- * @returns {observable}
- */
-
-var filter = curry((predicate, stream) => new Observable(observer => {
-  var subs = stream.subscribe(withNext(observer)(value => {
-    try {
-      if (predicate(value)) {
-        observer.next(value);
-      }
-    } catch (err) {
-      observer.error(err);
-    }
-  }));
-  return () => subs.unsubscribe();
-}));
 /**
  * Buffer
  * @param {number} count - Size of events to buffer
@@ -5248,147 +5104,7 @@ var buffer = curry((count, stream) => {
     return () => subs.unsubscribe();
   });
 });
-/**
- * Take
- * @param {number} numberToTake - Items to take from stream
- * @param {observable} stream
- * @returns {observable}
- */
 
-var take = curry((numberToTake, stream) => {
-  var taken = 0;
-  return new Observable(observer => {
-    var subs = stream.subscribe(withNext(observer)(value => {
-      if (taken++ >= numberToTake) return observer.complete();
-      observer.next(value);
-    }));
-    return () => subs.unsubscribe();
-  });
-});
-/**
- * Skip
- * @param {number} count - Number of items to skip
- * @parma {observable} stream
- * @returns {observable}
- */
-
-var skip = curry((count, stream) => {
-  var skipped = 0;
-  return new Observable(observer => {
-    var subs = stream.subscribe(withNext(observer)(value => {
-      if (skipped++ >= count) {
-        observer.next(value);
-      }
-    }));
-    return () => subs.unsubscribe();
-  });
-});
-/**
- * Reduce
- * @param {function} reducer
- * @param {any} initialValue
- * @param {observable} stream
- * @returns {observable}
- */
-
-var reduce = curry((reducer, initialValue, stream) => {
-  var accumulator = initialValue !== null && initialValue !== void 0 ? initialValue : {};
-  return new Observable(observer => {
-    var subs = stream.subscribe({
-      next(value) {
-        try {
-          accumulator = reducer(accumulator, value);
-        } catch (err) {
-          observer.error(err);
-        }
-      },
-
-      error(e) {
-        observer.error(e);
-      },
-
-      complete() {
-        observer.next(accumulator);
-        observer.complete();
-      }
-
-    });
-    return () => subs.unsubscribe();
-  });
-});
-/**
- * MapTo, map a stream to only output value
- * @param {any} value
- * @param {observable} stream
- * @returns {observable}
- */
-
-var mapTo = curry((value, stream) => new Observable(observer => {
-  var subs = stream.subscribe(withNext(observer)(() => observer.next(value)));
-  return () => subs.unsubscribe();
-}));
-/**
- * Do
- * @param {function} fn - Side effect function to run on each event
- * @param {observable} stream
- * @returns {observable}
- */
-
-var _do = curry((fn, stream) => new Observable(observer => {
-  var subs = stream.subscribe(withNext(observer)(value => {
-    try {
-      fn(value);
-      observer.next(value);
-    } catch (err) {
-      observer.error(err);
-    }
-  }));
-  return () => subs.unsubscribe();
-}));
-/**
- * ForEach, syntactic sugar for Observable.subscribe()
- * @param {function} fn - Function to run on each event
- * @param {observable} stream
- * @returns {object} unsubscribe object
- */
-
-var forEach = curry((fn, stream) => {
-  var subs = stream.subscribe({
-    next: fn,
-    error: fn
-  });
-  return {
-    unsubscribe: subs.unsubscribe.bind(subs)
-  };
-});
-/**
- * Pick, pick keys from objects of stream
- * @param {string} key
- * @param {observable} stream
- * @returns {observable}
- */
-
-var pick = curry((key, stream) => new Observable(observer => {
-  var subs = stream.subscribe(withNext(observer)(obj => observer.next(deepProp(key, obj))));
-  return () => subs.unsubscribe();
-}));
-/**
- * Interval
- * @param {number} time of interval
- * @param {any} optional value to emit
- * @returns {observable}
- */
-
-var interval = (time, value) => {
-  return new Observable(observer => {
-    var id = setInterval(() => observer.next(value), time);
-    observer.next(value);
-    return () => {
-      observer.complete();
-      clearInterval(id);
-    };
-  });
-};
 /**
  * combine, combine the latest output of each stream
  * @param {observable} Stream a
@@ -5428,16 +5144,191 @@ var combine = function combine() {
     return () => subscriptions.forEach(subs => subs.unsubscribe());
   });
 };
+
+/**
+ * Debounce
+ * @param {number} time to aggregate events for
+ * @param {observable} stream - stream to debounce
+ * @returns {observable}
+ */
+
+var debounce = curry((limit, stream) => {
+  var stack = [];
+  var lastInterval = 0;
+  var wantsComplete = false;
+  return new Observable(observer => {
+    var subs = stream.subscribe({
+      next: value => {
+        stack.push(value);
+        clearTimeout(lastInterval);
+        lastInterval = setTimeout(() => {
+          observer.next(last(stack));
+          stack.length = 0;
+          if (wantsComplete) observer.complete();
+        }, limit);
+      },
+      error: observer.error.bind(observer),
+      complete: () => wantsComplete = true
+    });
+    return () => subs.unsubscribe();
+  });
+});
+
+/**
+ * Distinct, filter only unique consecutive events
+ * @param {observable} Stream to filter distinct
+ * @returns {observable} Stream with unique values only
+ */
+
+var distinct = (fn, stream) => {
+  var lastSent = null;
+  return new Observable(observer => {
+    var subs = stream.subscribe(withNext(observer)(value => {
+      try {
+        var a = fn(lastSent);
+        var b = fn(value);
+
+        if (!deepEqual(a, b)) {
+          observer.next(value);
+        }
+      } catch (_unused) {
+        observer.next(value);
+      }
+
+      lastSent = value;
+    }));
+    return () => subs.unsubscribe();
+  });
+};
+
+/**
+ * Effect
+ * @param {function} fn - Side effect function to run on each event
+ * @param {observable} stream
+ * @returns {observable}
+ */
+
+var effect = curry((fn, stream) => new Observable(observer => {
+  var subs = stream.subscribe(withNext(observer)(value => {
+    try {
+      fn(value);
+      observer.next(value);
+    } catch (err) {
+      observer.error(err);
+    }
+  }));
+  return () => subs.unsubscribe();
+}));
+
+/**
+ * Filter
+ * @param {function} predicate - Filter function
+ * @param {observable} stream - Stream to filter
+ * @returns {observable}
+ */
+
+var filter = curry((predicate, stream) => new Observable(observer => {
+  var subs = stream.subscribe(withNext(observer)(value => {
+    try {
+      if (predicate(value)) {
+        observer.next(value);
+      }
+    } catch (err) {
+      observer.error(err);
+    }
+  }));
+  return () => subs.unsubscribe();
+}));
+
+/**
+ * ForEach, syntactic sugar for Observable.subscribe()
+ * @param {function} fn - Function to run on each event
+ * @param {observable} stream
+ * @returns {object} unsubscribe object
+ */
+
+var forEach = curry((fn, stream) => {
+  var subs = stream.subscribe({
+    next: fn,
+    error: fn
+  });
+  return {
+    unsubscribe: subs.unsubscribe.bind(subs)
+  };
+});
+
+/**
+ * Interval
+ * @param {number} time of interval
+ * @param {any} optional value to emit
+ * @returns {observable}
+ */
+var interval = (time, value) => {
+  return new Observable(observer => {
+    var id = setInterval(() => observer.next(value), time);
+    observer.next(value);
+    return () => {
+      observer.complete();
+      clearInterval(id);
+    };
+  });
+};
+
+/**
+ * Listen
+ * @param {string} eventName - Event to listen on
+ * @param {HTMLElement} element
+ * @returns {observable}
+ */
+
+var listen = curry((eventName, element) => {
+  return new Observable(observer => {
+    var handler = event => observer.next(event);
+
+    element.addEventListener(eventName, handler, true);
+    return () => element.removeEventListener(eventName, handler, true);
+  });
+});
+
+/**
+ * Map
+ * @param {function} fn - Mapper function
+ * @parma {observable} stream - Stream to map
+ * @returns {observable}
+ */
+
+var map = curry((fn, stream) => new Observable(observer => {
+  var subs = stream.subscribe(withNext(observer)(value => {
+    try {
+      observer.next(fn(value));
+    } catch (err) {
+      observer.error(err);
+    }
+  }));
+  return () => subs.unsubscribe();
+}));
+
+/**
+ * MapTo, map a stream to only output value
+ * @param {any} value
+ * @param {observable} stream
+ * @returns {observable}
+ */
+
+var mapTo = curry((value, stream) => new Observable(observer => {
+  var subs = stream.subscribe(withNext(observer)(() => observer.next(value)));
+  return () => subs.unsubscribe();
+}));
+
 /**
  * Merge, interleave two streams
  * @param {observable} Stream a
  * @param {observable} Stream b
  * @returns {observable} Interleaving stream of a and b
  */
-
 var merge = function merge() {
-  for (var _len2 = arguments.length, streams = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    streams[_key2] = arguments[_key2];
+  for (var _len = arguments.length, streams = new Array(_len), _key = 0; _key < _len; _key++) {
+    streams[_key] = arguments[_key];
   }
 
   var done = 0;
@@ -5450,39 +5341,13 @@ var merge = function merge() {
     return () => subscriptions.forEach(subs => subs.unsubscribe());
   });
 };
-/**
- * Switch, switch to a mapped Observable
- * @param {observable}
- * @returns {observable}
- */
 
-var _switch = stream => new Observable(observer => {
-  var done = false;
-  var prevSubs = [];
-  var subs = stream.subscribe({
-    next: nextStream => queueMicrotask(() => {
-      if (!done) {
-        prevSubs.push(() => subs.unsubscribe());
-        subs = nextStream.subscribe({
-          next: value => observer.next(value),
-          complete: () => observer.complete()
-        });
-      }
-    })
-  });
-  return () => {
-    done = true;
-    prevSubs.forEach(f => f());
-    subs.unsubscribe();
-  };
-});
 /**
  * MergeMap
  * @param {function} fn - Mapping function
  * @param {observable} stream
  * @returns {observable}
  */
-
 
 var mergeMap = curry((fn, stream) => new Observable(observer => {
   var done = false;
@@ -5509,14 +5374,190 @@ var mergeMap = curry((fn, stream) => new Observable(observer => {
 
   return () => (initialSub.unsubscribe(), subs.forEach(sub => sub.unsubscribe()), observer.complete());
 }));
+
+/**
+ * Pick, pick keys from objects of stream
+ * @param {string} key
+ * @param {observable} stream
+ * @returns {observable}
+ */
+
+var pick = curry((key, stream) => new Observable(observer => {
+  var subs = stream.subscribe(withNext(observer)(obj => observer.next(deepProp(key, obj))));
+  return () => subs.unsubscribe();
+}));
+
+/**
+ * Reduce
+ * @param {function} reducer
+ * @param {any} initialValue
+ * @param {observable} stream
+ * @returns {observable}
+ */
+
+var reduce = curry((reducer, initialValue, stream) => {
+  var accumulator = initialValue !== null && initialValue !== void 0 ? initialValue : {};
+  return new Observable(observer => {
+    var subs = stream.subscribe({
+      next(value) {
+        try {
+          accumulator = reducer(accumulator, value);
+        } catch (err) {
+          observer.error(err);
+        }
+      },
+
+      error(e) {
+        observer.error(e);
+      },
+
+      complete() {
+        observer.next(accumulator);
+        observer.complete();
+      }
+
+    });
+    return () => subs.unsubscribe();
+  });
+});
+
+/**
+ * Skip
+ * @param {number} count - Number of items to skip
+ * @parma {observable} stream
+ * @returns {observable}
+ */
+
+var skip = curry((count, stream) => {
+  var skipped = 0;
+  return new Observable(observer => {
+    var subs = stream.subscribe(withNext(observer)(value => {
+      if (skipped++ >= count) {
+        observer.next(value);
+      }
+    }));
+    return () => subs.unsubscribe();
+  });
+});
+
+/**
+ * Switch, switch to a mapped Observable
+ * @param {observable}
+ * @returns {observable}
+ */
+var switchStream = stream => new Observable(observer => {
+  var done = false;
+  var prevSubs = [];
+  var subs = stream.subscribe({
+    next: nextStream => queueMicrotask(() => {
+      if (!done) {
+        prevSubs.push(() => subs.unsubscribe());
+        subs = nextStream.subscribe({
+          next: value => observer.next(value),
+          complete: () => observer.complete()
+        });
+      }
+    })
+  });
+  return () => {
+    done = true;
+    prevSubs.forEach(f => f());
+    subs.unsubscribe();
+  };
+});
+
+/**
+ * Take
+ * @param {number} numberToTake - Items to take from stream
+ * @param {observable} stream
+ * @returns {observable}
+ */
+
+var take = curry((numberToTake, stream) => {
+  var taken = 0;
+  return new Observable(observer => {
+    var subs = stream.subscribe(withNext(observer)(value => {
+      if (taken++ >= numberToTake) return observer.complete();
+      observer.next(value);
+    }));
+    return () => subs.unsubscribe();
+  });
+});
+
+/**
+ * Throttle
+ * @param {number} limit - Delay between function calls
+ * @param {observable} stream - Stream to throttle to
+ * @returns {observable}
+ */
+
+var throttle = curry((limit, stream) => {
+  var lastRan = 0;
+  var lastInterval = 0;
+  return new Observable(observer => {
+    var subs = stream.subscribe(withNext(observer)(value => {
+      if (!lastRan) {
+        observer.next(value);
+        lastRan = Date.now();
+      } else {
+        clearTimeout(lastInterval);
+        lastInterval = setTimeout(() => {
+          if (Date.now() - lastRan >= limit) {
+            observer.next(value);
+            lastRan = Date.now();
+          }
+        }, limit - (Date.now() - lastRan));
+      }
+    }));
+    return () => subs.unsubscribe();
+  });
+});
+
+var {
+  Observable: Observable$1,
+  ReadableStream: ReadableStream$1
+} = globalThis;
+
+if (Observable$1.fromGenerator === undefined || typeof Observable$1.fromGenerator !== 'function') {
+  if (ReadableStream$1 === undefined) {
+    var {
+      Readable
+    } = await import('stream');
+    Object.defineProperty(Observable$1, 'fromGenerator', {
+      value(generator) {
+        return new Observable$1(observer => {
+          Readable.from(generator).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
+        });
+      },
+
+      enumerable: false,
+      writable: false,
+      configurable: false
+    });
+  } else {
+    await Promise.resolve().then(function () { return webStreams; });
+    Object.defineProperty(Observable$1, 'fromGenerator', {
+      value(generator) {
+        return new Observable$1(observer => {
+          ReadableStream$1.from(generator).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
+        });
+      },
+
+      enumerable: false,
+      writable: false,
+      configurable: false
+    });
+  }
+}
+
 var p = {
   enumerable: false,
   writable: false,
   configurable: false
 };
-Object.defineProperties(Observable, {
+Object.defineProperties(Observable$1, {
   listen: _objectSpread2({
-    value: listen$
+    value: listen
   }, p),
   interval: _objectSpread2({
     value: interval
@@ -5528,7 +5569,7 @@ Object.defineProperties(Observable, {
     value: merge
   }, p),
   fromEvent: _objectSpread2({
-    value: curry((emitter, event, handler) => new Observable(observer => {
+    value: curry((emitter, event, handler) => new Observable$1(observer => {
       emitter.on(event, function () {
         return observer.next(handler(...arguments));
       });
@@ -5537,7 +5578,7 @@ Object.defineProperties(Observable, {
     }))
   }, p),
   fromPromise: _objectSpread2({
-    value: promise => new Observable(observer => {
+    value: promise => new Observable$1(observer => {
       promise.then(value => observer.next(value)).catch(err => observer.error(err)).finally(() => observer.complete());
     })
   }, p)
@@ -5580,8 +5621,8 @@ var ReactiveExtensions = {
     return forEach(fn, this);
   },
 
-  do(fn) {
-    return _do(fn, this);
+  effect(fn) {
+    return effect(fn, this);
   },
 
   pick(key) {
@@ -5601,38 +5642,45 @@ var ReactiveExtensions = {
   },
 
   switch() {
-    return _switch(this);
+    return switchStream(this);
   },
 
   mergeMap(fn) {
     return mergeMap(fn, this);
+  },
+
+  distinct() {
+    var fn = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : x => x;
+    return distinct(fn, this);
   }
 
 };
-Object.assign(Observable.prototype, ReactiveExtensions);
+Object.assign(Observable$1.prototype, ReactiveExtensions);
 
 var rx = /*#__PURE__*/Object.freeze({
   __proto__: null,
-  Observable: Observable,
+  Observable: Observable$1,
   ReadableStream: ReadableStream$1,
-  listen$: listen$,
-  throttle: throttle,
-  debounce: debounce,
-  map: map,
-  filter: filter,
+  ReactiveExtensions: ReactiveExtensions,
   buffer: buffer,
-  take: take,
-  skip: skip,
-  reduce: reduce,
-  mapTo: mapTo,
-  _do: _do,
-  forEach: forEach,
-  pick: pick,
-  interval: interval,
   combine: combine,
+  debounce: debounce,
+  distinct: distinct,
+  effect: effect,
+  filter: filter,
+  forEach: forEach,
+  interval: interval,
+  listen: listen,
+  map: map,
+  mapTo: mapTo,
   merge: merge,
   mergeMap: mergeMap,
-  ReactiveExtensions: ReactiveExtensions
+  pick: pick,
+  reduce: reduce,
+  skip: skip,
+  switchStream: switchStream,
+  take: take,
+  throttle: throttle
 });
 
 var EventEmitter;
@@ -5756,7 +5804,7 @@ var reactivize = obj => {
   });
   var observable = {
     [Symbol.observable]() {
-      return new Observable(observer => {
+      return new Observable$1(observer => {
         emitter.on(ON_EVENT, newValue => {
           observer.next(newValue);
         });
@@ -5977,4 +6025,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge$1 as merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick$1 as pick, pipe, pipeAsync, pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable$1 as Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge$1 as merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick$1 as pick, pipe, pipeAsync, pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };

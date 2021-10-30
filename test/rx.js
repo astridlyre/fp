@@ -20,7 +20,9 @@ describe('Observable', function () {
         },
       })
     })
+  })
 
+  describe('from EventEmitter', function () {
     it('should create an Observable from an EventEmitter', function (done) {
       const emitter = new EventEmitter()
       const stream = Observable.fromEvent(emitter, 'test', (...args) => [...args])
@@ -36,7 +38,9 @@ describe('Observable', function () {
       emitter.emit('test', 'dog')
       emitter.emit('end')
     })
+  })
 
+  describe('operators', function () {
     it('should throttle a stream', function (done) {
       const stream = Observable.from([1, 2, 3])
       const values = []
@@ -167,6 +171,23 @@ describe('Observable', function () {
       })
     })
 
+    it('should merge promise-based streams', function (done) {
+      const values = []
+      const streamA = Observable.fromPromise(
+        new Promise(resolve => setTimeout(() => resolve('hello'), 10))
+      )
+      const streamB = Observable.fromPromise(
+        new Promise(resolve => setTimeout(() => resolve('world'), 15))
+      )
+      Observable.merge(streamA, streamB).subscribe({
+        next: value => values.push(value),
+        complete() {
+          assert.deepEqual(values, ['hello', 'world'])
+          done()
+        },
+      })
+    })
+
     it('should switch streams', function (done) {
       const values = []
       const streamA = Observable.from([1, 2, 3])
@@ -272,6 +293,41 @@ describe('Observable', function () {
           next: value => values.push(value),
           complete() {
             assert.deepEqual(values, ['tim', 'bob'])
+            done()
+          },
+        })
+    })
+
+    it('should filter distinct', function (done) {
+      const values = []
+      Observable.from([1, 2, 2, 2, 3, 4, 5, 5, 6])
+        .distinct()
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            assert.deepEqual(values, [1, 2, 3, 4, 5, 6])
+            done()
+          },
+        })
+    })
+
+    it('should filter distinct with a function', function (done) {
+      const values = []
+      Observable.from([
+        { name: 'tim', age: 2 },
+        { name: 'tim', age: 3 },
+        { name: 'tim', age: 3 },
+        { name: 'tim', age: 2 },
+      ])
+        .distinct(x => x.age)
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            assert.deepEqual(values, [
+              { name: 'tim', age: 2 },
+              { name: 'tim', age: 3 },
+              { name: 'tim', age: 2 },
+            ])
             done()
           },
         })

@@ -1,12 +1,25 @@
-import { curry, last, values, deepProp } from './combinators.js'
+import { curry } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable, ReadableStream } = globalThis
-
-const withNext = observer => next => ({
-  next,
-  error: observer.error.bind(observer),
-  complete: observer.complete.bind(observer),
-})
+import { buffer } from './rx/buffer.js'
+import { combine } from './rx/combine.js'
+import { debounce } from './rx/debounce.js'
+import { distinct } from './rx/distinct.js'
+import { effect } from './rx/effect.js'
+import { filter } from './rx/filter.js'
+import { forEach } from './rx/forEach.js'
+import { interval } from './rx/interval.js'
+import { listen } from './rx/listen.js'
+import { map } from './rx/map.js'
+import { mapTo } from './rx/mapTo.js'
+import { merge } from './rx/merge.js'
+import { mergeMap } from './rx/mergeMap.js'
+import { pick } from './rx/pick.js'
+import { reduce } from './rx/reduce.js'
+import { skip } from './rx/skip.js'
+import { switchStream } from './rx/switch.js'
+import { take } from './rx/take.js'
+import { throttle } from './rx/throttle.js'
 
 if (
   Observable.fromGenerator === undefined ||
@@ -45,419 +58,6 @@ if (
   }
 }
 
-/**
- * Listen$
- * @param {string} eventName - Event to listen on
- * @param {HTMLElement} element
- * @returns {observable}
- */
-export const listen$ = curry((eventName, element) => {
-  return new Observable(observer => {
-    const handler = event => observer.next(event)
-    element.addEventListener(eventName, handler, true)
-    return () => element.removeEventListener(eventName, handler, true)
-  })
-})
-
-/**
- * Throttle
- * @param {number} limit - Delay between function calls
- * @param {observable} stream - Stream to throttle to
- * @returns {observable}
- */
-export const throttle = curry((limit, stream) => {
-  let lastRan = 0
-  let lastInterval = 0
-  return new Observable(observer => {
-    const subs = stream.subscribe(
-      withNext(observer)(value => {
-        if (!lastRan) {
-          observer.next(value)
-          lastRan = Date.now()
-        } else {
-          clearTimeout(lastInterval)
-          lastInterval = setTimeout(() => {
-            if (Date.now() - lastRan >= limit) {
-              observer.next(value)
-              lastRan = Date.now()
-            }
-          }, limit - (Date.now() - lastRan))
-        }
-      })
-    )
-    return () => subs.unsubscribe()
-  })
-})
-
-/**
- * Debounce
- * @param {number} time to aggregate events for
- * @param {observable} stream - stream to debounce
- * @returns {observable}
- */
-export const debounce = curry((limit, stream) => {
-  const stack = []
-  let lastInterval = 0
-  let wantsComplete = false
-  return new Observable(observer => {
-    const subs = stream.subscribe({
-      next: value => {
-        stack.push(value)
-        clearTimeout(lastInterval)
-        lastInterval = setTimeout(() => {
-          observer.next(last(stack))
-          stack.length = 0
-          if (wantsComplete) observer.complete()
-        }, limit)
-      },
-      error: observer.error.bind(observer),
-      complete: () => (wantsComplete = true),
-    })
-    return () => subs.unsubscribe()
-  })
-})
-
-/**
- * Map
- * @param {function} fn - Mapper function
- * @parma {observable} stream - Stream to map
- * @returns {observable}
- */
-export const map = curry(
-  (fn, stream) =>
-    new Observable(observer => {
-      const subs = stream.subscribe(
-        withNext(observer)(value => {
-          try {
-            observer.next(fn(value))
-          } catch (err) {
-            observer.error(err)
-          }
-        })
-      )
-      return () => subs.unsubscribe()
-    })
-)
-
-/**
- * Filter
- * @param {function} predicate - Filter function
- * @param {observable} stream - Stream to filter
- * @returns {observable}
- */
-export const filter = curry(
-  (predicate, stream) =>
-    new Observable(observer => {
-      const subs = stream.subscribe(
-        withNext(observer)(value => {
-          try {
-            if (predicate(value)) {
-              observer.next(value)
-            }
-          } catch (err) {
-            observer.error(err)
-          }
-        })
-      )
-      return () => subs.unsubscribe()
-    })
-)
-
-/**
- * Buffer
- * @param {number} count - Size of events to buffer
- * @param {observable} stream - Stream to buffer
- * @returns {observable}
- */
-export const buffer = curry((count, stream) => {
-  const internalStorage = []
-  return new Observable(observer => {
-    const subs = stream.subscribe(
-      withNext(observer)(value => {
-        internalStorage.push(value)
-        if (internalStorage.length >= count) {
-          observer.next(internalStorage.slice())
-          internalStorage.length = 0
-        }
-      })
-    )
-    return () => subs.unsubscribe()
-  })
-})
-
-/**
- * Take
- * @param {number} numberToTake - Items to take from stream
- * @param {observable} stream
- * @returns {observable}
- */
-export const take = curry((numberToTake, stream) => {
-  let taken = 0
-  return new Observable(observer => {
-    const subs = stream.subscribe(
-      withNext(observer)(value => {
-        if (taken++ >= numberToTake) return observer.complete()
-        observer.next(value)
-      })
-    )
-    return () => subs.unsubscribe()
-  })
-})
-
-/**
- * Skip
- * @param {number} count - Number of items to skip
- * @parma {observable} stream
- * @returns {observable}
- */
-export const skip = curry((count, stream) => {
-  let skipped = 0
-  return new Observable(observer => {
-    const subs = stream.subscribe(
-      withNext(observer)(value => {
-        if (skipped++ >= count) {
-          observer.next(value)
-        }
-      })
-    )
-    return () => subs.unsubscribe()
-  })
-})
-
-/**
- * Reduce
- * @param {function} reducer
- * @param {any} initialValue
- * @param {observable} stream
- * @returns {observable}
- */
-export const reduce = curry((reducer, initialValue, stream) => {
-  let accumulator = initialValue ?? {}
-  return new Observable(observer => {
-    const subs = stream.subscribe({
-      next(value) {
-        try {
-          accumulator = reducer(accumulator, value)
-        } catch (err) {
-          observer.error(err)
-        }
-      },
-      error(e) {
-        observer.error(e)
-      },
-      complete() {
-        observer.next(accumulator)
-        observer.complete()
-      },
-    })
-    return () => subs.unsubscribe()
-  })
-})
-
-/**
- * MapTo, map a stream to only output value
- * @param {any} value
- * @param {observable} stream
- * @returns {observable}
- */
-export const mapTo = curry(
-  (value, stream) =>
-    new Observable(observer => {
-      const subs = stream.subscribe(withNext(observer)(() => observer.next(value)))
-      return () => subs.unsubscribe()
-    })
-)
-
-/**
- * Do
- * @param {function} fn - Side effect function to run on each event
- * @param {observable} stream
- * @returns {observable}
- */
-export const _do = curry(
-  (fn, stream) =>
-    new Observable(observer => {
-      const subs = stream.subscribe(
-        withNext(observer)(value => {
-          try {
-            fn(value)
-            observer.next(value)
-          } catch (err) {
-            observer.error(err)
-          }
-        })
-      )
-      return () => subs.unsubscribe()
-    })
-)
-
-/**
- * ForEach, syntactic sugar for Observable.subscribe()
- * @param {function} fn - Function to run on each event
- * @param {observable} stream
- * @returns {object} unsubscribe object
- */
-export const forEach = curry((fn, stream) => {
-  const subs = stream.subscribe({
-    next: fn,
-    error: fn,
-  })
-  return { unsubscribe: subs.unsubscribe.bind(subs) }
-})
-
-/**
- * Pick, pick keys from objects of stream
- * @param {string} key
- * @param {observable} stream
- * @returns {observable}
- */
-export const pick = curry(
-  (key, stream) =>
-    new Observable(observer => {
-      const subs = stream.subscribe(
-        withNext(observer)(obj => observer.next(deepProp(key, obj)))
-      )
-      return () => subs.unsubscribe()
-    })
-)
-
-/**
- * Interval
- * @param {number} time of interval
- * @param {any} optional value to emit
- * @returns {observable}
- */
-export const interval = (time, value) => {
-  return new Observable(observer => {
-    const id = setInterval(() => observer.next(value), time)
-    observer.next(value)
-    return () => {
-      observer.complete()
-      clearInterval(id)
-    }
-  })
-}
-
-/**
- * combine, combine the latest output of each stream
- * @param {observable} Stream a
- * @param {observable} Stream b
- * @returns {observable} Latest combined output of stream a and b
- */
-export const combine = (...streams) => {
-  let done = 0
-  const store = Object.fromEntries(streams.map((_, i) => [i, []]))
-  const buffers = values(store)
-
-  function pushResults(event, observer) {
-    store[event.stream].push(event.value)
-    if (buffers.every(buffer => buffer.length)) {
-      buffers.forEach(buffer => {
-        observer.next(buffer.pop())
-        buffer.length = 0
-      })
-    }
-  }
-
-  return new Observable(observer => {
-    const subscriptions = streams.map((stream, i) =>
-      stream.subscribe({
-        next: value => pushResults({ stream: i, value }, observer),
-        error: observer.error.bind(observer),
-        complete: () => ++done === streams.length && observer.complete(),
-      })
-    )
-    return () => subscriptions.forEach(subs => subs.unsubscribe())
-  })
-}
-
-/**
- * Merge, interleave two streams
- * @param {observable} Stream a
- * @param {observable} Stream b
- * @returns {observable} Interleaving stream of a and b
- */
-export const merge = (...streams) => {
-  let done = 0
-  return new Observable(observer => {
-    const subscriptions = streams.map(stream =>
-      stream.subscribe({
-        next: value => observer.next(value),
-        error: observer.error.bind(observer),
-        complete: () => ++done === streams.length && observer.complete(),
-      })
-    )
-    return () => subscriptions.forEach(subs => subs.unsubscribe())
-  })
-}
-
-/**
- * Switch, switch to a mapped Observable
- * @param {observable}
- * @returns {observable}
- */
-const _switch = stream =>
-  new Observable(observer => {
-    let done = false
-    let prevSubs = []
-    let subs = stream.subscribe({
-      next: nextStream =>
-        queueMicrotask(() => {
-          if (!done) {
-            prevSubs.push(() => subs.unsubscribe())
-            subs = nextStream.subscribe({
-              next: value => observer.next(value),
-              complete: () => observer.complete(),
-            })
-          }
-        }),
-    })
-    return () => {
-      done = true
-      prevSubs.forEach(f => f())
-      subs.unsubscribe()
-    }
-  })
-
-/**
- * MergeMap
- * @param {function} fn - Mapping function
- * @param {observable} stream
- * @returns {observable}
- */
-export const mergeMap = curry(
-  (fn, stream) =>
-    new Observable(observer => {
-      let done = false
-      let pending = 0
-      const subs = []
-      const initialSub = stream.subscribe({
-        next: value => handleNext(fn(value)),
-        complete: () => {
-          done = true
-          if (!pending) observer.complete()
-        },
-      })
-      function handleNext(nextObs) {
-        pending++
-        subs.push(
-          nextObs.subscribe({
-            next: value => observer.next(value),
-            complete: () => {
-              pending -= 1
-              if (done && pending === 0) observer.complete()
-            },
-          })
-        )
-      }
-      return () => (
-        initialSub.unsubscribe(),
-        subs.forEach(sub => sub.unsubscribe()),
-        observer.complete()
-      )
-    })
-)
-
 const p = {
   enumerable: false,
   writable: false,
@@ -465,7 +65,7 @@ const p = {
 }
 
 Object.defineProperties(Observable, {
-  listen: { value: listen$, ...p },
+  listen: { value: listen, ...p },
   interval: { value: interval, ...p },
   combine: { value: combine, ...p },
   merge: { value: merge, ...p },
@@ -520,8 +120,8 @@ export const ReactiveExtensions = {
   forEach(fn) {
     return forEach(fn, this)
   },
-  do(fn) {
-    return _do(fn, this)
+  effect(fn) {
+    return effect(fn, this)
   },
   pick(key) {
     return pick(key, this)
@@ -536,11 +136,35 @@ export const ReactiveExtensions = {
     return merge(this, stream)
   },
   switch() {
-    return _switch(this)
+    return switchStream(this)
   },
   mergeMap(fn) {
     return mergeMap(fn, this)
   },
+  distinct(fn = x => x) {
+    return distinct(fn, this)
+  },
 }
-
 Object.assign(Observable.prototype, ReactiveExtensions)
+
+export {
+  buffer,
+  combine,
+  debounce,
+  distinct,
+  effect,
+  filter,
+  forEach,
+  interval,
+  listen,
+  map,
+  mapTo,
+  merge,
+  mergeMap,
+  pick,
+  reduce,
+  skip,
+  switchStream,
+  take,
+  throttle,
+}
