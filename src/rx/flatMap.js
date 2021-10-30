@@ -13,7 +13,13 @@ export const flatMap = curry(
       let pending = 0
       const subs = []
       const initialSub = stream.subscribe({
-        next: value => handleNext(fn(value)),
+        next: value => {
+          try {
+            handleNext(fn(value))
+          } catch (err) {
+            observer.error(err)
+          }
+        },
         complete: () => {
           done = true
           if (!pending) observer.complete()
