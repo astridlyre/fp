@@ -1,5 +1,6 @@
 import { curry } from '../combinators.js'
 import { withNext } from './utils.js'
+
 /**
  * Throttle
  * @param {number} limit - Delay between function calls

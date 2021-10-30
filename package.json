@@ -1,9 +1,16 @@
 {
   "name": "@ebflat9/fp",
-  "version": "1.1.76",
+  "version": "1.1.77",
   "description": "my fp utils",
   "main": "index.js",
   "type": "module",
+  "keywords": [
+    "functional",
+    "observable",
+    "iterators",
+    "fp",
+    "functional programming"
+  ],
   "scripts": {
     "test": "mocha --parallel"
   },

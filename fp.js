@@ -5387,16 +5387,22 @@ var forEach = curry((fn, stream) => {
  * @param {any} optional value to emit
  * @returns {observable}
  */
-var interval = (time, value) => {
-  return new Observable(observer => {
-    var id = setInterval(() => observer.next(value), time);
-    observer.next(value);
-    return () => {
-      observer.complete();
-      clearInterval(id);
+var interval = time => new Proxy({}, {
+  get(_, prop) {
+    return function () {
+      var n = 0;
+      return new Observable(observer => {
+        var id = setInterval(() => observer.next(++n), time);
+        observer.next(++n);
+        return () => {
+          observer.complete();
+          clearInterval(id);
+        };
+      })[prop](...arguments);
     };
-  });
-};
+  }
+
+});
 
 /**
  * Listen
