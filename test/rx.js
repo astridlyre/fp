@@ -248,8 +248,12 @@ describe('Observable', function () {
 
     it('should mergeMap with a promise', function (done) {
       const values = []
-      Observable.fromPromise(Promise.resolve('hi'))
-        .mergeMap(str => Observable.fromPromise(Promise.resolve(str + 'there')))
+      Observable.fromPromise(new Promise(resolve => setTimeout(() => resolve('hi'), 10)))
+        .mergeMap(str =>
+          Observable.fromPromise(
+            new Promise(resolve => setTimeout(() => resolve(str + 'there'), 50))
+          )
+        )
         .mergeMap(result => Observable.of(result))
         .subscribe({
           next: value => values.push(value),
