@@ -2,6 +2,7 @@ import { curry } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable, ReadableStream } = globalThis
 import { buffer } from './rx/buffer.js'
+import { catchError } from './rx/catch.js'
 import { concat } from './rx/concat.js'
 import { combine } from './rx/combine.js'
 import { debounce } from './rx/debounce.js'
@@ -131,6 +132,9 @@ export const ReactiveExtensions = {
   debounce(limit) {
     return debounce(limit, this)
   },
+  catch(handler) {
+    return catchError(handler, this)
+  },
   concat(...streams) {
     return concat(this, ...streams)
   },
@@ -157,6 +161,7 @@ Object.assign(Observable.prototype, ReactiveExtensions)
 
 export {
   buffer,
+  catchError,
   concat,
   combine,
   debounce,

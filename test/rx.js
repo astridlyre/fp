@@ -371,5 +371,41 @@ describe('Observable', function () {
           },
         })
     })
+
+    it('should catch error', function (done) {
+      new Observable(observer => {
+        let n = 0
+        if (n < 1) {
+          n++
+          throw new Error('Uh oh')
+        }
+        observer.next(n)
+      })
+        .catch(err => `Error: ${err.message}`)
+        .subscribe({
+          next: value => {
+            assert.equal(value, 'Error: Uh oh')
+            done()
+          },
+        })
+    })
+
+    it('should catch error and restart', function (done) {
+      let n = 0
+      new Observable(observer => {
+        if (n < 1) {
+          n++
+          throw new Error('Uh oh')
+        }
+        observer.next(n)
+      })
+        .catch((_, source) => source)
+        .subscribe({
+          next: value => {
+            assert.equal(value, 1)
+            done()
+          },
+        })
+    })
   })
 })
