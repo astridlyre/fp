@@ -407,5 +407,64 @@ describe('Observable', function () {
           },
         })
     })
+
+    it('should zip multiple streams', function (done) {
+      const values = []
+      Observable.from([1, 2, 3])
+        .zip(Observable.from(['a', 'b', 'c']), Observable.from([4, 5, 6]))
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            assert.deepEqual(values, [
+              [1, 'a', 4],
+              [2, 'b', 5],
+              [3, 'c', 6],
+            ])
+            done()
+          },
+        })
+    })
+
+    it('should retry', function (done) {
+      const values = []
+      let n = 0
+      new Observable(observer => {
+        if (n === 1) {
+          observer.next('hello')
+          observer.complete()
+        }
+        n++
+        throw new Error('NO')
+      })
+        .retry()
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            assert.deepEqual(values, ['hello'])
+            done()
+          },
+        })
+    })
+
+    it('should retry n times', function (done) {
+      const values = []
+      let n = 0
+      new Observable(observer => {
+        if (n === 3) {
+          observer.next('hello')
+          observer.complete()
+        }
+        n++
+        throw new Error('NO')
+      })
+        .retry(5)
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            assert.deepEqual(values, ['hello'])
+            done()
+          },
+        })
+    })
   })
 })

@@ -18,11 +18,13 @@ import { merge } from './rx/merge.js'
 import { flatMap } from './rx/flatMap.js'
 import { pick } from './rx/pick.js'
 import { reduce } from './rx/reduce.js'
+import { retry } from './rx/retry.js'
 import { skip } from './rx/skip.js'
 import { switchStream } from './rx/switch.js'
 import { take } from './rx/take.js'
 import { throttle } from './rx/throttle.js'
 import { until } from './rx/until.js'
+import { zip } from './rx/zip.js'
 
 if (
   Observable.fromGenerator === undefined ||
@@ -156,6 +158,12 @@ export const ReactiveExtensions = {
   until(fn) {
     return until(fn, this)
   },
+  zip(...streams) {
+    return zip(this, ...streams)
+  },
+  retry(config) {
+    return retry(config, this)
+  },
 }
 Object.assign(Observable.prototype, ReactiveExtensions)
 
@@ -177,9 +185,11 @@ export {
   flatMap,
   pick,
   reduce,
+  retry,
   skip,
   switchStream,
   take,
   throttle,
   until,
+  zip,
 }

@@ -2380,7 +2380,7 @@ function* take$1(numberToTake, iterable) {
  * the combined values of each iterator of iterables
  */
 
-function* zip() {
+function* zip$1() {
   for (var _len = arguments.length, iterables = new Array(_len), _key = 0; _key < _len; _key++) {
     iterables[_key] = arguments[_key];
   }
@@ -5106,6 +5106,41 @@ var buffer = curry((count, stream) => {
 });
 
 /**
+ * Catch, handle error in stream
+ * @param {function} Error handler
+ * @param {observable} Stream
+ * @returns {observable}
+ */
+
+var catchError = curry((handler, stream) => {
+  var sub = [];
+  return new Observable(observer => {
+    retry(handler, stream, sub, observer);
+    return () => sub.pop().unsubscribe();
+  });
+});
+
+function retry(handler, stream, sub, observer) {
+  stream.subscribe({
+    next: value => observer.next(value),
+    error: err => {
+      try {
+        var capture = handler(err, stream);
+
+        if (capture === stream) {
+          return retry(handler, stream, sub, observer);
+        }
+
+        observer.next(capture);
+      } catch (err) {
+        observer.error(err);
+      }
+    },
+    complete: () => observer.complete()
+  });
+}
+
+/**
  * Concat, append streams
  * @param {observable} Streams to append
  * @returns {observable} Concatenated stream
@@ -5384,7 +5419,13 @@ var flatMap = curry((fn, stream) => new Observable(observer => {
   var pending = 0;
   var subs = [];
   var initialSub = stream.subscribe({
-    next: value => handleNext(fn(value)),
+    next: value => {
+      try {
+        handleNext(fn(value));
+      } catch (err) {
+        observer.error(err);
+      }
+    },
     complete: () => {
       done = true;
       if (!pending) observer.complete();
@@ -5551,8 +5592,12 @@ var throttle = curry((limit, stream) => {
 var until = curry((comparator, stream) => new Observable(observer => {
   var subs = stream.subscribe({
     next: value => {
-      if (comparator(value)) {
-        return observer.complete();
+      try {
+        if (comparator(value)) {
+          return observer.complete();
+        }
+      } catch (err) {
+        observer.error(err);
       }
 
       observer.next(value);
@@ -5560,6 +5605,42 @@ var until = curry((comparator, stream) => new Observable(observer => {
   });
   return () => subs.unsubscribe();
 }));
+
+/**
+ * Zip
+ * @param {observable} Streams
+ * @returns {observable} One-to-one zipped streams
+ */
+
+var zip = function zip() {
+  for (var _len = arguments.length, streams = new Array(_len), _key = 0; _key < _len; _key++) {
+    streams[_key] = arguments[_key];
+  }
+
+  var done = 0;
+  var store = Object.fromEntries(streams.map((_, i) => [i, []]));
+  var buffers = values(store);
+
+  function pushValue(event, observer) {
+    buffers[event.n].unshift(event.value);
+
+    if (buffers.every(buffer => buffer.length > 0)) {
+      observer.next(buffers.map(buffer => buffer.pop()));
+    }
+  }
+
+  return new Observable(observer => {
+    var subscriptions = streams.map((stream, i) => stream.subscribe({
+      next: value => pushValue({
+        n: i,
+        value
+      }, observer),
+      error: observer.error.bind(observer),
+      complete: () => ++done === streams.length && observer.complete()
+    }));
+    return () => subscriptions.forEach(subs => subs.unsubscribe());
+  });
+};
 
 var {
   Observable: Observable$1,
@@ -5681,6 +5762,10 @@ var ReactiveExtensions = {
     return debounce(limit, this);
   },
 
+  catch(handler) {
+    return catchError(handler, this);
+  },
+
   concat() {
     for (var _len = arguments.length, streams = new Array(_len), _key = 0; _key < _len; _key++) {
       streams[_key] = arguments[_key];
@@ -5712,6 +5797,14 @@ var ReactiveExtensions = {
 
   until(fn) {
     return until(fn, this);
+  },
+
+  zip() {
+    for (var _len2 = arguments.length, streams = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      streams[_key2] = arguments[_key2];
+    }
+
+    return zip(this, ...streams);
   }
 
 };
@@ -5723,6 +5816,7 @@ var rx = /*#__PURE__*/Object.freeze({
   ReadableStream: ReadableStream$1,
   ReactiveExtensions: ReactiveExtensions,
   buffer: buffer,
+  catchError: catchError,
   concat: concat,
   combine: combine,
   debounce: debounce,
@@ -5742,7 +5836,8 @@ var rx = /*#__PURE__*/Object.freeze({
   switchStream: switchStream,
   take: take,
   throttle: throttle,
-  until: until
+  until: until,
+  zip: zip
 });
 
 var EventEmitter;
@@ -6087,4 +6182,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable$1 as Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap$1 as flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge$1 as merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick$1 as pick, pipe, pipeAsync, pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable$1 as Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap$1 as flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge$1 as merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick$1 as pick, pipe, pipeAsync, pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip$1 as zip, zipMap, zipWith };
