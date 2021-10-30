@@ -2,6 +2,7 @@ import { curry } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable, ReadableStream } = globalThis
 import { buffer } from './rx/buffer.js'
+import { concat } from './rx/concat.js'
 import { combine } from './rx/combine.js'
 import { debounce } from './rx/debounce.js'
 import { distinct } from './rx/distinct.js'
@@ -13,7 +14,7 @@ import { listen } from './rx/listen.js'
 import { map } from './rx/map.js'
 import { mapTo } from './rx/mapTo.js'
 import { merge } from './rx/merge.js'
-import { mergeMap } from './rx/mergeMap.js'
+import { flatMap } from './rx/flatMap.js'
 import { pick } from './rx/pick.js'
 import { reduce } from './rx/reduce.js'
 import { skip } from './rx/skip.js'
@@ -129,6 +130,9 @@ export const ReactiveExtensions = {
   debounce(limit) {
     return debounce(limit, this)
   },
+  concat(...streams) {
+    return concat(this, ...streams)
+  },
   combine(stream) {
     return combine(this, stream)
   },
@@ -138,8 +142,8 @@ export const ReactiveExtensions = {
   switch() {
     return switchStream(this)
   },
-  mergeMap(fn) {
-    return mergeMap(fn, this)
+  flatMap(fn) {
+    return flatMap(fn, this)
   },
   distinct(fn = x => x) {
     return distinct(fn, this)
@@ -149,6 +153,7 @@ Object.assign(Observable.prototype, ReactiveExtensions)
 
 export {
   buffer,
+  concat,
   combine,
   debounce,
   distinct,
@@ -160,7 +165,7 @@ export {
   map,
   mapTo,
   merge,
-  mergeMap,
+  flatMap,
   pick,
   reduce,
   skip,

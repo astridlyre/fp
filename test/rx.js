@@ -131,6 +131,32 @@ describe('Observable', function () {
         })
     })
 
+    it('should concat streams', function (done) {
+      const values = []
+      const streamA = new Observable(observer => {
+        let n = 0
+        let to = null
+        function go() {
+          if (n < 10) {
+            to = setTimeout(() => {
+              observer.next(++n)
+              go()
+            }, 1)
+          } else observer.complete()
+        }
+        go()
+        return () => clearTimeout(to)
+      })
+      const streamB = Observable.from(['a', 'b', 'c'])
+      streamA.concat(streamB).subscribe({
+        next: value => values.push(value),
+        complete() {
+          assert.deepEqual(values, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'a', 'b', 'c'])
+          done()
+        },
+      })
+    })
+
     it('should combine latest streams', function (done) {
       const values = []
       const streamA = Observable.from([1, 2, 3])
@@ -223,11 +249,11 @@ describe('Observable', function () {
         })
     })
 
-    it('should mergeMap', function (done) {
+    it('should flatMap', function (done) {
       const values = []
       const streamA = Observable.from([1, 2, 3])
       streamA
-        .mergeMap(x => Observable.from([x + x]))
+        .flatMap(x => Observable.from([x + x]))
         .subscribe({
           next: value => values.push(value),
           complete: () => {
@@ -237,12 +263,12 @@ describe('Observable', function () {
         })
     })
 
-    it('should mergeMap async', function (done) {
+    it('should flatMap async', function (done) {
       let n = 1
       const values = []
       const streamA = Observable.interval(5).take(4)
       streamA
-        .mergeMap(() => Observable.from(['a', n++]))
+        .flatMap(() => Observable.from(['a', n++]))
         .subscribe({
           next: value => values.push(value),
           complete: () => {
@@ -252,12 +278,12 @@ describe('Observable', function () {
         })
     })
 
-    it('should mergeMap another mergeMap', function (done) {
+    it('should flatMap another flatMap', function (done) {
       const values = []
       Observable.interval(5)
         .take(1)
-        .mergeMap(() => Observable.of('hi', 'hello'))
-        .mergeMap(value => Observable.of(value + 'there'))
+        .flatMap(() => Observable.of('hi', 'hello'))
+        .flatMap(value => Observable.of(value + 'there'))
         .subscribe({
           next: value => values.push(value),
           complete: () => {
@@ -267,15 +293,15 @@ describe('Observable', function () {
         })
     })
 
-    it('should mergeMap with a promise', function (done) {
+    it('should flatMap with a promise', function (done) {
       const values = []
       Observable.fromPromise(new Promise(resolve => setTimeout(() => resolve('hi'), 10)))
-        .mergeMap(str =>
+        .flatMap(str =>
           Observable.fromPromise(
             new Promise(resolve => setTimeout(() => resolve(str + 'there'), 50))
           )
         )
-        .mergeMap(result => Observable.of(result))
+        .flatMap(result => Observable.of(result))
         .subscribe({
           next: value => values.push(value),
           complete() {

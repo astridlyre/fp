@@ -1,12 +1,12 @@
 import { curry } from '../combinators.js'
 
 /**
- * MergeMap
+ * FlatMap
  * @param {function} fn - Mapping function
  * @param {observable} stream
  * @returns {observable}
  */
-export const mergeMap = curry(
+export const flatMap = curry(
   (fn, stream) =>
     new Observable(observer => {
       let done = false
