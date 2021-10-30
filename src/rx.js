@@ -21,6 +21,7 @@ import { skip } from './rx/skip.js'
 import { switchStream } from './rx/switch.js'
 import { take } from './rx/take.js'
 import { throttle } from './rx/throttle.js'
+import { until } from './rx/until.js'
 
 if (
   Observable.fromGenerator === undefined ||
@@ -148,6 +149,9 @@ export const ReactiveExtensions = {
   distinct(fn = x => x) {
     return distinct(fn, this)
   },
+  until(fn) {
+    return until(fn, this)
+  },
 }
 Object.assign(Observable.prototype, ReactiveExtensions)
 
@@ -172,4 +176,5 @@ export {
   switchStream,
   take,
   throttle,
+  until,
 }

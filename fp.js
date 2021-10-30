@@ -1097,7 +1097,7 @@ var filterAsync = /*#__PURE__*/function () {
   };
 }();
 var flat = M => M.flat();
-var flatMap = curry((f, M) => M.flatMap(f));
+var flatMap$1 = curry((f, M) => M.flatMap(f));
 var fold = curry((f, M) => M.fold(f));
 var getOrElseThrow = curry((e, M) => M.getOrElseThrow(e));
 /**
@@ -5106,6 +5106,36 @@ var buffer = curry((count, stream) => {
 });
 
 /**
+ * Concat, append streams
+ * @param {observable} Streams to append
+ * @returns {observable} Concatenated stream
+ */
+var concat = function concat() {
+  for (var _len = arguments.length, streams = new Array(_len), _key = 0; _key < _len; _key++) {
+    streams[_key] = arguments[_key];
+  }
+
+  var subs = [];
+  return new Observable(observer => {
+    subNextStream(streams, 0, subs, observer);
+    return () => subs.forEach(sub => sub.unsubscribe());
+  });
+};
+
+function subNextStream(streams, i, subs, observer) {
+  subs.push(streams[i].subscribe({
+    next: value => observer.next(value),
+    error: observer.error.bind(observer),
+
+    complete() {
+      if (i === streams.length - 1) return observer.complete();
+      subNextStream(streams, i + 1, subs, observer);
+    }
+
+  }));
+}
+
+/**
  * combine, combine the latest output of each stream
  * @param {observable} Stream a
  * @param {observable} Stream b
@@ -5343,13 +5373,13 @@ var merge = function merge() {
 };
 
 /**
- * MergeMap
+ * FlatMap
  * @param {function} fn - Mapping function
  * @param {observable} stream
  * @returns {observable}
  */
 
-var mergeMap = curry((fn, stream) => new Observable(observer => {
+var flatMap = curry((fn, stream) => new Observable(observer => {
   var done = false;
   var pending = 0;
   var subs = [];
@@ -5447,11 +5477,10 @@ var skip = curry((count, stream) => {
  */
 var switchStream = stream => new Observable(observer => {
   var done = false;
-  var prevSubs = [];
   var subs = stream.subscribe({
     next: nextStream => queueMicrotask(() => {
       if (!done) {
-        prevSubs.push(() => subs.unsubscribe());
+        subs.unsubscribe();
         subs = nextStream.subscribe({
           next: value => observer.next(value),
           complete: () => observer.complete()
@@ -5461,7 +5490,6 @@ var switchStream = stream => new Observable(observer => {
   });
   return () => {
     done = true;
-    prevSubs.forEach(f => f());
     subs.unsubscribe();
   };
 });
@@ -5512,6 +5540,26 @@ var throttle = curry((limit, stream) => {
     return () => subs.unsubscribe();
   });
 });
+
+/**
+ * Until, subscribe to a stream until Comparator returns true
+ * @param {function} Comparator function
+ * @param {observable} Stream
+ * @returns {observable} Stream that ends when comparator function returns true
+ */
+
+var until = curry((comparator, stream) => new Observable(observer => {
+  var subs = stream.subscribe({
+    next: value => {
+      if (comparator(value)) {
+        return observer.complete();
+      }
+
+      observer.next(value);
+    }
+  });
+  return () => subs.unsubscribe();
+}));
 
 var {
   Observable: Observable$1,
@@ -5633,6 +5681,14 @@ var ReactiveExtensions = {
     return debounce(limit, this);
   },
 
+  concat() {
+    for (var _len = arguments.length, streams = new Array(_len), _key = 0; _key < _len; _key++) {
+      streams[_key] = arguments[_key];
+    }
+
+    return concat(this, ...streams);
+  },
+
   combine(stream) {
     return combine(this, stream);
   },
@@ -5645,13 +5701,17 @@ var ReactiveExtensions = {
     return switchStream(this);
   },
 
-  mergeMap(fn) {
-    return mergeMap(fn, this);
+  flatMap(fn) {
+    return flatMap(fn, this);
   },
 
   distinct() {
     var fn = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : x => x;
     return distinct(fn, this);
+  },
+
+  until(fn) {
+    return until(fn, this);
   }
 
 };
@@ -5663,6 +5723,7 @@ var rx = /*#__PURE__*/Object.freeze({
   ReadableStream: ReadableStream$1,
   ReactiveExtensions: ReactiveExtensions,
   buffer: buffer,
+  concat: concat,
   combine: combine,
   debounce: debounce,
   distinct: distinct,
@@ -5674,13 +5735,14 @@ var rx = /*#__PURE__*/Object.freeze({
   map: map,
   mapTo: mapTo,
   merge: merge,
-  mergeMap: mergeMap,
+  flatMap: flatMap,
   pick: pick,
   reduce: reduce,
   skip: skip,
   switchStream: switchStream,
   take: take,
-  throttle: throttle
+  throttle: throttle,
+  until: until
 });
 
 var EventEmitter;
@@ -6025,4 +6087,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable$1 as Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge$1 as merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick$1 as pick, pipe, pipeAsync, pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable$1 as Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap$1 as flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge$1 as merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick$1 as pick, pipe, pipeAsync, pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip, zipMap, zipWith };

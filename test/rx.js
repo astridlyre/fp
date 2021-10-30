@@ -358,5 +358,18 @@ describe('Observable', function () {
           },
         })
     })
+
+    it('should stream until', function (done) {
+      const values = []
+      Observable.from([1, 2, 3, 4, 5])
+        .until(n => n > 3)
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            assert.deepEqual(values, [1, 2, 3])
+            done()
+          },
+        })
+    })
   })
 })
