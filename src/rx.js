@@ -1,4 +1,4 @@
-import { curry, last, values, deepPick } from './combinators.js'
+import { curry, last, values, deepProp } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable, ReadableStream } = globalThis
 
@@ -312,10 +312,10 @@ export const forEach = curry((fn, stream) => {
  * @returns {observable}
  */
 export const pick = curry(
-  (keys, stream) =>
+  (key, stream) =>
     new Observable(observer => {
       const subs = stream.subscribe(
-        withNext(observer)(obj => observer.next(deepPick(keys, obj)))
+        withNext(observer)(obj => observer.next(deepProp(key, obj)))
       )
       return () => subs.unsubscribe()
     })

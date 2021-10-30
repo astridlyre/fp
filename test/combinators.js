@@ -396,6 +396,15 @@ describe('Combinators', function () {
       assert.deepEqual(result, { a: { b: { c: 'hi' }, e: 'world' } })
       assert.notEqual(obj, result)
     })
+
+    it('should return an object with only key from paths', function () {
+      const obj = {
+        name: 'tim',
+        age: 15,
+      }
+      const result = combinators.deepPick(['name'], obj)
+      assert.deepEqual(result, { name: 'tim' })
+    })
   })
 
   describe('toJSON', function () {

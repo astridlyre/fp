@@ -461,7 +461,7 @@ export const deepSetProp = curry((path, value, a) => {
  * @returns {object} A copy of Object a with only properties paths
  */
 export const deepPick = curry((paths, a) =>
-  paths.reduce((result, path) => deepSetProp(path, deepProp(path)(a))(result), {})
+  paths.reduce((result, path) => deepSetProp(path, deepProp(path)(a), result), {})
 )
 
 /**

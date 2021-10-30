@@ -625,7 +625,7 @@ var deepSetProp = curry((path, value, a) => {
  * @returns {object} A copy of Object a with only properties paths
  */
 
-var deepPick = curry((paths, a) => paths.reduce((result, path) => deepSetProp(path, deepProp(path)(a))(result), {}));
+var deepPick = curry((paths, a) => paths.reduce((result, path) => deepSetProp(path, deepProp(path)(a), result), {}));
 /**
  * DiffObject, returns the changed values from newObj that are not in oldObj
  * @param {object} oldObj - Old Object
@@ -5368,8 +5368,8 @@ var forEach = curry((fn, stream) => {
  * @returns {observable}
  */
 
-var pick = curry((keys, stream) => new Observable(observer => {
-  var subs = stream.subscribe(withNext(observer)(obj => observer.next(deepPick(keys, obj))));
+var pick = curry((key, stream) => new Observable(observer => {
+  var subs = stream.subscribe(withNext(observer)(obj => observer.next(deepProp(key, obj))));
   return () => subs.unsubscribe();
 }));
 /**

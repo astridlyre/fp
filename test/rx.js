@@ -245,5 +245,32 @@ describe('Observable', function () {
           },
         })
     })
+
+    it('should mergeMap with a promise', function (done) {
+      const values = []
+      Observable.fromPromise(Promise.resolve('hi'))
+        .mergeMap(str => Observable.fromPromise(Promise.resolve(str + 'there')))
+        .mergeMap(result => Observable.of(result))
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            assert.deepEqual(values, ['hithere'])
+            done()
+          },
+        })
+    })
+
+    it('should pick', function (done) {
+      const values = []
+      Observable.from([{ name: 'tim' }, { name: 'bob' }])
+        .pick(['name'])
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            assert.deepEqual(values, ['tim', 'bob'])
+            done()
+          },
+        })
+    })
   })
 })
