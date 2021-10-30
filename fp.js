@@ -5311,6 +5311,40 @@ var effect = curry((fn, stream) => new Observable(observer => {
 }));
 
 /**
+ * Finally, run a side effect after stream completes
+ * @param {function} Clean-up function
+ * @param {observable} Stream to tap into
+ * @returns {observable}
+ */
+
+var finallyEffect = curry((fn, stream) => new Observable(observer => {
+  var subs = stream.subscribe({
+    next: value => observer.next(value),
+    error: err => {
+      try {
+        fn(err);
+        observer.complete();
+      } catch (err) {
+        observer.error(err);
+        observer.complete();
+      }
+    },
+
+    complete() {
+      try {
+        fn();
+        observer.complete();
+      } catch (err) {
+        observer.error(err);
+        observer.complete();
+      }
+    }
+
+  });
+  return () => subs.unsubscribe();
+}));
+
+/**
  * Filter
  * @param {function} predicate - Filter function
  * @param {observable} stream - Stream to filter
@@ -5905,6 +5939,10 @@ var ReactiveExtensions = {
 
   retry(config) {
     return retry(config, this);
+  },
+
+  finally(fn) {
+    return finallyEffect(fn, this);
   }
 
 };
@@ -5923,6 +5961,7 @@ var rx = /*#__PURE__*/Object.freeze({
   distinct: distinct,
   effect: effect,
   filter: filter,
+  finallyEffect: finallyEffect,
   forEach: forEach,
   interval: interval,
   listen: listen,

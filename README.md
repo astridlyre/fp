@@ -2,7 +2,7 @@
 
 My little functional programming library. Just a few functions I don't like
 re-writing. I am slowly adding tests, run with `npm run test` and you should see
-172 tests passing.
+198 tests passing.
 
 Features:
 
@@ -15,7 +15,7 @@ Features:
 
 `npm install @ebflat9/fp`
 
-## Examples
+## Functional Programming Examples
 
 ```javascript
 import * as fp from '@ebflat9/fp'
@@ -162,7 +162,14 @@ fp.deepJoin('isbn', 'isbn', a, b)
  *  },
  *]
  */
+```
 
+## MultiMethod
+
+A _multimethod_ is a function that decides which handler to call based on its
+arguments. It is a way to create polymorphism without classes.
+
+```javascript
 // multiMethod
 const store = {
   todos: [],
@@ -200,6 +207,75 @@ const router = fp.multi(
   fp.method('Unknown endpoint')
 )
 router({ method: 'GET', url: '/' }) // 'OK'
+```
+
+## Observable
+
+An _Observable_ is a way to abstract asynchronous and synchronous events in
+a way that makes it easier to work with, and more consistent.
+
+```javascript
+// Create an Observable
+Observable.from([1, 2, 3]).subscribe(console.log) // 1, 2, 3
+
+Observable.of(1, 2, 3).subscribe(console.log) // 1, 2, 3
+
+Observable.fromPromise(
+  new Promise(resolve => setTimeout(() => resolve('hi'), 1))
+).subscribe(console.log) // 'hi'
+```
+
+Various operations are available, such as:
+
+```javascript
+// Map
+Observable.from([1, 2, 3])
+  .map(x => x * x)
+  .subscribe(console.log) // 1, 4, 9
+
+// Filter
+Observable.from([1, 2, 3])
+  .filter(n => n % 2 !== 0)
+  .subscribe(console.log) // 1, 3
+
+// Take
+Observable.from([1, 2, 3]).take(2).subscribe(console.log) // 1, 2
+
+// Skip
+Observable.from([1, 2, 3]).skip(2).subscribe(console.log) // 3
+
+// Concat
+Observable.from([1, 2, 3])
+  .concat(Observable.from(['a', 'b', 'c']))
+  .subscribe(console.log) // [1, 2, 3, 'a', 'b', 'c']
+
+// Combine
+Observable.from([1, 2, 3])
+  .combine(Observable.from(['a', 'b', 'c']))
+  .subscribe(console.log) // [3, 'a']
+
+// flatMap
+Observable.from([1, 2, 3])
+  .flatMap(x => Observable.from([1, 2, 3].map(y => x + y)))
+  .subscribe(console.log) // [2, 3, 4, 3, 4, 5, 4, 5, 6]
+
+// Pick
+Observable.from([{ name: 'tim' }, { name: 'bob' }])
+  .pick('name')
+  .subscribe(console.log) // ['tim', 'bob']
+
+// Distinct
+Observable.from([1, 2, 2, 3]).distinct().subscribe(console.log) // [1, 2, 3]
+
+// Until
+Observable.from([1, 2, 3, 4, 5])
+  .until(n => n > 3)
+  .subscribe(console.log) // [1, 2, 3]
+
+// Zip
+Observable.from([1, 2, 3])
+  .zip(Observable.from(['a', 'b', 'c']))
+  .subscribe(console.log) // [1, 'a'], [2, 'b'], [3, 'c']
 ```
 
 There are many more functions available. Check out the tests for further
