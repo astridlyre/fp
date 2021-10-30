@@ -5521,7 +5521,7 @@ var reduce = curry((reducer, initialValue, stream) => {
 
 var defaultConfig = {
   method: 'expo',
-  delay: 200,
+  delay: 100,
   retries: 3
 };
 /**
@@ -5553,8 +5553,10 @@ function retryInner(stream, observer, sub, config, i) {
     next: value => observer.next(value),
     error: () => {
       if (i <= config.retries) {
-        return setTimeout(() => retryInner(stream, observer, sub, config, i + 1), retryInner(stream, observer, sub, config, i + 1), config.method === 'expo' ? Math.pow(config.delay, i) : config.delay * i);
+        return setTimeout(() => retryInner(stream, observer, sub, config, i + 1), config.method === 'expo' ? config.delay * Math.pow(i, 2) : config.delay * i);
       }
+
+      observer.complete();
     },
     complete: () => observer.complete()
   }));

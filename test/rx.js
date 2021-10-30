@@ -436,7 +436,7 @@ describe('Observable', function () {
         n++
         throw new Error('NO')
       })
-        .retry()
+        .retry({ delay: 2 })
         .subscribe({
           next: value => values.push(value),
           complete() {
@@ -457,7 +457,7 @@ describe('Observable', function () {
         n++
         throw new Error('NO')
       })
-        .retry(5)
+        .retry({ delay: 1 })
         .subscribe({
           next: value => values.push(value),
           complete() {
