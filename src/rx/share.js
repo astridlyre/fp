@@ -5,25 +5,55 @@ import { placeholder } from './utils.js'
  * @returns {observable}
  */
 export const share = stream => {
-  let sharedSubs = []
+  const store = {
+    values: [],
+    errors: [],
+    wantsComplete: false,
+    observers: [],
+    addObserver(o) {
+      this.observers.push(o)
+    },
+    removeObserver(o) {
+      this.observers = this.observers.filter(ob => ob !== o)
+    },
+  }
   const subs = stream.subscribe({
-    next: broadcast('next'),
-    error: broadcast('error'),
-    complete: broadcast('complete'),
+    next: value => {
+      store.values.push(value)
+      queueMicrotask(() => broadcast())
+    },
+    error: error => store.errors.push(error),
+    complete: () => (store.wantsComplete = true),
   })
 
-  function broadcast(handler) {
-    return value => sharedSubs.forEach(observer => observer[handler](value))
+  function broadcast() {
+    if (store.errors.length) {
+      store.observers.forEach(observer => {
+        store.errors.forEach(value => {
+          observer.error(value)
+        })
+      })
+    } else {
+      store.observers.forEach(observer => {
+        store.values.forEach(value => {
+          observer.next(value)
+        })
+      })
+    }
+    if (store.wantsComplete) {
+      store.observers.forEach(observer => observer.complete())
+      return subs.unsubscribe()
+    }
   }
 
   return placeholder(
     () =>
       new Observable(observer => {
-        sharedSubs.push(observer)
+        store.addObserver(observer)
         return () => {
-          sharedSubs = sharedSubs.filter(o => o !== observer)
+          store.removeObserver(observer)
           observer.complete()
-          if (sharedSubs.length === 0) subs.unsubscribe()
+          if (store.observers.length === 0) subs.unsubscribe()
         }
       })
   )()
