@@ -790,4 +790,33 @@ describe('Observable', function () {
         })
     })
   })
+
+  describe('share', function () {
+    it('should share a stream', function (done) {
+      const values = []
+      const values2 = []
+      let completed = 0
+      const stream = createAsyncStream([1, 2, 3, 4]).share()
+
+      stream.subscribe({
+        next: value => values.push(value),
+        complete() {
+          completed++
+          completed === 2 && test()
+        },
+      })
+      stream.subscribe({
+        next: value => values2.push(value),
+        complete() {
+          completed++
+          completed === 2 && test()
+        },
+      })
+
+      function test() {
+        assert.deepEqual(values2, values)
+        done()
+      }
+    })
+  })
 })

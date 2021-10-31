@@ -21,6 +21,7 @@ import { pick } from './rx/pick.js'
 import { reduce } from './rx/reduce.js'
 import { retry } from './rx/retry.js'
 import { skip } from './rx/skip.js'
+import { share } from './rx/share.js'
 import { switchStream } from './rx/switch.js'
 import { take } from './rx/take.js'
 import { throttle } from './rx/throttle.js'
@@ -159,6 +160,9 @@ export const ReactiveExtensions = {
   merge(stream) {
     return merge(this, stream)
   },
+  share() {
+    return share(this)
+  },
   switch() {
     return switchStream(this)
   },
@@ -207,6 +211,7 @@ export {
   reduce,
   retry,
   skip,
+  share,
   switchStream,
   take,
   throttle,
