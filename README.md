@@ -294,14 +294,6 @@ stream
   .filter(x => x % 2 === 0)
   .subscribe({
     next: value => values.push(value),
-    complete() {
-      try {
-        assert.deepEqual(values, [4, 16, 36])
-        done()
-      } catch (err) {
-        done(err)
-      }
-    },
   })
 Observable.from([1, 2, 3, 4, 5, 6]).subscribe(stream)
 // values = [4, 16, 36]
@@ -318,18 +310,11 @@ const stream = Observable.from([1, 2, 3, 4]).share()
 
 stream.subscribe({
   next: value => values.push(value),
-  complete() {
-    completed++
-    completed === 2 && test()
-  },
 })
 // values = [1, 2, 3, 4]
+
 stream.subscribe({
   next: value => values2.push(value),
-  complete() {
-    completed++
-    completed === 2 && test()
-  },
 })
 // values2 = [1, 2, 3, 4]
 ```
