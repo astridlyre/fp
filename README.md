@@ -13,7 +13,9 @@ Features:
 
 ## Install
 
-`npm install @ebflat9/fp`
+```bash
+npm install @ebflat9/fp
+```
 
 [View the npm package page](https://www.npmjs.com/package/@ebflat9/fp)
 
