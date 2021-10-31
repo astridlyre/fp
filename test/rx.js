@@ -247,7 +247,7 @@ describe('Observable', function () {
           },
         })
     })
-    it('should take from a stream', function (done) {
+    it('should take from a stream async', function (done) {
       const values = []
       createAsyncStream([1, 2, 3, 4, 5, 6])
         .take(2)
@@ -387,7 +387,7 @@ describe('Observable', function () {
     it('should output an interval', function (done) {
       const values = []
       let num = 1
-      Observable.interval(10)
+      Observable.interval(1)
         .take(5)
         .subscribe({
           next: () => values.push(num++),
@@ -511,12 +511,12 @@ describe('Observable', function () {
       const values = []
       const streamA = Observable.from([1, 2, 3])
       streamA
-        .flatMap(x => Observable.from([x + x]))
+        .flatMap(x => Observable.from([x + x, x]))
         .subscribe({
           next: value => values.push(value),
           complete: () => {
             try {
-              assert.deepEqual(values, [2, 4, 6])
+              assert.deepEqual(values, [2, 1, 4, 2, 6, 3])
               done()
             } catch (err) {
               done(err)
@@ -880,7 +880,7 @@ describe('Observable', function () {
         n++
         throw new Error('NO')
       })
-        .retry({ delay: 2 })
+        .retry({ delay: 1 })
         .subscribe({
           next: value => values.push(value),
           complete() {
@@ -905,7 +905,7 @@ describe('Observable', function () {
         n++
         throw new Error('NO')
       })
-        .retry({ delay: 1 })
+        .retry({ delay: 1, retries: 3 })
         .subscribe({
           next: value => values.push(value),
           complete() {
@@ -992,7 +992,9 @@ describe('Observable', function () {
       const stream = createAsyncStream([1, 2, 3, 4]).share()
 
       stream.subscribe({
-        next: value => values.push(value),
+        next: value => {
+          values.push(value)
+        },
         complete() {
           completed++
           completed === 2 && test()
@@ -1009,6 +1011,45 @@ describe('Observable', function () {
       function test() {
         try {
           assert.deepEqual(values2, values)
+          assert.deepEqual(values, [1, 2, 3, 4])
+          done()
+        } catch (err) {
+          done(err)
+        }
+      }
+    })
+
+    it('should share a stream, allowing map and filter', function (done) {
+      const values = []
+      const values2 = []
+      let completed = 0
+      const stream = createAsyncStream([1, 2, 3, 4]).share()
+
+      stream
+        .map(x => x * x)
+        .subscribe({
+          next: value => {
+            values.push(value)
+          },
+          complete() {
+            completed++
+            completed === 2 && test()
+          },
+        })
+      stream
+        .filter(n => n % 2 === 0)
+        .subscribe({
+          next: value => values2.push(value),
+          complete() {
+            completed++
+            completed === 2 && test()
+          },
+        })
+
+      function test() {
+        try {
+          assert.deepEqual(values, [1, 4, 9, 16])
+          assert.deepEqual(values2, [2, 4])
           done()
         } catch (err) {
           done(err)

@@ -36,21 +36,24 @@ export const share = (bufferSize, stream) => {
   })
 
   function broadcast() {
-    if (store.errors.length) {
-      store.observers.forEach(observer => {
-        store.errors.forEach(value => {
+    const { values, errors, observers, wantsComplete } = store
+    if (errors.length) {
+      observers.forEach(observer => {
+        errors.forEach(value => {
           observer.error(value)
         })
       })
+      errors.length = 0
     } else {
-      store.observers.forEach(observer => {
-        store.values.forEach(value => {
+      observers.forEach(observer => {
+        values.forEach(value => {
           observer.next(value)
         })
       })
+      values.length = 0
     }
-    if (store.wantsComplete) {
-      store.observers.forEach(observer => observer.complete())
+    if (wantsComplete) {
+      observers.forEach(observer => observer.complete())
       return subs.unsubscribe()
     }
   }
