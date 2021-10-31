@@ -5641,6 +5641,34 @@ var skip = placeholder((count, stream) => {
 });
 
 /**
+ * Share
+ * @param {observable} Observable to share
+ * @returns {observable}
+ */
+
+var share = stream => {
+  var sharedSubs = [];
+  var subs = stream.subscribe({
+    next: broadcast('next'),
+    error: broadcast('error'),
+    complete: broadcast('complete')
+  });
+
+  function broadcast(handler) {
+    return value => sharedSubs.forEach(observer => observer[handler](value));
+  }
+
+  return placeholder(() => new Observable(observer => {
+    sharedSubs.push(observer);
+    return () => {
+      sharedSubs = sharedSubs.filter(o => o !== observer);
+      observer.complete();
+      if (sharedSubs.length === 0) subs.unsubscribe();
+    };
+  }))();
+};
+
+/**
  * Switch, switch to a mapped Observable
  * @param {observable}
  * @returns {observable}
@@ -5928,6 +5956,10 @@ var ReactiveExtensions = {
     return merge(this, stream);
   },
 
+  share() {
+    return share(this);
+  },
+
   switch() {
     return switchStream(this);
   },
@@ -5993,6 +6025,7 @@ var rx = /*#__PURE__*/Object.freeze({
   reduce: reduce,
   retry: retry,
   skip: skip,
+  share: share,
   switchStream: switchStream,
   take: take,
   throttle: throttle,
