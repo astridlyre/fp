@@ -35,35 +35,66 @@ if (
 ) {
   if (ReadableStream === undefined) {
     const { Readable } = await import('stream')
-    Object.defineProperty(Observable, 'fromGenerator', {
-      value: placeholder(
-        generator =>
-          new Observable(observer => {
-            Readable.from(generator())
-              .on('data', observer.next.bind(observer))
-              .on('end', observer.complete.bind(observer))
-              .on('error', observer.error.bind(observer))
-          })
-      ),
-      enumerable: false,
-      writable: false,
-      configurable: false,
+    Object.defineProperties(Observable, {
+      fromGenerator: {
+        value: placeholder(
+          generator =>
+            new Observable(observer => {
+              Readable.from(generator())
+                .on('data', observer.next.bind(observer))
+                .on('end', observer.complete.bind(observer))
+                .on('error', observer.error.bind(observer))
+            })
+        ),
+        enumerable: false,
+        writable: false,
+        configurable: false,
+      },
+      fromStream: {
+        value: placeholder(
+          stream =>
+            new Observable(observer => {
+              stream.on('data', observer.next.bind(observer))
+              stream.on('end', observer.complete.bind(observer))
+              stream.on('error', observer.error.bind(observer))
+            })
+        ),
+        enumerable: false,
+        writable: false,
+        configurable: false,
+      },
     })
   } else {
-    await import('./web-streams.js')
-    Object.defineProperty(Observable, 'fromGenerator', {
-      value: placeholder(
-        generator =>
-          new Observable(observer => {
-            ReadableStream.from(generator())
-              .on('data', observer.next.bind(observer))
-              .on('end', observer.complete.bind(observer))
-              .on('error', observer.error.bind(observer))
-          })
-      ),
-      enumerable: false,
-      writable: false,
-      configurable: false,
+    await import('../web-streams.js')
+    Object.defineProperties(Observable, {
+      fromGenerator: {
+        value: placeholder(
+          generator =>
+            new Observable(observer => {
+              ReadableStream.from(generator())
+                .on('data', observer.next.bind(observer))
+                .on('end', observer.complete.bind(observer))
+                .on('error', observer.error.bind(observer))
+            })
+        ),
+        enumerable: false,
+        writable: false,
+        configurable: false,
+      },
+      fromFetch: {
+        value: placeholder(
+          (url, config) =>
+            new Observable(observer => {
+              fetch(url, config)
+                .then(res => observer.next(res))
+                .catch(err => observer.error(err))
+                .finally(() => observer.complete())
+            })
+        ),
+        enumerable: false,
+        writable: false,
+        configurable: false,
+      },
     })
   }
 }

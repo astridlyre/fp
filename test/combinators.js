@@ -497,8 +497,15 @@ describe('Combinators', function () {
     it('should compose two async functions', function (done) {
       const a = x => new Promise(resolve => setTimeout(() => resolve(x), 0))
       const b = x => new Promise(resolve => setTimeout(() => resolve(x), 1))
-      const c = async x => await combinators.composeAsync(a, b)
-      ;(async () => assert.equal(await c(5), 5), done())()
+      const c = combinators.composeAsync(a, b)
+      ;(async () => {
+        try {
+          assert.equal(await c(5), 5)
+          done()
+        } catch (err) {
+          done(err)
+        }
+      })()
     })
   })
 

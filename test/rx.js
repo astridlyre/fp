@@ -2,6 +2,7 @@ import { EventEmitter } from '../src/reactivize.js'
 import { Observable } from '../src/rx.js'
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
+import { Readable } from 'stream'
 
 function createAsyncStream(from) {
   return new Observable(observer => {
@@ -30,7 +31,11 @@ describe('Observable', function () {
       stream.subscribe({
         next: value => values.push(value),
         complete: () => {
-          assert.deepEqual(values, ['hello', 'world'])
+          try {
+            assert.deepEqual(values, ['hello', 'world'])
+          } catch (err) {
+            done(err)
+          }
         },
       })
       const values2 = []
@@ -39,8 +44,12 @@ describe('Observable', function () {
           values2.push(value)
         },
         complete: () => {
-          assert.deepEqual(values2, ['hello', 'world'])
-          done()
+          try {
+            assert.deepEqual(values2, ['hello', 'world'])
+            done()
+          } catch (err) {
+            done(err)
+          }
         },
       })
     })
@@ -54,8 +63,12 @@ describe('Observable', function () {
       stream.subscribe({
         next: value => values.push(value),
         complete: () => {
-          assert.deepEqual(values, [['cat'], ['dog']])
-          done()
+          try {
+            assert.deepEqual(values, [['cat'], ['dog']])
+            done()
+          } catch (err) {
+            done(err)
+          }
         },
       })
       emitter.emit('test', 'cat')
@@ -71,8 +84,12 @@ describe('Observable', function () {
       stream.throttle(50).subscribe({
         next: value => values.push(value),
         complete: () => {
-          assert.deepEqual(values, [1])
-          done()
+          try {
+            assert.deepEqual(values, [1])
+            done()
+          } catch (err) {
+            done(err)
+          }
         },
       })
     })
@@ -83,8 +100,12 @@ describe('Observable', function () {
       stream.throttle(50).subscribe({
         next: value => values.push(value),
         complete: () => {
-          assert.deepEqual(values, [1])
-          done()
+          try {
+            assert.deepEqual(values, [1])
+            done()
+          } catch (err) {
+            done(err)
+          }
         },
       })
     })
@@ -98,8 +119,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [3])
-            done()
+            try {
+              assert.deepEqual(values, [3])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -125,9 +150,13 @@ describe('Observable', function () {
       })
       setTimeout(() => {
         sub.unsubscribe()
-        assert.deepEqual(values, [1, 2, 3])
-        done()
-      }, 100)
+        try {
+          assert.deepEqual(values, [1, 2, 3])
+          done()
+        } catch (err) {
+          done(err)
+        }
+      }, 80)
     })
   })
 
@@ -139,8 +168,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, [1, 4, 9])
-            done()
+            try {
+              assert.deepEqual(values, [1, 4, 9])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -151,8 +184,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, [1, 4, 9])
-            done()
+            try {
+              assert.deepEqual(values, [1, 4, 9])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -166,8 +203,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, [2, 4, 6])
-            done()
+            try {
+              assert.deepEqual(values, [2, 4, 6])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -178,8 +219,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, [2, 4, 6])
-            done()
+            try {
+              assert.deepEqual(values, [2, 4, 6])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -193,8 +238,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, [1, 2])
-            done()
+            try {
+              assert.deepEqual(values, [1, 2])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -205,8 +254,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, [1, 2])
-            done()
+            try {
+              assert.deepEqual(values, [1, 2])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -220,8 +273,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, ['how', 'are', 'you'])
-            done()
+            try {
+              assert.deepEqual(values, ['how', 'are', 'you'])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -232,8 +289,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, ['how', 'are', 'you'])
-            done()
+            try {
+              assert.deepEqual(values, ['how', 'are', 'you'])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -247,8 +308,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [1, 2, 3, 'a', 'b', 'c'])
-            done()
+            try {
+              assert.deepEqual(values, [1, 2, 3, 'a', 'b', 'c'])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -272,8 +337,12 @@ describe('Observable', function () {
       streamA.concat(streamB).subscribe({
         next: value => values.push(value),
         complete() {
-          assert.deepEqual(values, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'a', 'b', 'c'])
-          done()
+          try {
+            assert.deepEqual(values, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'a', 'b', 'c'])
+            done()
+          } catch (err) {
+            done(err)
+          }
         },
       })
     })
@@ -287,8 +356,12 @@ describe('Observable', function () {
       streamA.combine(streamB).subscribe({
         next: value => values.push(value),
         complete: () => {
-          assert.deepEqual(values, [3, 'a'])
-          done()
+          try {
+            assert.deepEqual(values, [3, 'a'])
+            done()
+          } catch (err) {
+            done(err)
+          }
         },
       })
     })
@@ -299,8 +372,12 @@ describe('Observable', function () {
       streamA.combine(streamB).subscribe({
         next: value => values.push(value),
         complete: () => {
-          assert.deepEqual(values, [1, 'a', 2, 'b', 3, 'c'])
-          done()
+          try {
+            assert.deepEqual(values, [1, 'a', 2, 'b', 3, 'c'])
+            done()
+          } catch (err) {
+            done(err)
+          }
         },
       })
     })
@@ -315,8 +392,12 @@ describe('Observable', function () {
         .subscribe({
           next: () => values.push(num++),
           complete: () => {
-            assert.deepEqual(values, [1, 2, 3, 4, 5])
-            done()
+            try {
+              assert.deepEqual(values, [1, 2, 3, 4, 5])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -330,8 +411,12 @@ describe('Observable', function () {
       Observable.merge(streamA, streamB).subscribe({
         next: value => values.push(value),
         complete: () => {
-          assert.deepEqual(values, [1, 2, 3, 'a', 'b', 'c'])
-          done()
+          try {
+            assert.deepEqual(values, [1, 2, 3, 'a', 'b', 'c'])
+            done()
+          } catch (err) {
+            done(err)
+          }
         },
       })
     })
@@ -342,8 +427,12 @@ describe('Observable', function () {
       Observable.merge(streamA, streamB).subscribe({
         next: value => values.push(value),
         complete: () => {
-          assert.deepEqual(values, [1, 'a', 2, 'b', 3, 'c'])
-          done()
+          try {
+            assert.deepEqual(values, [1, 'a', 2, 'b', 3, 'c'])
+            done()
+          } catch (err) {
+            done(err)
+          }
         },
       })
     })
@@ -361,8 +450,12 @@ describe('Observable', function () {
       Observable.merge(streamA, streamB).subscribe({
         next: value => values.push(value),
         complete() {
-          assert.deepEqual(values, ['hello', 'world'])
-          done()
+          try {
+            assert.deepEqual(values, ['hello', 'world'])
+            done()
+          } catch (err) {
+            done(err)
+          }
         },
       })
     })
@@ -379,8 +472,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, ['a', 'b', 'c'])
-            done()
+            try {
+              assert.deepEqual(values, ['a', 'b', 'c'])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -398,8 +495,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values2.push(value),
           complete: () => {
-            assert.deepEqual(values2, [1, 2, 3, 4])
-            done()
+            try {
+              assert.deepEqual(values2, [1, 2, 3, 4])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -414,8 +515,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, [2, 4, 6])
-            done()
+            try {
+              assert.deepEqual(values, [2, 4, 6])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -429,8 +534,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, ['a', 1, 'a', 2, 'a', 3, 'a', 4])
-            done()
+            try {
+              assert.deepEqual(values, ['a', 1, 'a', 2, 'a', 3, 'a', 4])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -444,8 +553,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete: () => {
-            assert.deepEqual(values, ['hithere', 'hellothere'])
-            done()
+            try {
+              assert.deepEqual(values, ['hithere', 'hellothere'])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -462,8 +575,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, ['hithere'])
-            done()
+            try {
+              assert.deepEqual(values, ['hithere'])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -477,8 +594,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, ['tim', 'bob'])
-            done()
+            try {
+              assert.deepEqual(values, ['tim', 'bob'])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -489,8 +610,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, ['tim', 'bob'])
-            done()
+            try {
+              assert.deepEqual(values, ['tim', 'bob'])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -504,8 +629,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [1, 2, 3, 4, 5, 6])
-            done()
+            try {
+              assert.deepEqual(values, [1, 2, 3, 4, 5, 6])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -516,8 +645,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [1, 2, 3, 4, 5, 6])
-            done()
+            try {
+              assert.deepEqual(values, [1, 2, 3, 4, 5, 6])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -533,12 +666,16 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [
-              { name: 'tim', age: 2 },
-              { name: 'tim', age: 3 },
-              { name: 'tim', age: 2 },
-            ])
-            done()
+            try {
+              assert.deepEqual(values, [
+                { name: 'tim', age: 2 },
+                { name: 'tim', age: 3 },
+                { name: 'tim', age: 2 },
+              ])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -554,12 +691,16 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [
-              { name: 'tim', age: 2 },
-              { name: 'tim', age: 3 },
-              { name: 'tim', age: 2 },
-            ])
-            done()
+            try {
+              assert.deepEqual(values, [
+                { name: 'tim', age: 2 },
+                { name: 'tim', age: 3 },
+                { name: 'tim', age: 2 },
+              ])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -573,8 +714,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [1, 2, 3])
-            done()
+            try {
+              assert.deepEqual(values, [1, 2, 3])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -585,8 +730,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [1, 2, 3])
-            done()
+            try {
+              assert.deepEqual(values, [1, 2, 3])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -605,8 +754,12 @@ describe('Observable', function () {
         .catch(err => `Error: ${err.message}`)
         .subscribe({
           next: value => {
-            assert.equal(value, 'Error: Uh oh')
-            done()
+            try {
+              assert.equal(value, 'Error: Uh oh')
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -623,8 +776,12 @@ describe('Observable', function () {
         .catch((_, source) => source)
         .subscribe({
           next: value => {
-            assert.equal(value, 1)
-            done()
+            try {
+              assert.equal(value, 1)
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -638,12 +795,16 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [
-              [1, 'a', 4],
-              [2, 'b', 5],
-              [3, 'c', 6],
-            ])
-            done()
+            try {
+              assert.deepEqual(values, [
+                [1, 'a', 4],
+                [2, 'b', 5],
+                [3, 'c', 6],
+              ])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -654,12 +815,16 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [
-              [1, 'a', 4],
-              [2, 'b', 5],
-              [3, 'c', 6],
-            ])
-            done()
+            try {
+              assert.deepEqual(values, [
+                [1, 'a', 4],
+                [2, 'b', 5],
+                [3, 'c', 6],
+              ])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -673,8 +838,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [3, 5, 7])
-            done()
+            try {
+              assert.deepEqual(values, [3, 5, 7])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -688,8 +857,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [3, 5, 7])
-            done()
+            try {
+              assert.deepEqual(values, [3, 5, 7])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -711,8 +884,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, ['hello'])
-            done()
+            try {
+              assert.deepEqual(values, ['hello'])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -732,8 +909,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, ['hello'])
-            done()
+            try {
+              assert.deepEqual(values, ['hello'])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -750,8 +931,12 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, ['hi', 'there'])
-            done()
+            try {
+              assert.deepEqual(values, ['hi', 'there'])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -765,11 +950,15 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [
-              [1, 2],
-              [3, 4],
-            ])
-            done()
+            try {
+              assert.deepEqual(values, [
+                [1, 2],
+                [3, 4],
+              ])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -781,11 +970,15 @@ describe('Observable', function () {
         .subscribe({
           next: value => values.push(value),
           complete() {
-            assert.deepEqual(values, [
-              [1, 2],
-              [3, 4],
-            ])
-            done()
+            try {
+              assert.deepEqual(values, [
+                [1, 2],
+                [3, 4],
+              ])
+              done()
+            } catch (err) {
+              done(err)
+            }
           },
         })
     })
@@ -814,8 +1007,12 @@ describe('Observable', function () {
       })
 
       function test() {
-        assert.deepEqual(values2, values)
-        done()
+        try {
+          assert.deepEqual(values2, values)
+          done()
+        } catch (err) {
+          done(err)
+        }
       }
     })
 
@@ -841,9 +1038,31 @@ describe('Observable', function () {
       })
 
       function test() {
-        assert.deepEqual(values2, values)
-        done()
+        try {
+          assert.deepEqual(values2, values)
+          done()
+        } catch (err) {
+          done(err)
+        }
       }
+    })
+  })
+
+  describe('fromStream', function () {
+    it('should make an observable from a stream', function (done) {
+      const values = []
+      const stream = Readable.from([1, 2, 3])
+      Observable.fromStream(stream).subscribe({
+        next: value => values.push(value),
+        complete() {
+          try {
+            assert.deepEqual(values, [1, 2, 3])
+            done()
+          } catch (err) {
+            done(err)
+          }
+        },
+      })
     })
   })
 })
