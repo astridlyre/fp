@@ -2279,11 +2279,12 @@ function createClient(apiEndpoint) {
  * @param {iterable} iterable
  * @returns {function} Generator iterator function
  */
-function* mapWith(fn, iterable) {
+
+var mapWith = curry(function* mapWith(fn, iterable) {
   for (var element of iterable) {
     yield fn(element);
   }
-}
+});
 /**
  * MapAllWith
  * @param {function} fn - Mapper function
@@ -2292,11 +2293,11 @@ function* mapWith(fn, iterable) {
  * elements and then yields the result of their individual iteration
  */
 
-function* mapAllWith(fn, iterable) {
+var mapAllWith = curry(function* mapAllWith(fn, iterable) {
   for (var element of iterable) {
     yield* fn(element);
   }
-}
+});
 /**
  * FilterWith
  * @param {function} fn - Filter function
@@ -2305,11 +2306,11 @@ function* mapAllWith(fn, iterable) {
  * function fn
  */
 
-function* filterWith(fn, iterable) {
+var filterWith = curry(function* filterWith(fn, iterable) {
   for (var element of iterable) {
     if (fn(element)) yield element;
   }
-}
+});
 /**
  * Compact
  * @param {iterable} iterable
@@ -2317,11 +2318,11 @@ function* filterWith(fn, iterable) {
  * values
  */
 
-function* compact(iterable) {
+var compact = curry(function* compact(iterable) {
   for (var element of iterable) {
     if (element != null) yield element;
   }
-}
+});
 /**
  * UntilWith
  * @param {function} fn - Tester function
@@ -2330,12 +2331,12 @@ function* compact(iterable) {
  * the result of fn(element) is true
  */
 
-function* untilWith(fn, iterable) {
+var untilWith = curry(function* untilWith(fn, iterable) {
   for (var element of iterable) {
     if (fn(element)) break;
     yield element;
   }
-}
+});
 /**
  * First
  * @param {iterable} iterable
@@ -2362,7 +2363,7 @@ function* rest(iterable) {
  * number elements from iteratable
  */
 
-function* take$1(numberToTake, iterable) {
+var take$1 = curry(function* take(numberToTake, iterable) {
   var iterator = iterable[Symbol.iterator]();
 
   for (var i = 0; i < numberToTake; ++i) {
@@ -2372,7 +2373,7 @@ function* take$1(numberToTake, iterable) {
     } = iterator.next();
     if (!done) yield value;
   }
-}
+});
 /**
  * Zip
  * @param {iterable} iterables
@@ -2440,7 +2441,7 @@ function* zipWith(zipper) {
  * @returns {any} Result of reducing iterable with reducer
  */
 
-function reduceWith(fn, seed, iterable) {
+var reduceWith = curry((fn, seed, iterable) => {
   var accumulator = seed;
 
   for (var element of iterable) {
@@ -2448,7 +2449,7 @@ function reduceWith(fn, seed, iterable) {
   }
 
   return accumulator;
-}
+});
 /**
  * MemoizeIter
  * @param {function} generator - Iterator function
@@ -5155,12 +5156,15 @@ var catchError = placeholder((handler, stream) => {
   var sub = [];
   return new Observable(observer => {
     retry$1(handler, stream, sub, observer);
-    return () => sub.pop().unsubscribe();
+    return () => sub.map(s => s.unsubscribe());
   });
 });
 
 function retry$1(handler, stream, sub, observer) {
-  stream.subscribe({
+  var _sub$pop;
+
+  (_sub$pop = sub.pop()) === null || _sub$pop === void 0 ? void 0 : _sub$pop.unsubscribe();
+  return sub.push(stream.subscribe({
     next: value => observer.next(value),
     error: err => {
       try {
@@ -5176,7 +5180,7 @@ function retry$1(handler, stream, sub, observer) {
       }
     },
     complete: () => observer.complete()
-  });
+  }));
 }
 
 /**
@@ -5601,6 +5605,9 @@ var retry = placeholder((config, stream) => {
 });
 
 function retryInner(stream, observer, sub, config, i) {
+  var _sub$pop;
+
+  (_sub$pop = sub.pop()) === null || _sub$pop === void 0 ? void 0 : _sub$pop.unsubscribe();
   return sub.push(stream.subscribe({
     next: value => observer.next(value),
     error: () => {
@@ -5792,12 +5799,9 @@ if (Observable$1.fromGenerator === undefined || typeof Observable$1.fromGenerato
       Readable
     } = await import('stream');
     Object.defineProperty(Observable$1, 'fromGenerator', {
-      value(generator) {
-        return new Observable$1(observer => {
-          Readable.from(generator).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
-        });
-      },
-
+      value: placeholder(generator => new Observable$1(observer => {
+        Readable.from(generator()).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
+      })),
       enumerable: false,
       writable: false,
       configurable: false
@@ -5805,12 +5809,9 @@ if (Observable$1.fromGenerator === undefined || typeof Observable$1.fromGenerato
   } else {
     await Promise.resolve().then(function () { return webStreams; });
     Object.defineProperty(Observable$1, 'fromGenerator', {
-      value(generator) {
-        return new Observable$1(observer => {
-          ReadableStream$1.from(generator).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
-        });
-      },
-
+      value: placeholder(generator => new Observable$1(observer => {
+        ReadableStream$1.from(generator()).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
+      })),
       enumerable: false,
       writable: false,
       configurable: false
@@ -5837,7 +5838,7 @@ Object.defineProperties(Observable$1, {
     value: merge
   }, p),
   fromEvent: _objectSpread2({
-    value: curry((emitter, event, handler) => new Observable$1(observer => {
+    value: placeholder((emitter, event, handler) => new Observable$1(observer => {
       var group = new Map([[event, function () {
         return observer.next(handler(...arguments));
       }], ['error', observer.error.bind(observer)], ['end', observer.complete.bind(observer)]]);
@@ -5852,9 +5853,9 @@ Object.defineProperties(Observable$1, {
     }))
   }, p),
   fromPromise: _objectSpread2({
-    value: promise => new Observable$1(observer => {
+    value: placeholder(promise => new Observable$1(observer => {
       promise.then(value => observer.next(value)).catch(err => observer.error(err)).finally(() => observer.complete());
-    })
+    }))
   }, p)
 });
 var ReactiveExtensions = {

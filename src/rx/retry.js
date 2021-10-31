@@ -30,6 +30,7 @@ export const retry = placeholder((config, stream) => {
 })
 
 function retryInner(stream, observer, sub, config, i) {
+  sub.pop()?.unsubscribe()
   return sub.push(
     stream.subscribe({
       next: value => observer.next(value),

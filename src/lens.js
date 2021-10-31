@@ -23,6 +23,7 @@ class Variable {
     return this.#value
   }
 }
+
 export const lens = (getter, setter) => fn => obj =>
   fn(getter(obj)).map(value => setter(value, obj))
 

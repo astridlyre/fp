@@ -1,14 +1,15 @@
+import { curry } from './combinators.js'
 /**
  * MapWith
  * @param {function} fn - Mapper function
  * @param {iterable} iterable
  * @returns {function} Generator iterator function
  */
-export function* mapWith(fn, iterable) {
+export const mapWith = curry(function* mapWith(fn, iterable) {
   for (const element of iterable) {
     yield fn(element)
   }
-}
+})
 
 /**
  * MapAllWith
@@ -17,11 +18,11 @@ export function* mapWith(fn, iterable) {
  * @returns {function} Generator iterator function that applies mapper to all
  * elements and then yields the result of their individual iteration
  */
-export function* mapAllWith(fn, iterable) {
+export const mapAllWith = curry(function* mapAllWith(fn, iterable) {
   for (const element of iterable) {
     yield* fn(element)
   }
-}
+})
 
 /**
  * FilterWith
@@ -30,11 +31,11 @@ export function* mapAllWith(fn, iterable) {
  * @returns {function} Generator iterator function that filters elements by
  * function fn
  */
-export function* filterWith(fn, iterable) {
+export const filterWith = curry(function* filterWith(fn, iterable) {
   for (const element of iterable) {
     if (fn(element)) yield element
   }
-}
+})
 
 /**
  * Compact
@@ -42,11 +43,11 @@ export function* filterWith(fn, iterable) {
  * @returns {function} Generator iterator function that removes nullable
  * values
  */
-export function* compact(iterable) {
+export const compact = curry(function* compact(iterable) {
   for (const element of iterable) {
     if (element != null) yield element
   }
-}
+})
 
 /**
  * UntilWith
@@ -55,12 +56,12 @@ export function* compact(iterable) {
  * @returns {function} Generator iterator function that returns elements until
  * the result of fn(element) is true
  */
-export function* untilWith(fn, iterable) {
+export const untilWith = curry(function* untilWith(fn, iterable) {
   for (const element of iterable) {
     if (fn(element)) break
     yield element
   }
-}
+})
 
 /**
  * First
@@ -87,13 +88,13 @@ export function* rest(iterable) {
  * @returns {function} Generator iterator function that yields numberToTake
  * number elements from iteratable
  */
-export function* take(numberToTake, iterable) {
+export const take = curry(function* take(numberToTake, iterable) {
   const iterator = iterable[Symbol.iterator]()
   for (let i = 0; i < numberToTake; ++i) {
     const { done, value } = iterator.next()
     if (!done) yield value
   }
-}
+})
 
 /**
  * Drop
@@ -102,7 +103,7 @@ export function* take(numberToTake, iterable) {
  * @returns {function} Generator iterator function that yields elements once
  * numberToDrop elements have been dropped
  */
-export function* drop(numberToDrop, iterable) {
+export const drop = curry(function* drop(numberToDrop, iterable) {
   if (numberToDrop >= iterable.length) return
   const iterator = iterable[Symbol.iterator]()
   let i = 0
@@ -113,7 +114,7 @@ export function* drop(numberToDrop, iterable) {
     const { done, value } = iterator.next()
     if (!done) yield value
   } while (++i <= iterable.length)
-}
+})
 
 /**
  * Zip
@@ -159,13 +160,13 @@ export function* zipWith(zipper, ...iterables) {
  * @param {iterable} iterable
  * @returns {any} Result of reducing iterable with reducer
  */
-export function reduceWith(fn, seed, iterable) {
+export const reduceWith = curry((fn, seed, iterable) => {
   let accumulator = seed
   for (const element of iterable) {
     accumulator = fn(accumulator, element)
   }
   return accumulator
-}
+})
 
 /**
  * MemoizeIter

@@ -1,6 +1,7 @@
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
 import * as iterators from '../src/iterators.js'
+import { compose } from '../src/combinators.js'
 
 describe('iterators', function () {
   describe('mapWith', function () {
@@ -100,6 +101,18 @@ describe('iterators', function () {
       const arr = [1, 2, 3]
       const result = iterators.drop(3, arr)
       assert.deepEqual([...result], [])
+    })
+  })
+
+  describe('composing iterators', function () {
+    it('should allow composing iterators', function () {
+      const arr = [1, 2, 3, 4, 5]
+      const result = compose(
+        iterators.filterWith(x => x % 2 === 0),
+        iterators.mapWith(x => x * 3),
+        iterators.take(2)
+      )
+      assert.deepEqual([...result(arr)], [6])
     })
   })
 })
