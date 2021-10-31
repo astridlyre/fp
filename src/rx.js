@@ -1,4 +1,4 @@
-import { curry, entries, isFunction } from './combinators.js'
+import { entries, isFunction } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable, ReadableStream } = globalThis
 import { buffer } from './rx/buffer.js'
@@ -26,6 +26,7 @@ import { take } from './rx/take.js'
 import { throttle } from './rx/throttle.js'
 import { until } from './rx/until.js'
 import { zip } from './rx/zip.js'
+import { placeholder } from './rx/utils.js'
 
 if (
   Observable.fromGenerator === undefined ||
@@ -34,14 +35,15 @@ if (
   if (ReadableStream === undefined) {
     const { Readable } = await import('stream')
     Object.defineProperty(Observable, 'fromGenerator', {
-      value(generator) {
-        return new Observable(observer => {
-          Readable.from(generator)
-            .on('data', observer.next.bind(observer))
-            .on('end', observer.complete.bind(observer))
-            .on('error', observer.error.bind(observer))
-        })
-      },
+      value: placeholder(
+        generator =>
+          new Observable(observer => {
+            Readable.from(generator())
+              .on('data', observer.next.bind(observer))
+              .on('end', observer.complete.bind(observer))
+              .on('error', observer.error.bind(observer))
+          })
+      ),
       enumerable: false,
       writable: false,
       configurable: false,
@@ -49,14 +51,15 @@ if (
   } else {
     await import('./web-streams.js')
     Object.defineProperty(Observable, 'fromGenerator', {
-      value(generator) {
-        return new Observable(observer => {
-          ReadableStream.from(generator)
-            .on('data', observer.next.bind(observer))
-            .on('end', observer.complete.bind(observer))
-            .on('error', observer.error.bind(observer))
-        })
-      },
+      value: placeholder(
+        generator =>
+          new Observable(observer => {
+            ReadableStream.from(generator())
+              .on('data', observer.next.bind(observer))
+              .on('end', observer.complete.bind(observer))
+              .on('error', observer.error.bind(observer))
+          })
+      ),
       enumerable: false,
       writable: false,
       configurable: false,
@@ -76,7 +79,7 @@ Object.defineProperties(Observable, {
   combine: { value: combine, ...p },
   merge: { value: merge, ...p },
   fromEvent: {
-    value: curry(
+    value: placeholder(
       (emitter, event, handler) =>
         new Observable(observer => {
           const group = new Map([
@@ -94,13 +97,15 @@ Object.defineProperties(Observable, {
     ...p,
   },
   fromPromise: {
-    value: promise =>
-      new Observable(observer => {
-        promise
-          .then(value => observer.next(value))
-          .catch(err => observer.error(err))
-          .finally(() => observer.complete())
-      }),
+    value: placeholder(
+      promise =>
+        new Observable(observer => {
+          promise
+            .then(value => observer.next(value))
+            .catch(err => observer.error(err))
+            .finally(() => observer.complete())
+        })
+    ),
     ...p,
   },
 })

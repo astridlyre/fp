@@ -25,12 +25,21 @@ describe('Observable', function () {
         yield 'hello'
         yield 'world'
       }
-      const stream = Observable.fromGenerator(gen())
+      const stream = Observable.fromGenerator(gen)
       const values = []
       stream.subscribe({
         next: value => values.push(value),
         complete: () => {
           assert.deepEqual(values, ['hello', 'world'])
+        },
+      })
+      const values2 = []
+      stream.subscribe({
+        next: value => {
+          values2.push(value)
+        },
+        complete: () => {
+          assert.deepEqual(values2, ['hello', 'world'])
           done()
         },
       })
