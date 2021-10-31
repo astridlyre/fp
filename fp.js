@@ -5641,32 +5641,77 @@ var skip = placeholder((count, stream) => {
 });
 
 /**
- * Share
+ * Share, buffers 100 events by default
+ * @param {number} bufferSize (length of buffer)
  * @param {observable} Observable to share
  * @returns {observable}
  */
 
-var share = stream => {
-  var sharedSubs = [];
+var share = curry((bufferSize, stream) => {
+  var store = {
+    values: [],
+    errors: [],
+    wantsComplete: false,
+    observers: [],
+
+    addObserver(o) {
+      this.observers.push(o);
+    },
+
+    removeObserver(o) {
+      this.observers = this.observers.filter(ob => ob !== o);
+    }
+
+  };
   var subs = stream.subscribe({
-    next: broadcast('next'),
-    error: broadcast('error'),
-    complete: broadcast('complete')
+    next: value => {
+      if (store.values.length > bufferSize) {
+        store.values.shift();
+      }
+
+      store.values.push(value);
+      queueMicrotask(() => broadcast());
+    },
+    error: _error => {
+      if (store.errors.length > bufferSize) {
+        store.errors.shift();
+      }
+
+      store.errors.push(_error);
+    },
+    complete: () => store.wantsComplete = true
   });
 
-  function broadcast(handler) {
-    return value => sharedSubs.forEach(observer => observer[handler](value));
+  function broadcast() {
+    if (store.errors.length) {
+      store.observers.forEach(observer => {
+        store.errors.forEach(value => {
+          observer.error(value);
+        });
+      });
+    } else {
+      store.observers.forEach(observer => {
+        store.values.forEach(value => {
+          observer.next(value);
+        });
+      });
+    }
+
+    if (store.wantsComplete) {
+      store.observers.forEach(observer => observer.complete());
+      return subs.unsubscribe();
+    }
   }
 
   return placeholder(() => new Observable(observer => {
-    sharedSubs.push(observer);
+    store.addObserver(observer);
     return () => {
-      sharedSubs = sharedSubs.filter(o => o !== observer);
+      store.removeObserver(observer);
       observer.complete();
-      if (sharedSubs.length === 0) subs.unsubscribe();
+      if (store.observers.length === 0) subs.unsubscribe();
     };
   }))();
-};
+});
 
 /**
  * Switch, switch to a mapped Observable
@@ -5957,7 +6002,8 @@ var ReactiveExtensions = {
   },
 
   share() {
-    return share(this);
+    var bufferSize = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 100;
+    return share(bufferSize, this);
   },
 
   switch() {

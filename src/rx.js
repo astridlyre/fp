@@ -160,8 +160,8 @@ export const ReactiveExtensions = {
   merge(stream) {
     return merge(this, stream)
   },
-  share() {
-    return share(this)
+  share(bufferSize = 100) {
+    return share(bufferSize, this)
   },
   switch() {
     return switchStream(this)

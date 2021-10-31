@@ -1,10 +1,11 @@
 import { placeholder } from './utils.js'
 /**
- * Share
+ * Share, buffers 100 events by default
+ * @param {number} bufferSize (length of buffer)
  * @param {observable} Observable to share
  * @returns {observable}
  */
-export const share = stream => {
+export const share = (bufferSize, stream) => {
   const store = {
     values: [],
     errors: [],
@@ -19,10 +20,18 @@ export const share = stream => {
   }
   const subs = stream.subscribe({
     next: value => {
+      if (store.values.length >= bufferSize) {
+        store.values.shift()
+      }
       store.values.push(value)
       queueMicrotask(() => broadcast())
     },
-    error: error => store.errors.push(error),
+    error: error => {
+      if (store.errors.length >= bufferSize) {
+        store.errors.shift()
+      }
+      store.errors.push(error)
+    },
     complete: () => (store.wantsComplete = true),
   })
 
