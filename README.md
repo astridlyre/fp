@@ -2,7 +2,7 @@
 
 My little functional programming library. Just a few functions I don't like
 re-writing. I am slowly adding tests, run with `npm run test` and you should see
-198 tests passing.
+208 tests passing.
 
 Features:
 
@@ -14,6 +14,8 @@ Features:
 ## Install
 
 `npm install @ebflat9/fp`
+
+[View the npm package page](https://www.npmjs.com/package/@ebflat9/fp)
 
 ## Functional Programming Examples
 
@@ -225,6 +227,8 @@ Observable.fromPromise(
 ).subscribe(console.log) // 'hi'
 ```
 
+### Observable Operators
+
 Various operations are available, such as:
 
 ```javascript
@@ -276,6 +280,58 @@ Observable.from([1, 2, 3, 4, 5])
 Observable.from([1, 2, 3])
   .zip(Observable.from(['a', 'b', 'c']))
   .subscribe(console.log) // [1, 'a'], [2, 'b'], [3, 'c']
+```
+
+### Observable Subjects
+
+A subject can act as an observable and an observer:
+
+```javascript
+const values = []
+const stream = Observable.subject()
+stream
+  .map(x => x * x)
+  .filter(x => x % 2 === 0)
+  .subscribe({
+    next: value => values.push(value),
+    complete() {
+      try {
+        assert.deepEqual(values, [4, 16, 36])
+        done()
+      } catch (err) {
+        done(err)
+      }
+    },
+  })
+Observable.from([1, 2, 3, 4, 5, 6]).subscribe(stream)
+// values = [4, 16, 36]
+```
+
+### Observable Sharing
+
+Share an async (hot) or sync (cold) stream:
+
+```javascript
+const values = []
+const values2 = []
+const stream = Observable.from([1, 2, 3, 4]).share()
+
+stream.subscribe({
+  next: value => values.push(value),
+  complete() {
+    completed++
+    completed === 2 && test()
+  },
+})
+// values = [1, 2, 3, 4]
+stream.subscribe({
+  next: value => values2.push(value),
+  complete() {
+    completed++
+    completed === 2 && test()
+  },
+})
+// values2 = [1, 2, 3, 4]
 ```
 
 There are many more functions available. Check out the tests for further

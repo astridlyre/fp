@@ -1040,6 +1040,7 @@ describe('Observable', function () {
       function test() {
         try {
           assert.deepEqual(values2, values)
+          assert.deepEqual(values, [1, 2, 3, 4])
           done()
         } catch (err) {
           done(err)
