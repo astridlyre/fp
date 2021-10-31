@@ -1,5 +1,5 @@
-import { curry, deepProp } from '../combinators.js'
-import { withNext } from './utils.js'
+import { deepProp } from '../combinators.js'
+import { withNext, placeholder } from './utils.js'
 
 /**
  * Pick, pick keys from objects of stream
@@ -7,7 +7,7 @@ import { withNext } from './utils.js'
  * @param {observable} stream
  * @returns {observable}
  */
-export const pick = curry(
+export const pick = placeholder(
   (key, stream) =>
     new Observable(observer => {
       const subs = stream.subscribe(

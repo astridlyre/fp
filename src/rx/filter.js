@@ -1,5 +1,4 @@
-import { curry } from '../combinators.js'
-import { withNext } from './utils.js'
+import { withNext, placeholder } from './utils.js'
 
 /**
  * Filter
@@ -7,7 +6,7 @@ import { withNext } from './utils.js'
  * @param {observable} stream - Stream to filter
  * @returns {observable}
  */
-export const filter = curry(
+export const filter = placeholder(
   (predicate, stream) =>
     new Observable(observer => {
       const subs = stream.subscribe(

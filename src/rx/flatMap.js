@@ -1,4 +1,4 @@
-import { curry } from '../combinators.js'
+import { placeholder } from './utils.js'
 
 /**
  * FlatMap
@@ -6,7 +6,7 @@ import { curry } from '../combinators.js'
  * @param {observable} stream
  * @returns {observable}
  */
-export const flatMap = curry(
+export const flatMap = placeholder(
   (fn, stream) =>
     new Observable(observer => {
       let done = false

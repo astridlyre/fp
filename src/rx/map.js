@@ -1,5 +1,4 @@
-import { curry } from '../combinators.js'
-import { withNext } from './utils.js'
+import { withNext, placeholder } from './utils.js'
 
 /**
  * Map
@@ -7,7 +6,7 @@ import { withNext } from './utils.js'
  * @parma {observable} stream - Stream to map
  * @returns {observable}
  */
-export const map = curry(
+export const map = placeholder(
   (fn, stream) =>
     new Observable(observer => {
       const subs = stream.subscribe(

@@ -1,4 +1,5 @@
 import { values } from '../combinators.js'
+import { placeholder } from './utils.js'
 
 /**
  * combine, combine the latest output of each stream
@@ -6,7 +7,7 @@ import { values } from '../combinators.js'
  * @param {observable} Stream b
  * @returns {observable} Latest combined output of stream a and b
  */
-export const combine = (...streams) => {
+export const combine = placeholder((...streams) => {
   let done = 0
   const store = Object.fromEntries(streams.map((_, i) => [i, []]))
   const buffers = values(store)
@@ -31,4 +32,4 @@ export const combine = (...streams) => {
     )
     return () => subscriptions.forEach(subs => subs.unsubscribe())
   })
-}
+})

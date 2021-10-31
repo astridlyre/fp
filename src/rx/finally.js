@@ -1,4 +1,4 @@
-import { curry } from '../combinators.js'
+import { placeholder } from './utils.js'
 
 /**
  * Finally, run a side effect after stream completes
@@ -6,7 +6,7 @@ import { curry } from '../combinators.js'
  * @param {observable} Stream to tap into
  * @returns {observable}
  */
-export const finallyEffect = curry(
+export const finallyEffect = placeholder(
   (fn, stream) =>
     new Observable(observer => {
       const subs = stream.subscribe({

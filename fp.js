@@ -5107,6 +5107,20 @@ var withNext = observer => next => ({
   error: observer.error.bind(observer),
   complete: observer.complete.bind(observer)
 });
+var placeholder = creator => function () {
+  for (var _len = arguments.length, initialArgs = new Array(_len), _key = 0; _key < _len; _key++) {
+    initialArgs[_key] = arguments[_key];
+  }
+
+  return new Proxy({}, {
+    get(_, prop) {
+      return function () {
+        return creator(...initialArgs)[prop](...arguments);
+      };
+    }
+
+  });
+};
 
 /**
  * Buffer
@@ -5115,7 +5129,7 @@ var withNext = observer => next => ({
  * @returns {observable}
  */
 
-var buffer = curry((count, stream) => {
+var buffer = placeholder((count, stream) => {
   var internalStorage = [];
   return new Observable(observer => {
     var subs = stream.subscribe(withNext(observer)(value => {
@@ -5137,7 +5151,7 @@ var buffer = curry((count, stream) => {
  * @returns {observable}
  */
 
-var catchError = curry((handler, stream) => {
+var catchError = placeholder((handler, stream) => {
   var sub = [];
   return new Observable(observer => {
     retry$1(handler, stream, sub, observer);
@@ -5170,7 +5184,8 @@ function retry$1(handler, stream, sub, observer) {
  * @param {observable} Streams to append
  * @returns {observable} Concatenated stream
  */
-var concat = function concat() {
+
+var concat = placeholder(function () {
   for (var _len = arguments.length, streams = new Array(_len), _key = 0; _key < _len; _key++) {
     streams[_key] = arguments[_key];
   }
@@ -5180,7 +5195,7 @@ var concat = function concat() {
     subNextStream(streams, 0, subs, observer);
     return () => subs.forEach(sub => sub.unsubscribe());
   });
-};
+});
 
 function subNextStream(streams, i, subs, observer) {
   subs.push(streams[i].subscribe({
@@ -5202,7 +5217,7 @@ function subNextStream(streams, i, subs, observer) {
  * @returns {observable} Latest combined output of stream a and b
  */
 
-var combine = function combine() {
+var combine = placeholder(function () {
   for (var _len = arguments.length, streams = new Array(_len), _key = 0; _key < _len; _key++) {
     streams[_key] = arguments[_key];
   }
@@ -5233,7 +5248,7 @@ var combine = function combine() {
     }));
     return () => subscriptions.forEach(subs => subs.unsubscribe());
   });
-};
+});
 
 /**
  * Debounce
@@ -5242,7 +5257,7 @@ var combine = function combine() {
  * @returns {observable}
  */
 
-var debounce = curry((limit, stream) => {
+var debounce = placeholder((limit, stream) => {
   var stack = [];
   var lastInterval = 0;
   var wantsComplete = false;
@@ -5270,7 +5285,7 @@ var debounce = curry((limit, stream) => {
  * @returns {observable} Stream with unique values only
  */
 
-var distinct = (fn, stream) => {
+var distinct = placeholder((fn, stream) => {
   var lastSent = null;
   return new Observable(observer => {
     var subs = stream.subscribe(withNext(observer)(value => {
@@ -5289,7 +5304,7 @@ var distinct = (fn, stream) => {
     }));
     return () => subs.unsubscribe();
   });
-};
+});
 
 /**
  * Effect
@@ -5298,7 +5313,7 @@ var distinct = (fn, stream) => {
  * @returns {observable}
  */
 
-var effect = curry((fn, stream) => new Observable(observer => {
+var effect = placeholder((fn, stream) => new Observable(observer => {
   var subs = stream.subscribe(withNext(observer)(value => {
     try {
       fn(value);
@@ -5317,7 +5332,7 @@ var effect = curry((fn, stream) => new Observable(observer => {
  * @returns {observable}
  */
 
-var finallyEffect = curry((fn, stream) => new Observable(observer => {
+var finallyEffect = placeholder((fn, stream) => new Observable(observer => {
   var subs = stream.subscribe({
     next: value => observer.next(value),
     error: err => {
@@ -5351,7 +5366,7 @@ var finallyEffect = curry((fn, stream) => new Observable(observer => {
  * @returns {observable}
  */
 
-var filter = curry((predicate, stream) => new Observable(observer => {
+var filter = placeholder((predicate, stream) => new Observable(observer => {
   var subs = stream.subscribe(withNext(observer)(value => {
     try {
       if (predicate(value)) {
@@ -5387,21 +5402,17 @@ var forEach = curry((fn, stream) => {
  * @param {any} optional value to emit
  * @returns {observable}
  */
-var interval = time => new Proxy({}, {
-  get(_, prop) {
-    return function () {
-      var n = 0;
-      return new Observable(observer => {
-        var id = setInterval(() => observer.next(++n), time);
-        observer.next(++n);
-        return () => {
-          observer.complete();
-          clearInterval(id);
-        };
-      })[prop](...arguments);
-    };
-  }
 
+var interval = placeholder(time => {
+  var n = 0;
+  return new Observable(observer => {
+    var id = setInterval(() => observer.next(++n), time);
+    observer.next(++n);
+    return () => {
+      observer.complete();
+      clearInterval(id);
+    };
+  });
 });
 
 /**
@@ -5411,7 +5422,7 @@ var interval = time => new Proxy({}, {
  * @returns {observable}
  */
 
-var listen = curry((eventName, element) => {
+var listen = placeholder((eventName, element) => {
   return new Observable(observer => {
     var handler = event => observer.next(event);
 
@@ -5427,7 +5438,7 @@ var listen = curry((eventName, element) => {
  * @returns {observable}
  */
 
-var map = curry((fn, stream) => new Observable(observer => {
+var map = placeholder((fn, stream) => new Observable(observer => {
   var subs = stream.subscribe(withNext(observer)(value => {
     try {
       observer.next(fn(value));
@@ -5445,7 +5456,7 @@ var map = curry((fn, stream) => new Observable(observer => {
  * @returns {observable}
  */
 
-var mapTo = curry((value, stream) => new Observable(observer => {
+var mapTo = placeholder((value, stream) => new Observable(observer => {
   var subs = stream.subscribe(withNext(observer)(() => observer.next(value)));
   return () => subs.unsubscribe();
 }));
@@ -5456,7 +5467,8 @@ var mapTo = curry((value, stream) => new Observable(observer => {
  * @param {observable} Stream b
  * @returns {observable} Interleaving stream of a and b
  */
-var merge = function merge() {
+
+var merge = placeholder(function () {
   for (var _len = arguments.length, streams = new Array(_len), _key = 0; _key < _len; _key++) {
     streams[_key] = arguments[_key];
   }
@@ -5470,7 +5482,7 @@ var merge = function merge() {
     }));
     return () => subscriptions.forEach(subs => subs.unsubscribe());
   });
-};
+});
 
 /**
  * FlatMap
@@ -5479,7 +5491,7 @@ var merge = function merge() {
  * @returns {observable}
  */
 
-var flatMap = curry((fn, stream) => new Observable(observer => {
+var flatMap = placeholder((fn, stream) => new Observable(observer => {
   var done = false;
   var pending = 0;
   var subs = [];
@@ -5518,7 +5530,7 @@ var flatMap = curry((fn, stream) => new Observable(observer => {
  * @returns {observable}
  */
 
-var pick = curry((key, stream) => new Observable(observer => {
+var pick = placeholder((key, stream) => new Observable(observer => {
   var subs = stream.subscribe(withNext(observer)(obj => observer.next(deepProp(key, obj))));
   return () => subs.unsubscribe();
 }));
@@ -5531,7 +5543,7 @@ var pick = curry((key, stream) => new Observable(observer => {
  * @returns {observable}
  */
 
-var reduce = curry((reducer, initialValue, stream) => {
+var reduce = placeholder((reducer, initialValue, stream) => {
   var accumulator = initialValue !== null && initialValue !== void 0 ? initialValue : {};
   return new Observable(observer => {
     var subs = stream.subscribe({
@@ -5572,7 +5584,7 @@ var defaultConfig = {
  * @returns {observable}
  */
 
-var retry = curry((config, stream) => {
+var retry = placeholder((config, stream) => {
   if (isNumber(config)) {
     config = Object.assign(defaultConfig, {
       retries: config
@@ -5609,7 +5621,7 @@ function retryInner(stream, observer, sub, config, i) {
  * @returns {observable}
  */
 
-var skip = curry((count, stream) => {
+var skip = placeholder((count, stream) => {
   var skipped = 0;
   return new Observable(observer => {
     var subs = stream.subscribe(withNext(observer)(value => {
@@ -5626,7 +5638,8 @@ var skip = curry((count, stream) => {
  * @param {observable}
  * @returns {observable}
  */
-var switchStream = stream => new Observable(observer => {
+
+var switchStream = placeholder(stream => new Observable(observer => {
   var done = false;
   var subs = stream.subscribe({
     next: nextStream => queueMicrotask(() => {
@@ -5643,7 +5656,7 @@ var switchStream = stream => new Observable(observer => {
     done = true;
     subs.unsubscribe();
   };
-});
+}));
 
 /**
  * Take
@@ -5652,7 +5665,7 @@ var switchStream = stream => new Observable(observer => {
  * @returns {observable}
  */
 
-var take = curry((numberToTake, stream) => {
+var take = placeholder((numberToTake, stream) => {
   var taken = 0;
   return new Observable(observer => {
     var subs = stream.subscribe(withNext(observer)(value => {
@@ -5670,7 +5683,7 @@ var take = curry((numberToTake, stream) => {
  * @returns {observable}
  */
 
-var throttle = curry((limit, stream) => {
+var throttle = placeholder((limit, stream) => {
   var lastRan = 0;
   var lastInterval = 0;
   return new Observable(observer => {
@@ -5699,7 +5712,7 @@ var throttle = curry((limit, stream) => {
  * @returns {observable} Stream that ends when comparator function returns true
  */
 
-var until = curry((comparator, stream) => new Observable(observer => {
+var until = placeholder((comparator, stream) => new Observable(observer => {
   var subs = stream.subscribe({
     next: value => {
       try {
@@ -5722,7 +5735,7 @@ var until = curry((comparator, stream) => new Observable(observer => {
  * @returns {observable} One-to-one zipped streams
  */
 
-var zip = function zip() {
+var zip = placeholder(function () {
   for (var _len = arguments.length, streams = new Array(_len), _key = 0; _key < _len; _key++) {
     streams[_key] = arguments[_key];
   }
@@ -5766,7 +5779,7 @@ var zip = function zip() {
     }));
     return () => subscriptions.forEach(subs => subs.unsubscribe());
   });
-};
+});
 
 var {
   Observable: Observable$1,

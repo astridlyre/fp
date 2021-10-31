@@ -1,5 +1,4 @@
-import { curry } from '../combinators.js'
-import { withNext } from './utils.js'
+import { withNext, placeholder } from './utils.js'
 
 /**
  * Take
@@ -7,7 +6,7 @@ import { withNext } from './utils.js'
  * @param {observable} stream
  * @returns {observable}
  */
-export const take = curry((numberToTake, stream) => {
+export const take = placeholder((numberToTake, stream) => {
   let taken = 0
   return new Observable(observer => {
     const subs = stream.subscribe(

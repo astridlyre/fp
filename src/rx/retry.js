@@ -1,4 +1,5 @@
-import { curry, isNumber } from '../combinators.js'
+import { isNumber } from '../combinators.js'
+import { placeholder } from './utils.js'
 
 // Defaults: method 'expo' for exponential time increase, anything else for
 // linear time increase.
@@ -14,7 +15,7 @@ const defaultConfig = {
  * @param {observable} Stream to retry incase of errors
  * @returns {observable}
  */
-export const retry = curry((config, stream) => {
+export const retry = placeholder((config, stream) => {
   if (isNumber(config)) {
     config = Object.assign(defaultConfig, { retries: config })
   } else {

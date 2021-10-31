@@ -1,5 +1,4 @@
-import { curry } from '../combinators.js'
-import { withNext } from './utils.js'
+import { withNext, placeholder } from './utils.js'
 
 /**
  * MapTo, map a stream to only output value
@@ -7,7 +6,7 @@ import { withNext } from './utils.js'
  * @param {observable} stream
  * @returns {observable}
  */
-export const mapTo = curry(
+export const mapTo = placeholder(
   (value, stream) =>
     new Observable(observer => {
       const subs = stream.subscribe(withNext(observer)(() => observer.next(value)))

@@ -1,10 +1,11 @@
+import { placeholder } from './utils.js'
 /**
  * Merge, interleave two streams
  * @param {observable} Stream a
  * @param {observable} Stream b
  * @returns {observable} Interleaving stream of a and b
  */
-export const merge = (...streams) => {
+export const merge = placeholder((...streams) => {
   let done = 0
   return new Observable(observer => {
     const subscriptions = streams.map(stream =>
@@ -16,4 +17,4 @@ export const merge = (...streams) => {
     )
     return () => subscriptions.forEach(subs => subs.unsubscribe())
   })
-}
+})

@@ -1,11 +1,12 @@
 import { isFunction, head, values } from '../combinators.js'
+import { placeholder } from './utils.js'
 
 /**
  * Zip
  * @param {observable} Streams
  * @returns {observable} One-to-one zipped streams
  */
-export const zip = (...streams) => {
+export const zip = placeholder((...streams) => {
   let zipper = (...args) => args
   if (isFunction(head(streams))) {
     zipper = streams.shift()
@@ -36,4 +37,4 @@ export const zip = (...streams) => {
     )
     return () => subscriptions.forEach(subs => subs.unsubscribe())
   })
-}
+})

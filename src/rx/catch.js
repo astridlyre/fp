@@ -1,4 +1,4 @@
-import { curry } from '../combinators.js'
+import { placeholder } from './utils.js'
 
 /**
  * Catch, handle error in stream
@@ -6,7 +6,7 @@ import { curry } from '../combinators.js'
  * @param {observable} Stream
  * @returns {observable}
  */
-export const catchError = curry((handler, stream) => {
+export const catchError = placeholder((handler, stream) => {
   const sub = []
   return new Observable(observer => {
     retry(handler, stream, sub, observer)

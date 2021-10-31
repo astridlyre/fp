@@ -1,4 +1,4 @@
-import { curry } from '../combinators.js'
+import { placeholder } from './utils.js'
 
 /**
  * Until, subscribe to a stream until Comparator returns true
@@ -6,7 +6,7 @@ import { curry } from '../combinators.js'
  * @param {observable} Stream
  * @returns {observable} Stream that ends when comparator function returns true
  */
-export const until = curry(
+export const until = placeholder(
   (comparator, stream) =>
     new Observable(observer => {
       const subs = stream.subscribe({

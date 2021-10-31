@@ -1,5 +1,4 @@
-import { curry } from '../combinators.js'
-import { withNext } from './utils.js'
+import { withNext, placeholder } from './utils.js'
 
 /**
  * Skip
@@ -7,7 +6,7 @@ import { withNext } from './utils.js'
  * @parma {observable} stream
  * @returns {observable}
  */
-export const skip = curry((count, stream) => {
+export const skip = placeholder((count, stream) => {
   let skipped = 0
   return new Observable(observer => {
     const subs = stream.subscribe(

@@ -1,4 +1,4 @@
-import { curry } from '../combinators.js'
+import { placeholder } from './utils.js'
 
 /**
  * Reduce
@@ -7,7 +7,7 @@ import { curry } from '../combinators.js'
  * @param {observable} stream
  * @returns {observable}
  */
-export const reduce = curry((reducer, initialValue, stream) => {
+export const reduce = placeholder((reducer, initialValue, stream) => {
   let accumulator = initialValue ?? {}
   return new Observable(observer => {
     const subs = stream.subscribe({

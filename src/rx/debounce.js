@@ -1,4 +1,5 @@
-import { curry, last } from '../combinators.js'
+import { last } from '../combinators.js'
+import { placeholder } from './utils.js'
 
 /**
  * Debounce
@@ -6,7 +7,7 @@ import { curry, last } from '../combinators.js'
  * @param {observable} stream - stream to debounce
  * @returns {observable}
  */
-export const debounce = curry((limit, stream) => {
+export const debounce = placeholder((limit, stream) => {
   const stack = []
   let lastInterval = 0
   let wantsComplete = false

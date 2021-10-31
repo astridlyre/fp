@@ -1,5 +1,4 @@
-import { curry } from '../combinators.js'
-import { withNext } from './utils.js'
+import { withNext, placeholder } from './utils.js'
 
 /**
  * Effect
@@ -7,7 +6,7 @@ import { withNext } from './utils.js'
  * @param {observable} stream
  * @returns {observable}
  */
-export const effect = curry(
+export const effect = placeholder(
   (fn, stream) =>
     new Observable(observer => {
       const subs = stream.subscribe(

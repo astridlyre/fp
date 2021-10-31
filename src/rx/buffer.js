@@ -1,5 +1,4 @@
-import { curry } from '../combinators.js'
-import { withNext } from './utils.js'
+import { placeholder, withNext } from './utils.js'
 
 /**
  * Buffer
@@ -7,7 +6,7 @@ import { withNext } from './utils.js'
  * @param {observable} stream - Stream to buffer
  * @returns {observable}
  */
-export const buffer = curry((count, stream) => {
+export const buffer = placeholder((count, stream) => {
   const internalStorage = []
   return new Observable(observer => {
     const subs = stream.subscribe(

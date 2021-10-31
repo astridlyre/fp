@@ -1,5 +1,4 @@
-import { curry } from '../combinators.js'
-import { withNext } from './utils.js'
+import { withNext, placeholder } from './utils.js'
 
 /**
  * Throttle
@@ -7,7 +6,7 @@ import { withNext } from './utils.js'
  * @param {observable} stream - Stream to throttle to
  * @returns {observable}
  */
-export const throttle = curry((limit, stream) => {
+export const throttle = placeholder((limit, stream) => {
   let lastRan = 0
   let lastInterval = 0
   return new Observable(observer => {

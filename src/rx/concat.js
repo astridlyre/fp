@@ -1,15 +1,16 @@
+import { placeholder } from './utils.js'
 /**
  * Concat, append streams
  * @param {observable} Streams to append
  * @returns {observable} Concatenated stream
  */
-export const concat = (...streams) => {
+export const concat = placeholder((...streams) => {
   const subs = []
   return new Observable(observer => {
     subNextStream(streams, 0, subs, observer)
     return () => subs.forEach(sub => sub.unsubscribe())
   })
-}
+})
 
 function subNextStream(streams, i, subs, observer) {
   subs.push(

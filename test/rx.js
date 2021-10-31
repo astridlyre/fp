@@ -747,4 +747,38 @@ describe('Observable', function () {
         })
     })
   })
+
+  describe('buffer', function () {
+    it('should buffer streams', function (done) {
+      const values = []
+      Observable.from([1, 2, 3, 4])
+        .buffer(2)
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            assert.deepEqual(values, [
+              [1, 2],
+              [3, 4],
+            ])
+            done()
+          },
+        })
+    })
+
+    it('should buffer streams async', function (done) {
+      const values = []
+      createAsyncStream([1, 2, 3, 4])
+        .buffer(2)
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            assert.deepEqual(values, [
+              [1, 2],
+              [3, 4],
+            ])
+            done()
+          },
+        })
+    })
+  })
 })
