@@ -1065,4 +1065,90 @@ describe('Observable', function () {
       })
     })
   })
+
+  describe('subjet', function () {
+    it('should allow subscribing and pushing', function (done) {
+      const values = []
+      const stream = Observable.subject()
+      stream.subscribe({
+        next: value => {
+          values.push(value)
+        },
+        complete() {
+          try {
+            assert.deepEqual(values, [1, 2, 3])
+            done()
+          } catch (err) {
+            done(err)
+          }
+        },
+      })
+      stream.next(1)
+      stream.next(2)
+      stream.next(3)
+      stream.complete()
+    })
+
+    it('should allow map', function (done) {
+      const values = []
+      const stream = Observable.subject()
+      stream
+        .map(x => x * x)
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            try {
+              assert.deepEqual(values, [1, 4, 9])
+              done()
+            } catch (err) {
+              done(err)
+            }
+          },
+        })
+      stream.next(1)
+      stream.next(2)
+      stream.next(3)
+      stream.complete()
+    })
+
+    it('should allow filter', function (done) {
+      const values = []
+      const stream = Observable.subject()
+      stream
+        .map(x => x * x)
+        .filter(x => x % 2 === 0)
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            try {
+              assert.deepEqual(values, [4, 16, 36])
+              done()
+            } catch (err) {
+              done(err)
+            }
+          },
+        })
+      Observable.from([1, 2, 3, 4, 5, 6]).subscribe(stream)
+    })
+
+    it('should work with async stream', function (done) {
+      const values = []
+      const stream = Observable.subject()
+      stream
+        .map(x => x.toUpperCase())
+        .flatMap(x => Observable.from([1, 2].map(n => x + n)))
+        .subscribe({
+          next: value => values.push(value),
+          complete() {
+            try {
+              assert.deepEqual(values, ['HELLO1', 'HELLO2', 'WORLD1', 'WORLD2'])
+              done()
+            } catch (err) {
+              done(err)
+            }
+          },
+        })
+      createAsyncStream(['hello', 'world']).subscribe(stream)
+    })
+  })
 })

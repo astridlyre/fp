@@ -23,6 +23,7 @@ import { retry } from './rx/retry.js'
 import { skip } from './rx/skip.js'
 import { share } from './rx/share.js'
 import { switchStream } from './rx/switch.js'
+import { subject } from './rx/subject.js'
 import { take } from './rx/take.js'
 import { throttle } from './rx/throttle.js'
 import { until } from './rx/until.js'
@@ -110,6 +111,7 @@ Object.defineProperties(Observable, {
   interval: { value: interval, ...p },
   combine: { value: combine, ...p },
   merge: { value: merge, ...p },
+  subject: { value: subject, ...p },
   fromEvent: {
     value: placeholder(
       (emitter, event, handler) =>
@@ -218,6 +220,9 @@ export const ReactiveExtensions = {
   finally(fn) {
     return finallyEffect(fn, this)
   },
+  subject() {
+    return subject(this)
+  },
 }
 Object.assign(Observable.prototype, ReactiveExtensions)
 
@@ -244,6 +249,7 @@ export {
   skip,
   share,
   switchStream,
+  subject,
   take,
   throttle,
   until,
