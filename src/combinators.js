@@ -1197,7 +1197,7 @@ export function deepCopy(obj) {
 Object.deepFreeze = Object.deepFreeze || deepFreeze
 
 /**
- * Immutate
+ * Immutable
  * @param {object} Object to seal and deep freeze
  * @returns {object} Object that is sealed and deep frozen
  */

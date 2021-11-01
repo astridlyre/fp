@@ -715,6 +715,13 @@ describe('Combinators', function () {
       assert.deepEqual(a, copy)
       assert.notEqual(a, copy)
     })
+
+    it('should deep copy an array', function () {
+      const arr = [{ name: 'Jim', age: 15 }]
+      const copy = combinators.deepCopy(arr)
+      assert.deepEqual(arr, copy)
+      assert.notEqual(arr[0], copy[0])
+    })
   })
 
   describe('merge', function () {
