@@ -1438,12 +1438,31 @@ function deepFreeze(obj) {
   return obj;
 }
 /**
+ * DeepCopyArray
+ * @param {array} Arr
+ * @param {number} offset
+ * @returns {array} new Array
+ */
+
+function deepCopyArray(arr) {
+  var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var len = Math.max(0, arr.length - offset);
+  var newArray = new Array(len);
+
+  for (var i = 0; i < len; i++) {
+    newArray[i] = deepCopy(arr[i + offset]);
+  }
+
+  return newArray;
+}
+/**
  * DeepCopy
  * @param {object} obj - Object to deep copy
  * @returns {object} aux - Copy of Object obj
  */
 
 function deepCopy(obj) {
+  if (isArray(obj)) return deepCopyArray(obj);
   var aux = obj;
 
   if (obj && typeof obj === 'object') {
@@ -1467,7 +1486,7 @@ function deepCopy(obj) {
 }
 Object.deepFreeze = Object.deepFreeze || deepFreeze;
 /**
- * Immutate
+ * Immutable
  * @param {object} Object to seal and deep freeze
  * @returns {object} Object that is sealed and deep frozen
  */
@@ -5647,7 +5666,7 @@ var skip = placeholder((count, stream) => {
  * @returns {observable}
  */
 
-var share = curry((bufferSize, stream) => {
+var share = (bufferSize, stream) => {
   var store = {
     values: [],
     errors: [],
@@ -5665,7 +5684,7 @@ var share = curry((bufferSize, stream) => {
   };
   var subs = stream.subscribe({
     next: value => {
-      if (store.values.length > bufferSize) {
+      if (store.values.length >= bufferSize) {
         store.values.shift();
       }
 
@@ -5673,7 +5692,7 @@ var share = curry((bufferSize, stream) => {
       queueMicrotask(() => broadcast());
     },
     error: _error => {
-      if (store.errors.length > bufferSize) {
+      if (store.errors.length >= bufferSize) {
         store.errors.shift();
       }
 
@@ -5683,22 +5702,31 @@ var share = curry((bufferSize, stream) => {
   });
 
   function broadcast() {
-    if (store.errors.length) {
-      store.observers.forEach(observer => {
-        store.errors.forEach(value => {
+    var {
+      values,
+      errors,
+      observers,
+      wantsComplete
+    } = store;
+
+    if (errors.length) {
+      observers.forEach(observer => {
+        errors.forEach(value => {
           observer.error(value);
         });
       });
+      errors.length = 0;
     } else {
-      store.observers.forEach(observer => {
-        store.values.forEach(value => {
+      observers.forEach(observer => {
+        values.forEach(value => {
           observer.next(value);
         });
       });
+      values.length = 0;
     }
 
-    if (store.wantsComplete) {
-      store.observers.forEach(observer => observer.complete());
+    if (wantsComplete) {
+      observers.forEach(observer => observer.complete());
       return subs.unsubscribe();
     }
   }
@@ -5711,7 +5739,7 @@ var share = curry((bufferSize, stream) => {
       if (store.observers.length === 0) subs.unsubscribe();
     };
   }))();
-});
+};
 
 /**
  * Switch, switch to a mapped Observable
@@ -5737,6 +5765,56 @@ var switchStream = placeholder(stream => new Observable(observer => {
     subs.unsubscribe();
   };
 }));
+
+/**
+ * Subject
+ * @param {observable} Stream to subscribe to
+ * @returns {observable} Subject
+ */
+
+var subject = () => {
+  var subs = [];
+  return new Proxy({}, {
+    get(_, prop) {
+      if (['error', 'next', 'complete'].includes(prop)) {
+        return function () {
+          for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+          }
+
+          return subs.forEach(observer => observer[prop](...args));
+        };
+      }
+
+      if (prop === 'subscribe') {
+        return observer => {
+          if (isFunction(observer)) {
+            observer = {
+              next: observer,
+              error: observer,
+              complete: observer
+            };
+          }
+
+          subs.push(observer);
+          return {
+            unsubscribe: () => subs.slice(subs.indexOf(observer), 1)
+          };
+        };
+      }
+
+      return new Observable(observer => {
+        subs.push({
+          next: observer.next.bind(observer),
+          error: observer.error.bind(observer),
+          complete: observer.complete.bind(observer)
+        });
+        return () => subs.slice(subs.indexOf(observer), 1);
+      })[prop];
+    }
+
+  });
+};
 
 /**
  * Take
@@ -5871,23 +5949,45 @@ if (Observable$1.fromGenerator === undefined || typeof Observable$1.fromGenerato
     var {
       Readable
     } = await import('stream');
-    Object.defineProperty(Observable$1, 'fromGenerator', {
-      value: placeholder(generator => new Observable$1(observer => {
-        Readable.from(generator()).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
-      })),
-      enumerable: false,
-      writable: false,
-      configurable: false
+    Object.defineProperties(Observable$1, {
+      fromGenerator: {
+        value: placeholder(generator => new Observable$1(observer => {
+          Readable.from(generator()).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
+        })),
+        enumerable: false,
+        writable: false,
+        configurable: false
+      },
+      fromStream: {
+        value: placeholder(stream => new Observable$1(observer => {
+          stream.on('data', observer.next.bind(observer));
+          stream.on('end', observer.complete.bind(observer));
+          stream.on('error', observer.error.bind(observer));
+        })),
+        enumerable: false,
+        writable: false,
+        configurable: false
+      }
     });
   } else {
     await Promise.resolve().then(function () { return webStreams; });
-    Object.defineProperty(Observable$1, 'fromGenerator', {
-      value: placeholder(generator => new Observable$1(observer => {
-        ReadableStream$1.from(generator()).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
-      })),
-      enumerable: false,
-      writable: false,
-      configurable: false
+    Object.defineProperties(Observable$1, {
+      fromGenerator: {
+        value: placeholder(generator => new Observable$1(observer => {
+          ReadableStream$1.from(generator()).on('data', observer.next.bind(observer)).on('end', observer.complete.bind(observer)).on('error', observer.error.bind(observer));
+        })),
+        enumerable: false,
+        writable: false,
+        configurable: false
+      },
+      fromFetch: {
+        value: placeholder((url, config) => new Observable$1(observer => {
+          fetch(url, config).then(res => observer.next(res)).catch(err => observer.error(err)).finally(() => observer.complete());
+        })),
+        enumerable: false,
+        writable: false,
+        configurable: false
+      }
     });
   }
 }
@@ -5909,6 +6009,9 @@ Object.defineProperties(Observable$1, {
   }, p),
   merge: _objectSpread2({
     value: merge
+  }, p),
+  subject: _objectSpread2({
+    value: subject
   }, p),
   fromEvent: _objectSpread2({
     value: placeholder((emitter, event, handler) => new Observable$1(observer => {
@@ -6041,6 +6144,10 @@ var ReactiveExtensions = {
 
   finally(fn) {
     return finallyEffect(fn, this);
+  },
+
+  subject() {
+    return subject();
   }
 
 };
@@ -6073,6 +6180,7 @@ var rx = /*#__PURE__*/Object.freeze({
   skip: skip,
   share: share,
   switchStream: switchStream,
+  subject: subject,
   take: take,
   throttle: throttle,
   until: until,

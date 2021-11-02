@@ -724,6 +724,24 @@ describe('Combinators', function () {
     })
   })
 
+  describe('deepCopyArray', function () {
+    it('should deep copy an array', function () {
+      const arr = [1, 2, 3, 4]
+      const copy = combinators.deepCopyArray(arr)
+      assert.deepEqual(arr, copy)
+      assert.notEqual(arr, copy)
+    })
+    it('should deep copy an array of objects', function () {
+      const arr = [{ name: 'tim' }, { name: 'bob' }]
+      const copy = combinators.deepCopyArray(arr)
+      assert.deepEqual(arr, copy)
+      for (let i = 0; i < arr.length; i++) {
+        assert.deepEqual(arr[i], copy[i])
+        assert.notEqual(arr[i], copy[i])
+      }
+    })
+  })
+
   describe('merge', function () {
     it('should merge arrays', function () {
       const a = [1, 2, 3]

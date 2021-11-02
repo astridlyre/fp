@@ -1171,11 +1171,27 @@ export function deepFreeze(obj) {
 }
 
 /**
+ * DeepCopyArray
+ * @param {array} Arr
+ * @param {number} offset
+ * @returns {array} new Array
+ */
+export function deepCopyArray(arr, offset = 0) {
+  const len = Math.max(0, arr.length - offset)
+  const newArray = new Array(len)
+  for (let i = 0; i < len; i++) {
+    newArray[i] = deepCopy(arr[i + offset])
+  }
+  return newArray
+}
+
+/**
  * DeepCopy
  * @param {object} obj - Object to deep copy
  * @returns {object} aux - Copy of Object obj
  */
 export function deepCopy(obj) {
+  if (isArray(obj)) return deepCopyArray(obj)
   let aux = obj
   if (obj && typeof obj === 'object') {
     aux = new obj.constructor()

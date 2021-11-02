@@ -66,7 +66,7 @@ if (
       },
     })
   } else {
-    await import('../web-streams.js')
+    await import('./web-streams.js')
     Object.defineProperties(Observable, {
       fromGenerator: {
         value: placeholder(
