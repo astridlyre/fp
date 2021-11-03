@@ -906,6 +906,7 @@ export const some = curry((f, arr) => arr.some(f))
 export const find = curry((f, arr) => arr.find(f))
 export const sum = (...args) => args.reduce((x, y) => x + y, 0)
 export const average = ns => sum(...ns) / ns.length
+export const join = curry((sep, a) => a.join(sep))
 
 /**
  * Partition, divide an array into two
