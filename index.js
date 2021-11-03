@@ -103,6 +103,7 @@ export {
   send,
   setProp,
   setPropM,
+  set,
   some,
   sortBy,
   split,

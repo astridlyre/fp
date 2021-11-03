@@ -349,7 +349,7 @@ export const send =
 
 /**
  * Bound, returns a bound method or calls method with args
- * @param {name} name - Property name
+ * @param {string} name - Property name
  * @param {any} args - Arguments to send to bound method
  * @returns {function} {any} Returns bound method or bound method called with
  * args
@@ -361,13 +361,13 @@ export const bound = (name, ...args) =>
 
 /**
  * SetPropM, sets a property in an object **MUTATES**
- * @param {name} name - Property name
+ * @param {string} name - Property name
  * @param {value} value - New value to set
  * @param {object} a - Object to mutate with new value
  * @returns {object} a
  */
 export const setPropM = curry((name, value, a) =>
-  a && name in a ? ((a[name] = value), a) : a
+  isObject(a) ? ((a[name] = value), a) : a
 )
 
 /**
@@ -379,6 +379,16 @@ export const setPropM = curry((name, value, a) =>
  */
 export const setProp = curry((name, value, a) =>
   a && name in a ? { ...a, [name]: value } : { ...a }
+)
+
+/**
+ * Set, set key in object a to value
+ * @param {string} Key name
+ * @param {any} Value
+ * @returns {object} Object with new value set
+ */
+export const set = curry(
+  (key, value, a) => (isMap(a) ? a.set(key, value) : (a[key] = value), a)
 )
 
 /**
@@ -416,7 +426,7 @@ export const invoke =
 
 /**
  * DeepProp, get a property from any object, deep
- * @param {string} {array} path - A path of properties or an Array of
+ * @param {string | array} path - A path of properties or an Array of
  * properties to get
  * @param {object} a - Object to get properties from
  * @returns {any} Value of property access
@@ -429,7 +439,7 @@ export const deepProp = curry((path, a) => {
 
 /**
  * DeepSetProp, set a property in an object, returns a copy, deep
- * @param {string} {array} path - A path of properties or an Array of
+ * @param {string | array} path - A path of properties or an Array of
  * properties to set
  * @param {any} value - The value to set
  * @param {object} a - Object to set new property in

@@ -510,7 +510,7 @@ var send = function send(name) {
 };
 /**
  * Bound, returns a bound method or calls method with args
- * @param {name} name - Property name
+ * @param {string} name - Property name
  * @param {any} args - Arguments to send to bound method
  * @returns {function} {any} Returns bound method or bound method called with
  * args
@@ -525,13 +525,13 @@ var bound = function bound(name) {
 };
 /**
  * SetPropM, sets a property in an object **MUTATES**
- * @param {name} name - Property name
+ * @param {string} name - Property name
  * @param {value} value - New value to set
  * @param {object} a - Object to mutate with new value
  * @returns {object} a
  */
 
-var setPropM = curry((name, value, a) => a && name in a ? (a[name] = value, a) : a);
+var setPropM = curry((name, value, a) => isObject$7(a) ? (a[name] = value, a) : a);
 /**
  * SetProp, returns a copy of an object with new property name set to value
  * @param {name} name - Property name
@@ -543,6 +543,14 @@ var setPropM = curry((name, value, a) => a && name in a ? (a[name] = value, a) :
 var setProp$1 = curry((name, value, a) => a && name in a ? _objectSpread2(_objectSpread2({}, a), {}, {
   [name]: value
 }) : _objectSpread2({}, a));
+/**
+ * Set, set key in object a to value
+ * @param {string} Key name
+ * @param {any} Value
+ * @returns {object} Object with new value set
+ */
+
+var set$2 = curry((key, value, a) => (isMap(a) ? a.set(key, value) : a[key] = value, a));
 /**
  * Props, gets an array of property names from an object, shallow
  * @param {array} names - Array of property names
@@ -576,7 +584,7 @@ var invoke = function invoke(fn) {
 };
 /**
  * DeepProp, get a property from any object, deep
- * @param {string} {array} path - A path of properties or an Array of
+ * @param {string | array} path - A path of properties or an Array of
  * properties to get
  * @param {object} a - Object to get properties from
  * @returns {any} Value of property access
@@ -589,7 +597,7 @@ var deepProp = curry((path, a) => {
 });
 /**
  * DeepSetProp, set a property in an object, returns a copy, deep
- * @param {string} {array} path - A path of properties or an Array of
+ * @param {string | array} path - A path of properties or an Array of
  * properties to set
  * @param {any} value - The value to set
  * @param {object} a - Object to set new property in
@@ -6529,4 +6537,4 @@ var webStreams = /*#__PURE__*/Object.freeze({
   createFilterStream: createFilterStream
 });
 
-export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable$1 as Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap$1 as flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge$1 as merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick$1 as pick, pipe, pipeAsync, pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip$1 as zip, zipMap, zipWith };
+export { Append, ClassMixin, Define, Enum, EventEmitter, FactoryFactory, Failure, FunctionalMixin, IO, IOAsync, Just, Maybe, Nothing, Observable$1 as Observable, Override, Pair$1 as Pair, Prepend, Result$1 as Result, SubclassFactory, Success, Triple, Try, TryAsync, ValidationError, accumulate, add, addRight, after, afterAll, aggregate, aggregateOn, append, apply, arity, aroundAll, average, before, beforeAll, binary, bound, callFirst, callLast, compact, compose, composeAsync, composeM, constant, createClient, curry, debounce$1 as debounce, deepCopy, deepEqual, deepFreeze, deepJoin, deepMap, deepPick, deepProp, deepSetProp, demethodize, diff, divide, divideRight, entries, eq, every, filter$1 as filter, filterAsync, filterTR, filterWith, find, first, flat, flatMap$1 as flatMap, flip2, flip3, fold, forEach$1 as forEach, fromJSON, getOrElseThrow, groupBy, head, identity, immutable, invert, invoke, isArray, isBoolean, isEmpty, isFunction, isInstanceOf, isMap, isNull, isNumber, isObject$7 as isObject, isSet, isString, keyBy, keys$1 as keys, last, lazy, len, lens$1 as lens, liftA2, liftA3, liftA4, log, map$1 as map, mapAllWith, mapAsync, mapTR, mapWith, match$1 as match, memoize, memoizeIter, merge$1 as merge, method, multi, multiply, multiplyRight, not, once, padEnd, padStart, parse, partition, pick$1 as pick, pipe, pipeAsync, pluck, pow, prepend, prop$1 as prop, props, provided, range, reactivize, reduce$1 as reduce, reduceAsync, reduceRight, reduceWith, rename, replace, rest, roundTo, rx, send, set$2 as set, setProp$1 as setProp, setPropM, some, sortBy, split$1 as split, stringify, subtract, subtractRight, sum, take$1 as take, tap, tee, ternary, toInteger, toJSON, toLowerCase, toString$5 as toString, toUpperCase, transduce, tryCatch, unary, unique, unless, untilWith, values, withValidation, wrapWith, zip$1 as zip, zipMap, zipWith };
