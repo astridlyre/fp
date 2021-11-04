@@ -1,6 +1,7 @@
 import { entries, isFunction } from './combinators.js'
 import 'core-js/features/observable/index.js'
-export const { Observable, ReadableStream } = globalThis
+export const { Observable } = globalThis
+import { Readable } from 'stream'
 import { buffer } from './rx/buffer.js'
 import { catchError } from './rx/catch.js'
 import { concat } from './rx/concat.js'
@@ -30,75 +31,35 @@ import { until } from './rx/until.js'
 import { zip } from './rx/zip.js'
 import { placeholder } from './rx/utils.js'
 
-if (
-  Observable.fromGenerator === undefined ||
-  typeof Observable.fromGenerator !== 'function'
-) {
-  if (ReadableStream === undefined) {
-    const { Readable } = await import('stream')
-    Object.defineProperties(Observable, {
-      fromGenerator: {
-        value: placeholder(
-          generator =>
-            new Observable(observer => {
-              Readable.from(generator())
-                .on('data', observer.next.bind(observer))
-                .on('end', observer.complete.bind(observer))
-                .on('error', observer.error.bind(observer))
-            })
-        ),
-        enumerable: false,
-        writable: false,
-        configurable: false,
-      },
-      fromStream: {
-        value: placeholder(
-          stream =>
-            new Observable(observer => {
-              stream.on('data', observer.next.bind(observer))
-              stream.on('end', observer.complete.bind(observer))
-              stream.on('error', observer.error.bind(observer))
-            })
-        ),
-        enumerable: false,
-        writable: false,
-        configurable: false,
-      },
-    })
-  } else {
-    await import('./web-streams.js')
-    Object.defineProperties(Observable, {
-      fromGenerator: {
-        value: placeholder(
-          generator =>
-            new Observable(observer => {
-              ReadableStream.from(generator())
-                .on('data', observer.next.bind(observer))
-                .on('end', observer.complete.bind(observer))
-                .on('error', observer.error.bind(observer))
-            })
-        ),
-        enumerable: false,
-        writable: false,
-        configurable: false,
-      },
-      fromFetch: {
-        value: placeholder(
-          (url, config) =>
-            new Observable(observer => {
-              fetch(url, config)
-                .then(res => observer.next(res))
-                .catch(err => observer.error(err))
-                .finally(() => observer.complete())
-            })
-        ),
-        enumerable: false,
-        writable: false,
-        configurable: false,
-      },
-    })
-  }
-}
+Object.defineProperties(Observable, {
+  fromGenerator: {
+    value: placeholder(
+      generator =>
+        new Observable(observer => {
+          Readable.from(generator())
+            .on('data', observer.next.bind(observer))
+            .on('end', observer.complete.bind(observer))
+            .on('error', observer.error.bind(observer))
+        })
+    ),
+    enumerable: false,
+    writable: false,
+    configurable: false,
+  },
+  fromStream: {
+    value: placeholder(
+      stream =>
+        new Observable(observer => {
+          stream.on('data', observer.next.bind(observer))
+          stream.on('end', observer.complete.bind(observer))
+          stream.on('error', observer.error.bind(observer))
+        })
+    ),
+    enumerable: false,
+    writable: false,
+    configurable: false,
+  },
+})
 
 const p = {
   enumerable: false,

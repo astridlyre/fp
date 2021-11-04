@@ -1,4 +1,5 @@
 import { isFunction, compose, composeAsync } from './combinators.js'
+
 // Maybe
 function throwError(error) {
   throw error

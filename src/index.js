@@ -126,7 +126,7 @@ export {
   unique,
   values,
   zipMap,
-} from './src/combinators.js'
+} from './combinators.js'
 export {
   Enum,
   Failure,
@@ -141,8 +141,8 @@ export {
   Triple,
   Try,
   TryAsync,
-} from './src/maybe.js'
-export { createClient } from './src/fetch.js'
+} from './maybe.js'
+export { createClient } from './fetch.js'
 export {
   compact,
   filterWith,
@@ -156,7 +156,7 @@ export {
   untilWith,
   zip,
   zipWith,
-} from './src/iterators.js'
+} from './iterators.js'
 export {
   after,
   afterAll,
@@ -173,11 +173,20 @@ export {
   SubclassFactory,
   unless,
   wrapWith,
-} from './src/classes.js'
-export * as lazy from './src/lazy.js'
-export * as lens from './src/lens.js'
-export * as rx from './src/rx.js'
-export { EventEmitter, reactivize } from './src/reactivize.js'
-export { withValidation, ValidationError } from './src/hofs.js'
-export { Observable } from './src/rx.js'
-export { multi, method } from './src/multimethod.js'
+} from './classes.js'
+export * as lazy from './lazy.js'
+export * as lens from './lens.js'
+export * as rx from './rx.js'
+export { EventEmitter, reactivize } from './reactivize.js'
+export { withValidation, ValidationError } from './hofs.js'
+export { Observable } from './rx.js'
+export { multi, method } from './multimethod.js'
+export {
+  createFilterStream,
+  createMapStream,
+  createReduceStream,
+  ParallelStream,
+  LimitedParallelStream,
+  createFork,
+  createMerge,
+} from './node-streams.js'

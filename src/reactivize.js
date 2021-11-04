@@ -1,49 +1,6 @@
 import { Observable } from './rx.js'
-
-export let EventEmitter
-if (typeof process != 'undefined' && typeof process.versions != 'undefined') {
-  ;({ EventEmitter } = await import('events'))
-} else {
-  EventEmitter = class EventEmitter {
-    #events = Object.create(null)
-
-    getListeners(event) {
-      return this.#events[event] || []
-    }
-    addListener(event, listener, options = {}) {
-      const listeners = this.#events[event] || []
-      if (options.once) {
-        this.#events[event] = listeners.concat({ listener, once: true })
-        return this
-      }
-      this.#events[event] = listeners.concat({ listener })
-      return this
-    }
-    addOnceListener(event, listener) {
-      return this.addListener(event, listener, { once: true })
-    }
-    on(event, listener, options) {
-      return this.addListener(event, listener, options)
-    }
-    removeListener(event, listener) {
-      const listeners = this.#events[event] || []
-      this.#events[event] = listeners.filter(l => l.listener !== listener)
-      return this
-    }
-    removeAllListeners(...events) {
-      events.forEach(event => delete this.#events[event])
-    }
-    emit(event, ...args) {
-      const listeners = this.#events[event] || []
-      listeners.forEach(
-        ({ listener, once }) => (
-          once && this.removeListener(event, listener), listener(...args)
-        )
-      )
-      return this
-    }
-  }
-}
+import { EventEmitter } from 'events'
+export { EventEmitter }
 
 function implementsPushProtocol(obj) {
   return (
