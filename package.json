@@ -1,10 +1,17 @@
 {
   "name": "@ebflat9/fp",
-  "version": "1.2.11",
+  "version": "1.2.12",
   "description": "my fp utils",
   "source": "src/index.js",
-  "main": "dist/main.js",
-  "module": "dist/module.js",
+  "main": "src/index.js",
+  "browser": "dist/fp-browser.js",
+  "targets": {
+    "browser": {
+      "engines": {
+        "browserslist": "> 0.5% and last 2 versions"
+      }
+    }
+  },
   "type": "module",
   "keywords": [
     "functional",
