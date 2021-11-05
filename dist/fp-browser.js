@@ -39,7 +39,7 @@ const $3d52677f95a43c24$export$f672e0b6f7222cd7 = (...fns)=>fns.reduce($3d52677f
 const $3d52677f95a43c24$export$a4627e546088548d = (...fns)=>fns.reduceRight($3d52677f95a43c24$var$compose2)
 ;
 const $3d52677f95a43c24$export$c3095a23b368d1f2 = (fn)=>function curryInner(...args1) {
-        return args1.length === fn.length ? fn.apply(this, args1) : (...args2)=>{
+        return args1.length >= fn.length ? fn.apply(this, args1) : (...args2)=>{
             return args1.length + args2.length >= fn.length ? fn.call(this, ...args1, ...args2) : $3d52677f95a43c24$export$c3095a23b368d1f2(fn)(...args1, ...args2);
         };
     }

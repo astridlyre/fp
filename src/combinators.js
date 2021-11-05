@@ -115,7 +115,7 @@ export const pipe = (...fns) => fns.reduceRight(compose2)
  */
 export const curry = fn =>
   function curryInner(...args1) {
-    return args1.length === fn.length
+    return args1.length >= fn.length
       ? fn.apply(this, args1)
       : (...args2) => {
           return args1.length + args2.length >= fn.length
