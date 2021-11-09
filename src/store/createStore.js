@@ -1,4 +1,4 @@
-import { immutable, isFunction, isObject, isUndefined } from '../combinators.js'
+import { isFunction, isUndefined } from '../combinators.js'
 import { $$observable, Observable } from '../rx.js'
 import { isPlainObject } from './isPlainObject.js'
 
@@ -33,7 +33,7 @@ export function createStore(reducer, initialState, enhancer) {
     throw new Error(`Expected reducer to be a function, got: ${reducer}`)
   }
 
-  let currentState = initialState ?? {}
+  let currentState = initialState
   let isDispatching = false
 
   let currentListeners = []
@@ -137,11 +137,11 @@ export function createStore(reducer, initialState, enhancer) {
    */
   dispatch({ type: INIT })
 
-  return immutable({
+  return {
     dispatch,
     subscribe,
     getState,
     [$$observable]: observe,
     observe,
-  })
+  }
 }

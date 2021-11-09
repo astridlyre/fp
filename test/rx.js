@@ -1108,7 +1108,7 @@ describe('Observable', function () {
     })
   })
 
-  describe('subjet', function () {
+  describe('subject', function () {
     it('should allow subscribing and pushing', function (done) {
       const values = []
       const stream = Observable.subject()

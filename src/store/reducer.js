@@ -1,14 +1,14 @@
-import { immutable, isFunction } from '../combinators.js'
+import { isFunction } from '../combinators.js'
 import { multi, method } from '../multimethod.js'
 import { combineReducers } from './combineReducers.js'
 
 /**
  * Reducer offers an easy way to create a reducer function
  */
-export const Reducer = immutable({
+export const Reducer = {
   builder() {
     const cases = []
-    return immutable({
+    return {
       case(type, handler) {
         if (isFunction(type)) {
           cases.push(method(type, handler))
@@ -24,7 +24,7 @@ export const Reducer = immutable({
       build() {
         return multi(...cases)
       },
-    })
+    }
   },
   combineReducers,
-})
+}

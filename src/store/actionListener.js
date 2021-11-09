@@ -1,4 +1,4 @@
-import { immutable, isFunction } from '../combinators.js'
+import { isFunction } from '../combinators.js'
 
 /**
  * Creates a middleware function that accepts an optional 'extra argument' to
@@ -36,7 +36,7 @@ function createActionListenerMiddleware() {
     )
   }
 
-  return immutable({
+  return {
     middleware(middlewareAPI) {
       return next => action => {
         if (isFunction(action)) {
@@ -67,7 +67,7 @@ function createActionListenerMiddleware() {
     },
     addListener,
     removeListener,
-  })
+  }
 }
 
 export const actionListener = createActionListenerMiddleware()

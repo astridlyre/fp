@@ -35,116 +35,91 @@ export function createAsyncThunk(typePrefix, payloadCreator, options) {
         )
       )
 
-      return Object.assign(
-        createPromise({
-          abortController,
-          abortedPromise,
-          arg,
-          dispatch,
-          extra,
-          getState,
-          options,
-          payloadCreator,
-          pending,
-          requestId,
-        }),
-        {
-          abort(reason) {
-            if (started) {
-              abortReason = reason
-              abortController.abort()
+      const promise = (async function createPromise() {
+        let finalAction
+
+        try {
+          if (options?.condition?.(arg, { getState, extra }) === false) {
+            throw {
+              name: 'ConditionError',
+              message: 'Aborted due to condition callback returning false',
             }
-          },
-          arg,
-          requestId,
-          unwrap() {
-            return promise.then(unwrapResult)
-          },
+          }
+
+          started = true
+
+          dispatch(
+            pending(
+              requestId,
+              arg,
+              options?.getPendingMeta?.({ requestId, arg }, { getState, extra })
+            )
+          )
+
+          finalAction = await Promise.race([
+            abortedPromise,
+            Promise.resolve(
+              payloadCreator(arg, {
+                dispatch,
+                getState,
+                extra,
+                requestId,
+                signal: abortController.signal,
+                rejectWithValue: (value, meta) => ({
+                  value,
+                  meta,
+                  status: STATUS_REJECTED,
+                }),
+                fulfillWithValue: (value, meta) => ({
+                  value,
+                  meta,
+                  status: STATUS_FULFILLED,
+                }),
+              }).then(result => {
+                if (result.status === STATUS_REJECTED) {
+                  throw result
+                }
+                if (result.status === STATUS_FULFILLED) {
+                  return fulfilled(result.payload, requestId, arg, result.meta)
+                }
+                return fulfilled(result, requestId, arg)
+              })
+            ),
+          ])
+        } catch (err) {
+          finalAction =
+            err.status === STATUS_REJECTED
+              ? rejected(null, requestId, arg, err.payload, err.meta)
+              : rejected(err, requestId, arg)
         }
-      )
+
+        const skipDispatch =
+          options &&
+          !options.dispatchConditionRejection &&
+          rejected.match(finalAction) &&
+          finalAction.meta.condition
+
+        if (!skipDispatch) dispatch(finalAction)
+        return finalAction
+      })()
+
+      return Object.assign(promise, {
+        abort(reason) {
+          if (started) {
+            abortReason = reason
+            abortController.abort()
+          }
+        },
+        arg,
+        requestId,
+        unwrap() {
+          return promise.then(unwrapResult)
+        },
+      })
     }
   }
 
   return Object.assign(actionCreator, { pending, rejected, fulfilled, typePrefix })
-}
-
-async function createPromise({
-  abortController,
-  abortedPromise,
-  arg,
-  dispatch,
-  extra,
-  getState,
-  options,
-  payloadCreator,
-  pending,
-  requestId,
-}) {
-  let finalAction
-
-  try {
-    if (options?.condition?.(arg, { getState, extra }) === false) {
-      throw {
-        name: 'ConditionError',
-        message: 'Aborted due to condition callback returning false',
-      }
-    }
-
-    started = true
-
-    dispatch(
-      pending(
-        requestId,
-        arg,
-        options?.getPendingMeta?.({ requestId, arg }, { getState, extra })
-      )
-    )
-
-    finalAction = await Promise.race([
-      abortedPromise,
-      Promise.resolve(
-        payloadCreator(arg, {
-          dispatch,
-          getState,
-          extra,
-          requestId,
-          signal: abortController.signal,
-          rejectWithValue: (value, meta) => ({
-            value,
-            meta,
-            status: STATUS_REJECTED,
-          }),
-          fulfillWithValue: (value, meta) => ({
-            value,
-            meta,
-            status: STATUS_FULFILLED,
-          }),
-        }).then(result => {
-          if (result.status === STATUS_REJECTED) {
-            throw result
-          }
-          if (result.status === STATUS_FULFILLED) {
-            return fulfilled(result.payload, requestId, arg, result.meta)
-          }
-          return fulfilled(result, requestId, arg)
-        })
-      ),
-    ])
-  } catch (err) {
-    finalAction =
-      err.status === STATUS_REJECTED
-        ? rejected(null, requestId, arg, err.payload, err.meta)
-        : rejected(err, requestId, arg)
-  }
-
-  const skipDispatch =
-    options &&
-    !options.dispatchConditionRejection &&
-    rejected.match(finalAction) &&
-    finalAction.meta.condition
-
-  if (!skipDispatch) dispatch(finalAction)
-  return finalAction
 }
 
 /**

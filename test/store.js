@@ -2,7 +2,8 @@ import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
 import { store } from '../src/index.js'
 
-const { createStore, Reducer, createAction, createAsyncThunk } = store
+const { createStore, Reducer, createAction, createAsyncThunk, createConfiguredStore } =
+  store
 
 const testReducer = Reducer.builder()
   .case('ADD', (state, action) => ({
@@ -97,7 +98,7 @@ describe('Store', function () {
 
   describe('subscribe', function () {
     it('should allow subscribing to updates', function (done) {
-      const store = createStore(testReducer, { values: [] })
+      const store = createConfiguredStore(testReducer, { values: [] })
       store.subscribe(() => {
         const state = store.getState()
         assert.deepEqual(state, { values: ['cat', 'dog'] })
@@ -107,7 +108,7 @@ describe('Store', function () {
     })
 
     it('should allow unsubscribing', function (done) {
-      const store = createStore(testReducer, { values: [] })
+      const store = createConfiguredStore(testReducer, { values: [] })
       let count = 0
       const handler = () => {
         const state = store.getState()
@@ -141,6 +142,43 @@ describe('createAction', function () {
     it('should let you see the action type', function () {
       const action = createAction('TEST')
       assert.equal(action.type, 'TEST')
+    })
+  })
+})
+
+describe('asyncThunk', function () {
+  describe('Creating a thunk', function () {
+    it('should create a thunk', function (done) {
+      const thunk = createAsyncThunk('ADD', arg => {
+        return new Promise(resolve => setTimeout(() => resolve(arg), 1))
+      })
+
+      const initalState = { values: [] }
+      const reducer = Reducer.builder()
+        .case(thunk.fulfilled.type, (state = initalState, action) => ({
+          ...state,
+          values: state.values.concat(action.payload),
+        }))
+        .init({ values: [] })
+        .build()
+
+      const store = createConfiguredStore(reducer)
+
+      let pending = 0
+      store.dispatch(thunk('hello'))
+      store.observe().subscribe(state => {
+        try {
+          if (pending) {
+            assert.deepEqual(state, { values: [] })
+            pending++
+          } else {
+            assert.deepEqual(state, { values: ['hello'] })
+            done()
+          }
+        } catch (err) {
+          done(err)
+        }
+      })
     })
   })
 })
