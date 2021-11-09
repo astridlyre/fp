@@ -152,6 +152,13 @@ export const isBoolean = isTypeOf('boolean')
 export const isNull = x => x === null
 
 /**
+ * IsUndefined, checks if x is undefined
+ * @param {any} x
+ * @returns {boolean}
+ */
+export const isUndefined = x => typeof x === 'undefined'
+
+/**
  * IsString, checks if x is a String
  * @param {any} x
  * @returns {boolean}

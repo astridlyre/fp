@@ -190,3 +190,4 @@ export {
   createFork,
   createMerge,
 } from './node-streams.js'
+export * as store from './store.js'

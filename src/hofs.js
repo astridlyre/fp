@@ -16,9 +16,12 @@ export class ValidationError {
  * @param {function} fn - Function to wrap with validation
  * @returns {function} Wrapped function fn with validation logic
  */
-export const withValidation = curry((validator, fn) => data => {
-  if (!validator(data)) {
-    throw new ValidationError('Validation failed', validator.errors)
-  }
-  return fn(data)
-})
+export const withValidation = curry(
+  (validator, selector, onSucces, onFailure) =>
+    (...args) => {
+      if (!validator(selector(...args))) {
+        return onFailure(new ValidationError('Validation failed', validator.errors))
+      }
+      return onSucces(...args)
+    }
+)

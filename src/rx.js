@@ -1,6 +1,7 @@
 import { entries, isFunction } from './combinators.js'
 import 'core-js/features/observable/index.js'
 export const { Observable } = globalThis
+
 import { Readable } from 'stream'
 import { buffer } from './rx/buffer.js'
 import { catchError } from './rx/catch.js'
@@ -30,6 +31,9 @@ import { throttle } from './rx/throttle.js'
 import { until } from './rx/until.js'
 import { zip } from './rx/zip.js'
 import { placeholder } from './rx/utils.js'
+
+export const $$observable = /* #__PURE__ */ (() =>
+  (typeof Symbol === 'function' && Symbol.observable) || '@@observable')()
 
 Object.defineProperties(Observable, {
   fromGenerator: {

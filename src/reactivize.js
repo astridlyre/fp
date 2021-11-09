@@ -1,4 +1,4 @@
-import { Observable } from './rx.js'
+import { Observable, $$observable } from './rx.js'
 import { EventEmitter } from 'events'
 export { EventEmitter }
 
@@ -34,7 +34,7 @@ export const reactivize = obj => {
     },
   })
   const observable = {
-    [Symbol.observable]() {
+    [$$observable]() {
       return new Observable(observer => {
         emitter.on(ON_EVENT, newValue => {
           observer.next(newValue)

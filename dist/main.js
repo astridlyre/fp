@@ -53,6 +53,8 @@ const $bb63e7e1bbd7ff6a$export$7e4aa119212bc614 = $bb63e7e1bbd7ff6a$var$isTypeOf
 const $bb63e7e1bbd7ff6a$export$f9ce7b637dfbe238 = $bb63e7e1bbd7ff6a$var$isTypeOf('boolean');
 const $bb63e7e1bbd7ff6a$export$630801d484da15df = (x)=>x === null
 ;
+const $bb63e7e1bbd7ff6a$export$fce6876652108ab = (x)=>typeof x === 'undefined'
+;
 const $bb63e7e1bbd7ff6a$export$844ec244b1367d54 = $bb63e7e1bbd7ff6a$var$isTypeOf('string');
 const $bb63e7e1bbd7ff6a$export$a6cdc56e425d0d0a = (x)=>x !== null && typeof x === 'object'
 ;
@@ -1667,6 +1669,7 @@ const $24005940e10e0512$export$a6ba95b157529836 = (p)=>$24005940e10e0512$export$
 var $c8c6d4fe325848b7$exports = {};
 
 $parcel$export($c8c6d4fe325848b7$exports, "Observable", () => $c8c6d4fe325848b7$export$77cea355fa80b5f4);
+$parcel$export($c8c6d4fe325848b7$exports, "$$observable", () => $c8c6d4fe325848b7$export$a7c40509ff863847);
 $parcel$export($c8c6d4fe325848b7$exports, "ReactiveExtensions", () => $c8c6d4fe325848b7$export$9a935b903d7a019b);
 $parcel$export($c8c6d4fe325848b7$exports, "buffer", () => $0a0abaada8e712cd$export$ab1029bcae9ddb4a);
 $parcel$export($c8c6d4fe325848b7$exports, "catchError", () => $68ee9199cbf1abef$export$3dede90624df3ba9);
@@ -2356,6 +2359,8 @@ const $45ab909c8d45a065$export$8901015135f2fb22 = $27a42192fed15930$export$c7187
 
 
 const { Observable: $c8c6d4fe325848b7$export$77cea355fa80b5f4  } = globalThis;
+const $c8c6d4fe325848b7$export$a7c40509ff863847 = /* #__PURE__ */ (()=>typeof Symbol === 'function' && Symbol.observable || '@@observable'
+)();
 Object.defineProperties($c8c6d4fe325848b7$export$77cea355fa80b5f4, {
     fromGenerator: {
         value: $27a42192fed15930$export$c7187bbd1a7a9244((generator)=>new $c8c6d4fe325848b7$export$77cea355fa80b5f4((observer)=>{
@@ -2548,7 +2553,7 @@ const $df5d87e734be3d90$export$ea9ec650125d8707 = (obj)=>{
         }
     });
     const observable = {
-        [Symbol.observable] () {
+        [$c8c6d4fe325848b7$export$a7c40509ff863847] () {
             return new $c8c6d4fe325848b7$export$77cea355fa80b5f4((observer)=>{
                 emitter.on($df5d87e734be3d90$var$ON_EVENT, (newValue)=>{
                     observer.next(newValue);
@@ -2578,9 +2583,9 @@ class $4b0a30a9238405cc$export$2191b9da168c6cf0 {
         );
     }
 }
-const $4b0a30a9238405cc$export$30c1bf1f6ea900a5 = $bb63e7e1bbd7ff6a$export$c3095a23b368d1f2((validator, fn)=>(data)=>{
-        if (!validator(data)) throw new $4b0a30a9238405cc$export$2191b9da168c6cf0('Validation failed', validator.errors);
-        return fn(data);
+const $4b0a30a9238405cc$export$30c1bf1f6ea900a5 = $bb63e7e1bbd7ff6a$export$c3095a23b368d1f2((validator, selector, onSucces, onFailure)=>(...args)=>{
+        if (!validator(selector(...args))) return onFailure(new $4b0a30a9238405cc$export$2191b9da168c6cf0('Validation failed', validator.errors));
+        return onSucces(...args);
     }
 );
 
@@ -2769,6 +2774,300 @@ function $3d17850c787403bf$export$ebab2c558c013279(...sources) {
         });
     };
 }
+
+
+var $62ebb3b92c69642f$exports = {};
+
+$parcel$export($62ebb3b92c69642f$exports, "createStore", () => $9b8aa3408a85f1e4$export$f51a9068ac82ea43);
+$parcel$export($62ebb3b92c69642f$exports, "bindActionCreators", () => $104d7da1ab7a6efc$export$aea084d96e84da92);
+$parcel$export($62ebb3b92c69642f$exports, "applyMiddleware", () => $41589822c08ae343$export$9ff26e0402cc7b7);
+$parcel$export($62ebb3b92c69642f$exports, "thunk", () => $f748b07d130c7d2e$export$dd164f5517779f15);
+$parcel$export($62ebb3b92c69642f$exports, "combineReducers", () => $875d44ee4fdab364$export$66e4520cdb265d18);
+$parcel$export($62ebb3b92c69642f$exports, "actionListener", () => $4ba82b2f52be5725$export$d977db1e2c3d2800);
+
+
+
+function $92239ca854c3ec73$export$53b83ca8eaab0383(obj) {
+    if (!$bb63e7e1bbd7ff6a$export$a6cdc56e425d0d0a(obj)) return false;
+    let proto = obj;
+    while(Object.getPrototypeOf(proto) !== null)proto = Object.getPrototypeOf(proto);
+    return Object.getPrototypeOf(obj) === proto;
+}
+
+
+const $9b8aa3408a85f1e4$export$d788bc089976c004 = '@@ACTION/INIT';
+function $9b8aa3408a85f1e4$export$f51a9068ac82ea43(reducer, initialState, enhancer) {
+    if ($bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(initialState) && $bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(enhancer)) throw new Error('Passing multiple enhancers is not supported');
+    if ($bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(initialState) && $bb63e7e1bbd7ff6a$export$fce6876652108ab(enhancer)) {
+        enhancer = initialState;
+        initialState = undefined;
+    }
+    if (!$bb63e7e1bbd7ff6a$export$fce6876652108ab(enhancer)) {
+        if (!$bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(enhancer)) throw new Error(`Expected enhancer to be a function, got: ${enhancer}`);
+        return enhancer($9b8aa3408a85f1e4$export$f51a9068ac82ea43)(reducer, initialState);
+    }
+    if (!$bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(reducer)) throw new Error(`Expected reducer to be a function, got: ${reducer}`);
+    let currentState = initialState ?? {
+    };
+    let isDispatching = false;
+    let currentListeners = [];
+    let nextListeners = currentListeners;
+    /**
+   * Ensure that listeners that might be added during dispatch do not interfere
+   * with the current broadcast
+   */ function ensureCanMutateNextListeners() {
+        if (nextListeners === currentListeners) nextListeners = currentListeners.slice();
+    }
+    /**
+   * Get the current state of the store
+   */ function getState() {
+        if (isDispatching) throw new Error('Unable to get state while reducer is executing');
+        return currentState;
+    }
+    /**
+   * Subscribe a listener to store updates
+   */ function subscribe(listener) {
+        if (!$bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(listener)) throw new Error(`Expected listener to be a function, received: ${listener}`);
+        if (isDispatching) throw new Error('Cannot call subscribe() while reducer is executing');
+        ensureCanMutateNextListeners();
+        nextListeners.push(listener);
+        let isSubscribed = true;
+        return function unsubscribe() {
+            if (!isSubscribed) return;
+            if (isDispatching) throw new Error('Cannot call unsubscribe() while reducer is executing');
+            isSubscribed = false;
+            ensureCanMutateNextListeners();
+            const index = nextListeners.indexOf(listener);
+            nextListeners.splice(index, 1);
+            currentListeners = null;
+        };
+    }
+    /**
+   * Dispatch an action to update the state
+   */ function dispatch(action) {
+        if (!$92239ca854c3ec73$export$53b83ca8eaab0383(action)) throw new Error('Actions must be plain objects');
+        if (!action.type) throw new Error('Actions must have a type property');
+        if (isDispatching) throw new Error('Reducers may not dispatch actions');
+        try {
+            isDispatching = true;
+            currentState = reducer(currentState, action);
+        } finally{
+            isDispatching = false;
+        }
+        const listeners = currentListeners = nextListeners;
+        for(let i = 0; i < listeners.length; i++){
+            const listener = listeners[i];
+            listener();
+        }
+        return action;
+    }
+    /**
+   * Creates a simple observable from state updates, compatible with the
+   * Observable proposal
+   */ function observable() {
+        const outerSubscribe = subscribe;
+        return $bb63e7e1bbd7ff6a$export$fc3a40dec7b33bf({
+            subscribe (observer) {
+                if (!$bb63e7e1bbd7ff6a$export$a6cdc56e425d0d0a(observer)) throw new Error(`Expected observer to be an object, received: ${observer}`);
+                observeState();
+                const unsubscribe = outerSubscribe(function observeState() {
+                    if (observer.next) observer.next(getState());
+                });
+                return {
+                    unsubscribe: unsubscribe
+                };
+            },
+            [$c8c6d4fe325848b7$export$a7c40509ff863847] () {
+                return this;
+            }
+        });
+    }
+    /**
+   * Initialize the store to allow populating initalState
+   */ dispatch({
+        type: $9b8aa3408a85f1e4$export$d788bc089976c004
+    });
+    return $bb63e7e1bbd7ff6a$export$fc3a40dec7b33bf({
+        dispatch: dispatch,
+        subscribe: subscribe,
+        getState: getState,
+        [$c8c6d4fe325848b7$export$a7c40509ff863847]: observable
+    });
+}
+
+
+
+function $104d7da1ab7a6efc$export$aea084d96e84da92(actionCreators, dispatch) {
+    if ($bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(actionCreators)) return $104d7da1ab7a6efc$var$bindActionCreator(actionCreators, dispatch);
+    if (!$bb63e7e1bbd7ff6a$export$a6cdc56e425d0d0a(actionCreators)) throw new Error(`Expected an object or function, but got: ${actionCreators}`);
+    const boundActionCreators = {
+    };
+    for (const key of Reflect.ownKeys(actionCreators)){
+        const actionCreator = actionCreators[key];
+        if ($bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(actionCreator)) boundActionCreators[key] = $104d7da1ab7a6efc$var$bindActionCreator(actionCreator, dispatch);
+    }
+    return boundActionCreators;
+}
+function $104d7da1ab7a6efc$var$bindActionCreator(actionCreator, dispatch) {
+    return function boundCreator(...args) {
+        return dispatch(actionCreator.apply(this, args));
+    };
+}
+
+
+
+function $41589822c08ae343$export$9ff26e0402cc7b7(...middlewares) {
+    return (createStore)=>(reducer, initialState)=>{
+            const store = createStore(reducer, initialState);
+            let dispatch = ()=>{
+                throw new Error('Cannot dispatch while constructing middleware');
+            };
+            const middlewareAPI = $bb63e7e1bbd7ff6a$export$fc3a40dec7b33bf({
+                getState: store.getState,
+                dispatch: (action, ...args)=>dispatch(action, ...args)
+            });
+            const chain = middlewares.map((middleware)=>middleware(middlewareAPI)
+            );
+            dispatch = $bb63e7e1bbd7ff6a$export$f672e0b6f7222cd7(...chain)(store.dispatch);
+            return {
+                ...store,
+                dispatch: dispatch
+            };
+        }
+    ;
+}
+
+
+
+/**
+ * Creates a middleware function that accepts an optional 'extra argument' to
+ * be injected later.
+ */ function $f748b07d130c7d2e$var$createThunkMiddleware(extraArgument) {
+    const middleware = ({ dispatch: dispatch , getState: getState  })=>(next)=>(action)=>{
+                //If a function was passed to store.dispatch, call it and return the
+                // result
+                if ($bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(action)) return action(dispatch, getState, extraArgument);
+                //Otherwise, pass the action down the middleware chain
+                return next(action);
+            }
+    ;
+    return middleware;
+}
+const $f748b07d130c7d2e$export$dd164f5517779f15 = $f748b07d130c7d2e$var$createThunkMiddleware();
+$f748b07d130c7d2e$export$dd164f5517779f15.withExtraArgument = $f748b07d130c7d2e$var$createThunkMiddleware;
+
+
+
+
+function $875d44ee4fdab364$export$66e4520cdb265d18(reducers) {
+    const reducerKeys = Reflect.ownKeys(reducers);
+    const finalReducers = {
+    };
+    for (const key of reducerKeys)if ($bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(reducers[key])) finalReducers[key] = reducers[key];
+    const finalReducerKeys = $bb63e7e1bbd7ff6a$export$ed97f33186d4b816(finalReducers);
+    let shapeAssertionError;
+    try {
+        $875d44ee4fdab364$var$assertReducerShape(finalReducers);
+    } catch (err) {
+        shapeAssertionError = err;
+    }
+    /**
+   * Combined reducer
+   *
+   * @param {object} State to reduce
+   * @param {object} Action to perform
+   * @returns {object} New state
+   */ return function combinedReducers(state, action) {
+        if (shapeAssertionError) throw shapeAssertionError;
+        let hasChanged = false;
+        const nextState = {
+        };
+        for (const key of finalReducerKeys){
+            const reducer = finalReducers[key];
+            const previousStateForKey = state[key];
+            const nextStateForKey = reducer(previousStateForKey, action);
+            if (typeof nextStateForKey === 'undefined') {
+                const actionType = action && action.type;
+                throw new Error(`When called with action of type ${actionType} ` + `the reducer for key ${key} returned undefined.`);
+            }
+            nextState[key] = nextStateForKey;
+            hasChanged = hasChanged || nextStateForKey !== previousStateForKey;
+        }
+        hasChanged = hasChanged || finalReducerKeys.length !== $bb63e7e1bbd7ff6a$export$ed97f33186d4b816(state).length;
+        return hasChanged ? nextState : state;
+    };
+}
+function $875d44ee4fdab364$var$assertReducerShape(reducers) {
+    const keys = Reflect.ownKeys(reducers);
+    for (const key of keys){
+        const reducer = reducers[key];
+        const initialState = reducer(undefined, {
+            type: $9b8aa3408a85f1e4$export$d788bc089976c004
+        });
+        if (typeof initialState === 'undefined') throw new Error(`Reducer for key ${key} returned undefined. ` + 'Set null for the return value if you do not ' + 'want to set a value for this reducer.');
+    }
+}
+
+
+
+/**
+ * Creates a middleware function that accepts an optional 'extra argument' to
+ * be injected later.
+ *
+ * @returns {object} Action listener, with methods:
+ *
+ *     @method middleware
+ *     @method addListener(action, listener) Add a listener for an
+ *     actionCreator or action.type
+ *     @method removeListener(action, listener) Remove a listener for
+ *     an actionCreator or action.type
+ */ function $4ba82b2f52be5725$var$createActionListenerMiddleware() {
+    const listeners = new Map();
+    /**
+   * Add a listener
+   * @param Action creator function or action.type
+   */ function addListener(actionCreator, listener) {
+        const currentListeners = listeners.get(actionCreator) || [];
+        listeners.set(actionCreator, currentListeners.concat(listener));
+    }
+    /**
+   * Remove a listener
+   * @param Action creator function or action.type
+   */ function removeListener(actionCreator, listener) {
+        const currentListeners = listeners.get(actionCreator) || [];
+        listeners.set(actionCreator, currentListeners.filter((currentListener)=>currentListener !== listener
+        ));
+    }
+    return $bb63e7e1bbd7ff6a$export$fc3a40dec7b33bf({
+        middleware (middlewareAPI) {
+            return (next)=>(action)=>{
+                    if ($bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(action)) {
+                        const listeners = listeners.get(action) || [];
+                        for (const listener of listeners)try {
+                            listener(action, middlewareAPI);
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    } else {
+                        const { type: type  } = action;
+                        const listeners = listeners.get(type) || [];
+                        for (const listener of listeners)try {
+                            listener(action, middlewareAPI);
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    }
+                    return next(action);
+                }
+            ;
+        },
+        addListener: addListener,
+        removeListener: removeListener
+    });
+}
+const $4ba82b2f52be5725$export$d977db1e2c3d2800 = $4ba82b2f52be5725$var$createActionListenerMiddleware();
+
+
 
 
 
