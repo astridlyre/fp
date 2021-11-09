@@ -1,4 +1,4 @@
-import { immutable, isFunction, isUndefined } from '../combinators.js'
+import { immutable, isFunction } from '../combinators.js'
 
 /**
  * Creates a middleware function that accepts an optional 'extra argument' to

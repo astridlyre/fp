@@ -906,8 +906,8 @@ export const pow = (base, power) =>
  * Array functions
  * Provides a set of functions for common array operations
  */
-export const head = a => a[0]
-export const last = a => a[a.length - 1]
+export const head = a => a && a[0]
+export const last = a => a && a[a.length - 1]
 export const every = curry((f, arr) => arr.every(f))
 export const some = curry((f, arr) => arr.some(f))
 export const find = curry((f, arr) => arr.find(f))

@@ -1,4 +1,4 @@
-import { isFunction, keys } from '../combinators.js'
+import { isFunction, isUndefined, keys } from '../combinators.js'
 import { INIT } from './createStore.js'
 
 /**
@@ -41,6 +41,7 @@ export function combineReducers(reducers) {
    */
   return function combinedReducers(state, action) {
     if (shapeAssertionError) throw shapeAssertionError
+    if (isUndefined(state)) state = {}
 
     let hasChanged = false
 

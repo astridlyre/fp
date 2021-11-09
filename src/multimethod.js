@@ -44,7 +44,7 @@ export function multi(...initialMethods) {
     let handler = initialHandler(multiMethod[handlersKey])
     for (const [key, method] of multiMethod[handlersKey]) {
       if (
-        (isFunction(key) && args[0].constructor === key) ||
+        (isFunction(key) && args[0]?.constructor === key) ||
         (isFunction(key) && !isClass(key) && key(...args)) ||
         deepEqual(multiMethod[dispatchKey](...args), key)
       ) {

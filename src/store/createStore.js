@@ -1,5 +1,5 @@
 import { immutable, isFunction, isObject, isUndefined } from '../combinators.js'
-import { $$observable } from '../rx.js'
+import { $$observable, Observable } from '../rx.js'
 import { isPlainObject } from './isPlainObject.js'
 
 export const INIT = '@@ACTION/INIT'
@@ -115,8 +115,7 @@ export function createStore(reducer, initialState, enhancer) {
     }
 
     const listeners = (currentListeners = nextListeners)
-    for (let i = 0; i < listeners.length; i++) {
-      const listener = listeners[i]
+    for (const listener of listeners) {
       listener()
     }
 
@@ -127,25 +126,9 @@ export function createStore(reducer, initialState, enhancer) {
    * Creates a simple observable from state updates, compatible with the
    * Observable proposal
    */
-  function observable() {
-    const outerSubscribe = subscribe
-    return immutable({
-      subscribe(observer) {
-        if (!isObject(observer)) {
-          throw new Error(`Expected observer to be an object, received: ${observer}`)
-        }
-
-        observeState()
-
-        const unsubscribe = outerSubscribe(function observeState() {
-          if (observer.next) observer.next(getState())
-        })
-
-        return { unsubscribe }
-      },
-      [$$observable]() {
-        return this
-      },
+  function observe() {
+    return new Observable(observer => {
+      return subscribe(() => observer.next(getState()))
     })
   }
 
@@ -158,6 +141,7 @@ export function createStore(reducer, initialState, enhancer) {
     dispatch,
     subscribe,
     getState,
-    [$$observable]: observable,
+    [$$observable]: observe,
+    observe,
   })
 }
