@@ -35,79 +35,65 @@ import { placeholder } from './rx/utils.js'
 export const $$observable = /* #__PURE__ */ (() =>
   (typeof Symbol === 'function' && Symbol.observable) || '@@observable')()
 
-Object.defineProperties(Observable, {
-  fromGenerator: {
-    value: placeholder(
-      generator =>
-        new Observable(observer => {
-          Readable.from(generator())
-            .on('data', observer.next.bind(observer))
-            .on('end', observer.complete.bind(observer))
-            .on('error', observer.error.bind(observer))
-        })
-    ),
-    enumerable: false,
-    writable: false,
-    configurable: false,
-  },
-  fromStream: {
-    value: placeholder(
-      stream =>
-        new Observable(observer => {
-          stream.on('data', observer.next.bind(observer))
-          stream.on('end', observer.complete.bind(observer))
-          stream.on('error', observer.error.bind(observer))
-        })
-    ),
-    enumerable: false,
-    writable: false,
-    configurable: false,
-  },
-})
-
-const p = {
-  enumerable: false,
-  writable: false,
-  configurable: false,
+const additionalProperties = {
+  fromEvent: placeholder(
+    (emitter, event, handler) =>
+      new Observable(observer => {
+        const group = new Map([
+          [event, (...args) => observer.next(handler(...args))],
+          ['error', observer.error.bind(observer)],
+          ['end', observer.complete.bind(observer)],
+        ])
+        entries(group).forEach(([event, handler]) => emitter.on(event, handler))
+        return () =>
+          entries(group).forEach(([event, handler]) =>
+            emitter.removeListener(event, handler)
+          )
+      })
+  ),
+  fromGenerator: placeholder(
+    generator =>
+      new Observable(observer => {
+        Readable.from(generator())
+          .on('data', observer.next.bind(observer))
+          .on('end', observer.complete.bind(observer))
+          .on('error', observer.error.bind(observer))
+      })
+  ),
+  fromPromise: placeholder(
+    promise =>
+      new Observable(observer => {
+        promise
+          .then(value => observer.next(value))
+          .catch(err => observer.error(err))
+          .finally(() => observer.complete())
+      })
+  ),
+  fromStream: placeholder(
+    stream =>
+      new Observable(observer => {
+        stream.on('data', observer.next.bind(observer))
+        stream.on('end', observer.complete.bind(observer))
+        stream.on('error', observer.error.bind(observer))
+      })
+  ),
+  combine,
+  interval,
+  listen,
+  merge,
+  subject,
 }
 
-Object.defineProperties(Observable, {
-  listen: { value: listen, ...p },
-  interval: { value: interval, ...p },
-  combine: { value: combine, ...p },
-  merge: { value: merge, ...p },
-  subject: { value: subject, ...p },
-  fromEvent: {
-    value: placeholder(
-      (emitter, event, handler) =>
-        new Observable(observer => {
-          const group = new Map([
-            [event, (...args) => observer.next(handler(...args))],
-            ['error', observer.error.bind(observer)],
-            ['end', observer.complete.bind(observer)],
-          ])
-          entries(group).forEach(([event, handler]) => emitter.on(event, handler))
-          return () =>
-            entries(group).forEach(([event, handler]) =>
-              emitter.removeListener(event, handler)
-            )
-        })
-    ),
-    ...p,
-  },
-  fromPromise: {
-    value: placeholder(
-      promise =>
-        new Observable(observer => {
-          promise
-            .then(value => observer.next(value))
-            .catch(err => observer.error(err))
-            .finally(() => observer.complete())
-        })
-    ),
-    ...p,
-  },
-})
+for (const [prop, value] of Object.entries(additionalProperties)) {
+  if (!Observable[prop]) {
+    Object.defineProperty(Observable, prop, {
+      value,
+      enumerable: false,
+      writable: false,
+      configurable: false,
+    })
+  }
+}
 
 export const ReactiveExtensions = {
   filter(predicate) {
