@@ -326,8 +326,7 @@ stream.subscribe({
 My attempt to write a simple Redux clone.
 
 ```javascript
-import { store } from '@ebflat9/fp'
-const { Reducer } = store
+import { Reducer, createStore } from '@ebflat9/fp'
 
 // Create a reducer
 const reducer = Reducer.builder()
@@ -354,8 +353,7 @@ store.dispatch({ type: 'ADD', payload: 'hello' }) // 'HELLO'
 ### Creating an Async Thunk
 
 ```javascript
-import {store} from '@ebflat/fp'
-const {createAsyncThunk} = store
+import { createAsyncThunk } from '@ebflat/fp'
 
 const myThunk = createAsyncThunk('ADD', arg =>
   new Promise(resolve) => setTimeout(() => resolve(arg), 1)

@@ -183,11 +183,22 @@ export { Observable } from './rx.js'
 export { multi, method } from './multimethod.js'
 export {
   createFilterStream,
-  createMapStream,
-  createReduceStream,
-  ParallelStream,
-  LimitedParallelStream,
   createFork,
+  createMapStream,
   createMerge,
+  createReduceStream,
+  LimitedParallelStream,
+  ParallelStream,
 } from './node-streams.js'
-export * as store from './store.js'
+export {
+  actionListener,
+  applyMiddleware,
+  bindActionCreators,
+  createAction,
+  createAsyncThunk,
+  createConfiguredStore,
+  createSelector,
+  createStore,
+  Reducer,
+  thunk,
+} from './store.js'
