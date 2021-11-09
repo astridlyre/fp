@@ -9,8 +9,8 @@ const $bb63e7e1bbd7ff6a$export$f0954fd7d5368655 = (x)=>x
 ;
 const $bb63e7e1bbd7ff6a$export$c983f826f44ff86 = (a)=>(b)=>a
 ;
-const $bb63e7e1bbd7ff6a$export$2b74374111f56d9e = (fn, n)=>function arity(...args) {
-        return fn.apply(this, args.slice(0, n));
+const $bb63e7e1bbd7ff6a$export$2b74374111f56d9e = (fn, n)=>function arity() {
+        return fn.apply(this, Array.from(arguments).slice(0, n));
     }
 ;
 const $bb63e7e1bbd7ff6a$export$a7e49f78f97b1037 = (fn)=>$bb63e7e1bbd7ff6a$export$2b74374111f56d9e(fn, 1)
@@ -30,17 +30,19 @@ const $bb63e7e1bbd7ff6a$export$3d41a7c27165bfa3 = (fn, rarg)=>function callLast(
 const $bb63e7e1bbd7ff6a$export$e775f2ca58d379f0 = Function.prototype.bind.bind(Function.prototype.call);
 const $bb63e7e1bbd7ff6a$export$fc1400facf92c78 = (a)=>$bb63e7e1bbd7ff6a$export$844ec244b1367d54(a) || $bb63e7e1bbd7ff6a$export$43bee75e5e14138e(a) || $bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(a) ? a.length : $bb63e7e1bbd7ff6a$export$6750766a7c7ec627(a) || $bb63e7e1bbd7ff6a$export$5c90113a285f2241(a) ? a.size : $bb63e7e1bbd7ff6a$export$a6cdc56e425d0d0a(a) ? Object.entries(a).length : void 0
 ;
-const $bb63e7e1bbd7ff6a$var$compose2 = (f, g)=>function compose(...args) {
-        return f.call(this, g.call(this, ...args));
+const $bb63e7e1bbd7ff6a$var$compose2 = (f, g)=>function compose() {
+        return f.call(this, g.apply(this, arguments));
     }
 ;
 const $bb63e7e1bbd7ff6a$export$f672e0b6f7222cd7 = (...fns)=>fns.reduce($bb63e7e1bbd7ff6a$var$compose2)
 ;
 const $bb63e7e1bbd7ff6a$export$a4627e546088548d = (...fns)=>fns.reduceRight($bb63e7e1bbd7ff6a$var$compose2)
 ;
-const $bb63e7e1bbd7ff6a$export$c3095a23b368d1f2 = (fn)=>function curryInner(...args1) {
-        return args1.length >= fn.length ? fn.apply(this, args1) : (...args2)=>{
-            return args1.length + args2.length >= fn.length ? fn.call(this, ...args1, ...args2) : $bb63e7e1bbd7ff6a$export$c3095a23b368d1f2(fn)(...args1, ...args2);
+const $bb63e7e1bbd7ff6a$export$c3095a23b368d1f2 = (fn)=>function curryInner() {
+        const args1 = arguments;
+        return args1.length >= fn.length ? fn.apply(this, arguments) : function curryInner2() {
+            const args = Array.from(args1).concat(Array.from(arguments));
+            return args.length >= fn.length ? fn.apply(this, args) : $bb63e7e1bbd7ff6a$export$c3095a23b368d1f2(fn)(...args);
         };
     }
 ;
@@ -328,8 +330,8 @@ const $bb63e7e1bbd7ff6a$export$ce7eaaed37329a1b = (fn)=>function innerDeepMap(tr
         );
     }
 ;
-const $bb63e7e1bbd7ff6a$var$composeM2 = (f, g)=>function innerComposeM2(...args) {
-        return g.apply(this, args).flatMap(f);
+const $bb63e7e1bbd7ff6a$var$composeM2 = (f, g)=>function innerComposeM2() {
+        return g.apply(this, arguments).flatMap(f);
     }
 ;
 const $bb63e7e1bbd7ff6a$export$fe41fac84f1fd82f = (...Ms)=>Ms.reduce($bb63e7e1bbd7ff6a$var$composeM2)
@@ -342,8 +344,8 @@ const $bb63e7e1bbd7ff6a$export$3a582736e2273011 = $bb63e7e1bbd7ff6a$export$c3095
 );
 const $bb63e7e1bbd7ff6a$export$5635d7ef4b8fee1c = $bb63e7e1bbd7ff6a$export$c3095a23b368d1f2((fn, F)=>$bb63e7e1bbd7ff6a$export$871de8747c9eaa88.call(F, fn)
 );
-const $bb63e7e1bbd7ff6a$var$composeAsync2 = (f, g)=>async function innerComposeAsync(...args) {
-        return await f.call(this, await g.call(this, ...args));
+const $bb63e7e1bbd7ff6a$var$composeAsync2 = (f, g)=>async function innerComposeAsync() {
+        return await f.call(this, await g.apply(this, arguments));
     }
 ;
 const $bb63e7e1bbd7ff6a$export$9dbe56a5aba4f4b4 = (...fns)=>fns.reduce($bb63e7e1bbd7ff6a$var$composeAsync2)
@@ -457,20 +459,25 @@ const $bb63e7e1bbd7ff6a$export$d02631cccf789723 = (start, end, step = start < en
 function $bb63e7e1bbd7ff6a$export$d2de3aaeafa91619(fn) {
     let done = false;
     let result;
-    return function once(...args) {
-        return !done ? (done = true, result = fn.apply(this, args), result) : result;
+    return function once() {
+        return !done ? (done = true, result = fn.apply(this, arguments), result) : result;
     };
 }
 function $bb63e7e1bbd7ff6a$export$fc10aeed3a532e2a(fn) {
-    const cache = Object.create(null);
+    let cache = Object.create(null);
     const toKey = (key)=>JSON.stringify(key)
     ;
     const isPrimitive = (x)=>typeof x === 'number' || typeof x === 'string' || typeof x === 'boolean'
     ;
-    return function memoize(...args) {
-        const key = args.length === 1 && isPrimitive(args[0]) ? args[0] : toKey(args);
-        return key in cache ? cache[key] : cache[key] = fn.apply(this, args);
+    function memoize() {
+        const key = arguments.length === 1 && isPrimitive(arguments[0]) ? arguments[0] : toKey(arguments);
+        return key in cache ? cache[key] : cache[key] = fn.apply(this, arguments);
+    }
+    memoize.clearCache = function clearCache() {
+        cache = Object.create(null);
+        return memoize;
     };
+    return memoize;
 }
 const $bb63e7e1bbd7ff6a$export$61fc7d43ac8f84b0 = (delay)=>{
     let pending = false;
@@ -2603,8 +2610,9 @@ class $1f5123af4789726e$var$NoHandlerError {
 const $1f5123af4789726e$var$handlersKey = Symbol('handlers key');
 const $1f5123af4789726e$var$dispatchKey = Symbol('dispatch key');
 const $1f5123af4789726e$var$DEFAULT_DISPATCH = 'MULTI:DEFAULT_DISPATCH';
-const $1f5123af4789726e$var$defaultDispatch = (...args)=>args.length === 1 ? args[0] : args
-;
+const $1f5123af4789726e$var$defaultDispatch = function defaultDispatch() {
+    return arguments.length === 1 ? arguments[0] : Array.from(arguments);
+};
 const $1f5123af4789726e$var$extractDispatchAndMethods = (methods)=>$bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(methods[0]) ? [
         methods[0],
         methods.slice(1)
@@ -2628,14 +2636,18 @@ function $1f5123af4789726e$export$26f73335cc2e7868(key, handler) {
 function $1f5123af4789726e$export$13e2537ceeaf8a3a(...initialMethods) {
     // multiMethod function takes variable arguments and returns the result of
     // calling any handler that can handle the arguments
-    function multiMethod(...args) {
+    function multiMethod() {
         let handler = $1f5123af4789726e$var$initialHandler(multiMethod[$1f5123af4789726e$var$handlersKey]);
-        for (const [key, method] of multiMethod[$1f5123af4789726e$var$handlersKey])if ($bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(key) && args[0]?.constructor === key || $bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(key) && !$bb63e7e1bbd7ff6a$export$5578ef75f4140928(key) && key(...args) || $bb63e7e1bbd7ff6a$export$9cb4719e2e525b7a(multiMethod[$1f5123af4789726e$var$dispatchKey](...args), key)) {
-            handler = method;
-            break;
+        for(let i = 0; i < multiMethod[$1f5123af4789726e$var$handlersKey].length; i++){
+            const key = multiMethod[$1f5123af4789726e$var$handlersKey][i][0];
+            const method = multiMethod[$1f5123af4789726e$var$handlersKey][i][1];
+            if ($bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(key) && arguments[0]?.constructor === key || $bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(key) && !$bb63e7e1bbd7ff6a$export$5578ef75f4140928(key) && key.apply(null, arguments) || $bb63e7e1bbd7ff6a$export$9cb4719e2e525b7a(multiMethod[$1f5123af4789726e$var$dispatchKey].apply(null, arguments), key)) {
+                handler = method;
+                break;
+            }
         }
-        if (handler) return $bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(handler) ? handler(...args) : handler;
-        throw new $1f5123af4789726e$var$NoHandlerError(`No handlers for args (${JSON.stringify(args)})`);
+        if (handler) return $bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(handler) ? handler.apply(null, arguments) : handler;
+        throw new $1f5123af4789726e$var$NoHandlerError(`No handlers for args (${JSON.stringify(arguments)})`);
     }
     const [dispatch, methods] = $1f5123af4789726e$var$extractDispatchAndMethods(initialMethods);
     multiMethod[$1f5123af4789726e$var$dispatchKey] = dispatch;
@@ -2647,8 +2659,9 @@ function $1f5123af4789726e$export$13e2537ceeaf8a3a(...initialMethods) {
     multiMethod.map = function map(fn) {
         return $1f5123af4789726e$export$13e2537ceeaf8a3a(multiMethod[$1f5123af4789726e$var$dispatchKey], ...multiMethod[$1f5123af4789726e$var$handlersKey].map(([key, handler])=>[
                 key,
-                (...args)=>fn(handler(...args))
-                , 
+                function mappedHandler() {
+                    return fn(handler.apply(null, arguments));
+                }, 
             ]
         ));
     };
@@ -2783,6 +2796,7 @@ $parcel$export($62ebb3b92c69642f$exports, "bindActionCreators", () => $104d7da1a
 $parcel$export($62ebb3b92c69642f$exports, "createAsyncThunk", () => $4151227d8d9fe495$export$6abd22dc03e5063f);
 $parcel$export($62ebb3b92c69642f$exports, "actionListener", () => $4ba82b2f52be5725$export$d977db1e2c3d2800);
 $parcel$export($62ebb3b92c69642f$exports, "createAction", () => $4c7686ba179dd3dd$export$309c7a02b0b0bc62);
+$parcel$export($62ebb3b92c69642f$exports, "createSelector", () => $481aebe6b38b0185$export$595d22ed68ca2841);
 $parcel$export($62ebb3b92c69642f$exports, "Reducer", () => $110769fead9c24cb$export$9fe743c6906fa583);
 $parcel$export($62ebb3b92c69642f$exports, "createStore", () => $9b8aa3408a85f1e4$export$f51a9068ac82ea43);
 $parcel$export($62ebb3b92c69642f$exports, "applyMiddleware", () => $41589822c08ae343$export$9ff26e0402cc7b7);
@@ -2810,8 +2824,7 @@ function $9b8aa3408a85f1e4$export$f51a9068ac82ea43(reducer, initialState, enhanc
         return enhancer($9b8aa3408a85f1e4$export$f51a9068ac82ea43)(reducer, initialState);
     }
     if (!$bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(reducer)) throw new Error(`Expected reducer to be a function, got: ${reducer}`);
-    let currentState = initialState ?? {
-    };
+    let currentState = initialState;
     let isDispatching = false;
     let currentListeners = [];
     let nextListeners = currentListeners;
@@ -2875,13 +2888,13 @@ function $9b8aa3408a85f1e4$export$f51a9068ac82ea43(reducer, initialState, enhanc
    */ dispatch({
         type: $9b8aa3408a85f1e4$export$d788bc089976c004
     });
-    return $bb63e7e1bbd7ff6a$export$fc3a40dec7b33bf({
+    return {
         dispatch: dispatch,
         subscribe: subscribe,
         getState: getState,
         [$c8c6d4fe325848b7$export$a7c40509ff863847]: observe,
         observe: observe
-    });
+    };
 }
 
 
@@ -2892,10 +2905,10 @@ function $41589822c08ae343$export$9ff26e0402cc7b7(...middlewares) {
             let dispatch = ()=>{
                 throw new Error('Cannot dispatch while constructing middleware');
             };
-            const middlewareAPI = $bb63e7e1bbd7ff6a$export$fc3a40dec7b33bf({
+            const middlewareAPI = {
                 getState: store.getState,
                 dispatch: (action, ...args)=>dispatch(action, ...args)
-            });
+            };
             const chain = middlewares.map((middleware)=>middleware(middlewareAPI)
             );
             dispatch = $bb63e7e1bbd7ff6a$export$f672e0b6f7222cd7(...chain)(store.dispatch);
@@ -3023,18 +3036,57 @@ function $4151227d8d9fe495$export$6abd22dc03e5063f(typePrefix, payloadCreator, o
                     })
                 )
             );
-            return Object.assign($4151227d8d9fe495$var$createPromise({
-                abortController: abortController,
-                abortedPromise: abortedPromise,
-                arg: arg,
-                dispatch: dispatch,
-                extra: extra,
-                getState: getState,
-                options: options,
-                payloadCreator: payloadCreator,
-                pending: pending,
-                requestId: requestId
-            }), {
+            const promise = async function createPromise() {
+                let finalAction;
+                try {
+                    if (options?.condition?.(arg, {
+                        getState: getState,
+                        extra: extra
+                    }) === false) throw {
+                        name: 'ConditionError',
+                        message: 'Aborted due to condition callback returning false'
+                    };
+                    started = true;
+                    dispatch(pending(requestId, arg, options?.getPendingMeta?.({
+                        requestId: requestId,
+                        arg: arg
+                    }, {
+                        getState: getState,
+                        extra: extra
+                    })));
+                    finalAction = await Promise.race([
+                        abortedPromise,
+                        Promise.resolve(payloadCreator(arg, {
+                            dispatch: dispatch,
+                            getState: getState,
+                            extra: extra,
+                            requestId: requestId,
+                            signal: abortController.signal,
+                            rejectWithValue: (value, meta)=>({
+                                    value: value,
+                                    meta: meta,
+                                    status: $4151227d8d9fe495$var$STATUS_REJECTED
+                                })
+                            ,
+                            fulfillWithValue: (value, meta)=>({
+                                    value: value,
+                                    meta: meta,
+                                    status: $4151227d8d9fe495$var$STATUS_FULFILLED
+                                })
+                        }).then((result)=>{
+                            if (result.status === $4151227d8d9fe495$var$STATUS_REJECTED) throw result;
+                            if (result.status === $4151227d8d9fe495$var$STATUS_FULFILLED) return fulfilled(result.payload, requestId, arg, result.meta);
+                            return fulfilled(result, requestId, arg);
+                        })), 
+                    ]);
+                } catch (err) {
+                    finalAction = err.status === $4151227d8d9fe495$var$STATUS_REJECTED ? rejected(null, requestId, arg, err.payload, err.meta) : rejected(err, requestId, arg);
+                }
+                const skipDispatch = options && !options.dispatchConditionRejection && rejected.match(finalAction) && finalAction.meta.condition;
+                if (!skipDispatch) dispatch(finalAction);
+                return finalAction;
+            }();
+            return Object.assign(promise, {
                 abort (reason) {
                     if (started) {
                         abortReason = reason;
@@ -3055,56 +3107,6 @@ function $4151227d8d9fe495$export$6abd22dc03e5063f(typePrefix, payloadCreator, o
         fulfilled: fulfilled,
         typePrefix: typePrefix
     });
-}
-async function $4151227d8d9fe495$var$createPromise({ abortController: abortController , abortedPromise: abortedPromise , arg: arg , dispatch: dispatch , extra: extra , getState: getState , options: options , payloadCreator: payloadCreator , pending: pending , requestId: requestId ,  }) {
-    let finalAction;
-    try {
-        if (options?.condition?.(arg, {
-            getState: getState,
-            extra: extra
-        }) === false) throw {
-            name: 'ConditionError',
-            message: 'Aborted due to condition callback returning false'
-        };
-        started = true;
-        dispatch(pending(requestId, arg, options?.getPendingMeta?.({
-            requestId: requestId,
-            arg: arg
-        }, {
-            getState: getState,
-            extra: extra
-        })));
-        finalAction = await Promise.race([
-            abortedPromise,
-            Promise.resolve(payloadCreator(arg, {
-                dispatch: dispatch,
-                getState: getState,
-                extra: extra,
-                requestId: requestId,
-                signal: abortController.signal,
-                rejectWithValue: (value, meta)=>({
-                        value: value,
-                        meta: meta,
-                        status: $4151227d8d9fe495$var$STATUS_REJECTED
-                    })
-                ,
-                fulfillWithValue: (value, meta)=>({
-                        value: value,
-                        meta: meta,
-                        status: $4151227d8d9fe495$var$STATUS_FULFILLED
-                    })
-            }).then((result)=>{
-                if (result.status === $4151227d8d9fe495$var$STATUS_REJECTED) throw result;
-                if (result.status === $4151227d8d9fe495$var$STATUS_FULFILLED) return fulfilled(result.payload, requestId, arg, result.meta);
-                return fulfilled(result, requestId, arg);
-            })), 
-        ]);
-    } catch (err) {
-        finalAction = err.status === $4151227d8d9fe495$var$STATUS_REJECTED ? rejected(null, requestId, arg, err.payload, err.meta) : rejected(err, requestId, arg);
-    }
-    const skipDispatch = options && !options.dispatchConditionRejection && rejected.match(finalAction) && finalAction.meta.condition;
-    if (!skipDispatch) dispatch(finalAction);
-    return finalAction;
 }
 /**
  * Unwrap an action
@@ -3193,7 +3195,7 @@ async function $4151227d8d9fe495$var$createPromise({ abortController: abortContr
         listeners.set(actionCreator, currentListeners.filter((currentListener)=>currentListener !== listener
         ));
     }
-    return $bb63e7e1bbd7ff6a$export$fc3a40dec7b33bf({
+    return {
         middleware (middlewareAPI) {
             return (next)=>(action)=>{
                     if ($bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(action)) {
@@ -3218,10 +3220,46 @@ async function $4151227d8d9fe495$var$createPromise({ abortController: abortContr
         },
         addListener: addListener,
         removeListener: removeListener
-    });
+    };
 }
 const $4ba82b2f52be5725$export$d977db1e2c3d2800 = $4ba82b2f52be5725$var$createActionListenerMiddleware();
 
+
+
+
+function $481aebe6b38b0185$export$595d22ed68ca2841(...fns) {
+    let recomputations = 0;
+    let lastResult;
+    let resultFunc = fns.pop();
+    if (!$bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(resultFunc)) throw new Error(`createSelector expects an output function after the ` + `inputs, but received: ${resultFunc}`);
+    const dependencies = $481aebe6b38b0185$var$getDependencies(fns);
+    const memoizedResultFunc = $bb63e7e1bbd7ff6a$export$fc10aeed3a532e2a(function wrappedResultFunc() {
+        recomputations++;
+        return resultFunc.apply(null, arguments);
+    });
+    const selector = $bb63e7e1bbd7ff6a$export$fc10aeed3a532e2a(function selector() {
+        const params = [];
+        const length = dependencies.length;
+        for(let i = 0; i < length; i++)params.push(dependencies[i].apply(null, arguments));
+        lastResult = memoizedResultFunc.apply(null, params);
+        return lastResult;
+    });
+    return Object.assign(selector, {
+        resultFunc: resultFunc,
+        memoizedResultFunc: memoizedResultFunc,
+        dependencies: dependencies,
+        lastResult: ()=>lastResult
+        ,
+        recomputations: ()=>recomputations
+        ,
+        resetRecomputations: ()=>recomputations = 0
+    });
+}
+function $481aebe6b38b0185$var$getDependencies(fns) {
+    const dependencies = $bb63e7e1bbd7ff6a$export$43bee75e5e14138e($bb63e7e1bbd7ff6a$export$5fd5031fecdacec3(fns)) ? $bb63e7e1bbd7ff6a$export$5fd5031fecdacec3(fns) : fns;
+    if (!dependencies.every($bb63e7e1bbd7ff6a$export$f6e2535fb5126e54)) throw new Error('createSelector expects all input-selectors to be functions');
+    return dependencies;
+}
 
 
 
@@ -3280,10 +3318,10 @@ function $875d44ee4fdab364$var$assertReducerShape(reducers) {
 }
 
 
-const $110769fead9c24cb$export$9fe743c6906fa583 = $bb63e7e1bbd7ff6a$export$fc3a40dec7b33bf({
+const $110769fead9c24cb$export$9fe743c6906fa583 = {
     builder () {
         const cases = [];
-        return $bb63e7e1bbd7ff6a$export$fc3a40dec7b33bf({
+        return {
             case (type, handler) {
                 if ($bb63e7e1bbd7ff6a$export$f6e2535fb5126e54(type)) cases.push($1f5123af4789726e$export$26f73335cc2e7868(type, handler));
                 else cases.push($1f5123af4789726e$export$26f73335cc2e7868((_, action)=>action.type === type
@@ -3298,10 +3336,10 @@ const $110769fead9c24cb$export$9fe743c6906fa583 = $bb63e7e1bbd7ff6a$export$fc3a4
             build () {
                 return $1f5123af4789726e$export$13e2537ceeaf8a3a(...cases);
             }
-        });
+        };
     },
     combineReducers: $875d44ee4fdab364$export$66e4520cdb265d18
-});
+};
 
 
 const $62ebb3b92c69642f$export$da91ee5d258bba9d = $41589822c08ae343$export$9ff26e0402cc7b7($f748b07d130c7d2e$export$dd164f5517779f15)($9b8aa3408a85f1e4$export$f51a9068ac82ea43);

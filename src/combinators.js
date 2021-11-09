@@ -19,8 +19,8 @@ export const constant = a => b => a
  * @returns {function} arity - Function fn with new arity
  */
 export const arity = (fn, n) =>
-  function arity(...args) {
-    return fn.apply(this, args.slice(0, n))
+  function arity() {
+    return fn.apply(this, Array.from(arguments).slice(0, n))
   }
 
 /**
@@ -88,8 +88,8 @@ export const len = a =>
     : void 0
 
 const compose2 = (f, g) =>
-  function compose(...args) {
-    return f.call(this, g.call(this, ...args))
+  function compose() {
+    return f.call(this, g.apply(this, arguments))
   }
 
 /**
@@ -114,13 +114,13 @@ export const pipe = (...fns) => fns.reduceRight(compose2)
  * function fn.
  */
 export const curry = fn =>
-  function curryInner(...args1) {
+  function curryInner() {
+    const args1 = arguments
     return args1.length >= fn.length
-      ? fn.apply(this, args1)
-      : (...args2) => {
-          return args1.length + args2.length >= fn.length
-            ? fn.call(this, ...args1, ...args2)
-            : curry(fn)(...args1, ...args2)
+      ? fn.apply(this, arguments)
+      : function curryInner2() {
+          const args = Array.from(args1).concat(Array.from(arguments))
+          return args.length >= fn.length ? fn.apply(this, args) : curry(fn)(...args)
         }
   }
 
@@ -819,8 +819,8 @@ export const deepMap = fn =>
   }
 
 const composeM2 = (f, g) =>
-  function innerComposeM2(...args) {
-    return g.apply(this, args).flatMap(f)
+  function innerComposeM2() {
+    return g.apply(this, arguments).flatMap(f)
   }
 
 /**
@@ -835,8 +835,8 @@ export const liftA4 = curry((fn, a1, a2, a3, a4) => a1.map(fn).ap(a2).ap(a3).ap(
 export const apply = curry((fn, F) => map.call(F, fn))
 
 const composeAsync2 = (f, g) =>
-  async function innerComposeAsync(...args) {
-    return await f.call(this, await g.call(this, ...args))
+  async function innerComposeAsync() {
+    return await f.call(this, await g.apply(this, arguments))
   }
 
 /**
@@ -1022,8 +1022,8 @@ export const range = (start, end, step = start < end ? 1 : -1) => {
 export function once(fn) {
   let done = false
   let result
-  return function once(...args) {
-    return !done ? ((done = true), (result = fn.apply(this, args)), result) : result
+  return function once() {
+    return !done ? ((done = true), (result = fn.apply(this, arguments)), result) : result
   }
 }
 
@@ -1033,14 +1033,25 @@ export function once(fn) {
  * @returns {function} memorize - Memoized function fn
  */
 export function memoize(fn) {
-  const cache = Object.create(null)
+  let cache = Object.create(null)
   const toKey = key => JSON.stringify(key)
   const isPrimitive = x =>
     typeof x === 'number' || typeof x === 'string' || typeof x === 'boolean'
-  return function memoize(...args) {
-    const key = args.length === 1 && isPrimitive(args[0]) ? args[0] : toKey(args)
-    return key in cache ? cache[key] : (cache[key] = fn.apply(this, args))
+
+  function memoize() {
+    const key =
+      arguments.length === 1 && isPrimitive(arguments[0])
+        ? arguments[0]
+        : toKey(arguments)
+    return key in cache ? cache[key] : (cache[key] = fn.apply(this, arguments))
   }
+
+  memoize.clearCache = function clearCache() {
+    cache = Object.create(null)
+    return memoize
+  }
+
+  return memoize
 }
 
 /**

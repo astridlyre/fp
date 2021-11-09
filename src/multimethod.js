@@ -12,9 +12,14 @@ class NoHandlerError {
 const handlersKey = Symbol('handlers key')
 const dispatchKey = Symbol('dispatch key')
 const DEFAULT_DISPATCH = 'MULTI:DEFAULT_DISPATCH'
-const defaultDispatch = (...args) => (args.length === 1 ? args[0] : args)
+
+const defaultDispatch = function defaultDispatch() {
+  return arguments.length === 1 ? arguments[0] : Array.from(arguments)
+}
+
 const extractDispatchAndMethods = methods =>
   isFunction(methods[0]) ? [methods[0], methods.slice(1)] : [defaultDispatch, methods]
+
 const initialHandler = handlers =>
   last(handlers)[0] === DEFAULT_DISPATCH ? last(handlers)[1] : null
 
@@ -40,22 +45,27 @@ export function method(key, handler) {
 export function multi(...initialMethods) {
   // multiMethod function takes variable arguments and returns the result of
   // calling any handler that can handle the arguments
-  function multiMethod(...args) {
+  function multiMethod() {
     let handler = initialHandler(multiMethod[handlersKey])
-    for (const [key, method] of multiMethod[handlersKey]) {
+    for (let i = 0; i < multiMethod[handlersKey].length; i++) {
+      const key = multiMethod[handlersKey][i][0]
+      const method = multiMethod[handlersKey][i][1]
+
       if (
-        (isFunction(key) && args[0]?.constructor === key) ||
-        (isFunction(key) && !isClass(key) && key(...args)) ||
-        deepEqual(multiMethod[dispatchKey](...args), key)
+        (isFunction(key) && arguments[0]?.constructor === key) ||
+        (isFunction(key) && !isClass(key) && key.apply(null, arguments)) ||
+        deepEqual(multiMethod[dispatchKey].apply(null, arguments), key)
       ) {
         handler = method
         break
       }
     }
+
     if (handler) {
-      return isFunction(handler) ? handler(...args) : handler
+      return isFunction(handler) ? handler.apply(null, arguments) : handler
     }
-    throw new NoHandlerError(`No handlers for args (${JSON.stringify(args)})`)
+
+    throw new NoHandlerError(`No handlers for args (${JSON.stringify(arguments)})`)
   }
 
   const [dispatch, methods] = extractDispatchAndMethods(initialMethods)
@@ -74,7 +84,9 @@ export function multi(...initialMethods) {
       multiMethod[dispatchKey],
       ...multiMethod[handlersKey].map(([key, handler]) => [
         key,
-        (...args) => fn(handler(...args)),
+        function mappedHandler() {
+          return fn(handler.apply(null, arguments))
+        },
       ])
     )
   }

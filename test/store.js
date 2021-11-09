@@ -2,8 +2,14 @@ import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
 import { store } from '../src/index.js'
 
-const { createStore, Reducer, createAction, createAsyncThunk, createConfiguredStore } =
-  store
+const {
+  createStore,
+  Reducer,
+  createAction,
+  createAsyncThunk,
+  createConfiguredStore,
+  createSelector,
+} = store
 
 const testReducer = Reducer.builder()
   .case('ADD', (state, action) => ({
@@ -179,6 +185,27 @@ describe('asyncThunk', function () {
           done(err)
         }
       })
+    })
+  })
+
+  describe('createSelector', function () {
+    it('should create a selector', function () {
+      let called = 0
+      const store = createConfiguredStore(testReducer)
+      const values = state => state.values
+      const s = createSelector(values, values => {
+        called++
+        return values.map(x => x.toUpperCase())
+      })
+
+      const a = store.getState()
+      assert.deepEqual(a, { values: [] })
+      store.dispatch({ type: 'ADD', payload: 'kitten' })
+
+      assert.deepEqual(s(store.getState()), ['KITTEN'])
+      s(store.getState())
+      s(store.getState())
+      assert.equal(called, 1)
     })
   })
 })

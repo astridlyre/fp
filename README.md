@@ -321,5 +321,59 @@ stream.subscribe({
 // values2 = [1, 2, 3, 4]
 ```
 
+## Store
+
+My attempt to write a simple Redux clone.
+
+```javascript
+import { store } from '@ebflat9/fp'
+const { Reducer } = store
+
+// Create a reducer
+const reducer = Reducer.builder()
+  .case('ADD', (state, action) => ({
+    ...state,
+    value: action.payload,
+  }))
+  .init({ value: null })
+  .build()
+
+// Create a store
+const store = createStore(reducer)
+
+// Listen to updates
+store
+  .observe()
+  .map(state => state.value && state.value.toUpperCase())
+  .subscribe(console.log)
+
+// Dispatch an update
+store.dispatch({ type: 'ADD', payload: 'hello' }) // 'HELLO'
+```
+
+### Creating an Async Thunk
+
+```javascript
+import {store} from '@ebflat/fp'
+const {createAsyncThunk} = store
+
+const myThunk = createAsyncThunk('ADD', arg =>
+  new Promise(resolve) => setTimeout(() => resolve(arg), 1)
+)
+
+const myReducer = Reducer.builder()
+  .case(myThunk.fulfilled.type, (state, action) => ({
+    ...state,
+    value: action.payload
+  }))
+  .init({value: null})
+  .build()
+
+const myStore = createConfiguredStore(myReducer)
+
+store.dispatch(myThunk('hello'))
+store.observe().subscribe(console.log) // { value: 'hello' }
+```
+
 There are many more functions available. Check out the tests for further
 clarification.

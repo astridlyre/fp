@@ -6,6 +6,7 @@ export { bindActionCreators } from './store/bindActionCreators.js'
 export { createAsyncThunk } from './store/asyncThunk.js'
 export { actionListener } from './store/actionListener.js'
 export { createAction } from './store/createAction.js'
+export { createSelector } from './store/createSelector.js'
 export { Reducer } from './store/reducer.js'
 export { createStore, applyMiddleware, thunk }
 

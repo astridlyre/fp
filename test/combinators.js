@@ -1,6 +1,6 @@
 import * as combinators from '../src/combinators.js'
 import { describe, it } from 'mocha'
-import { strict as assert } from 'assert'
+import { AssertionError, strict as assert } from 'assert'
 
 describe('Combinators', function () {
   describe('identity', function () {
@@ -1204,6 +1204,51 @@ describe('Combinators', function () {
     })
     it('should combine with not', function () {
       assert.equal(combinators.compose(combinators.isEmpty, combinators.not)(''), false)
+    })
+  })
+
+  describe('memoize', function () {
+    it('should memoize a function', function () {
+      let called = 0
+      const f = x => (called++, x * x)
+      const m = combinators.memoize(f)
+      m(5)
+      m(5)
+      m(5)
+      m(5)
+      m(5)
+      m(2)
+      m(2)
+      m(2)
+      assert.equal(called, 2)
+    })
+
+    it('should memoize a function with object arg', function () {
+      let called = 0
+      const f = x => (called++, x.name.toUpperCase())
+      const m = combinators.memoize(f)
+      m({ name: 'tim' })
+      m({ name: 'tim' })
+      m({ name: 'tim' })
+      m({ name: 'bob' })
+      const result = m({ name: 'bob' })
+      assert.equal(called, 2)
+      assert.equal(result, 'BOB')
+    })
+
+    it('should enable clearing of cache', function () {
+      let called = 0
+      const f = x => (called++, x * x)
+      const m = combinators.memoize(f)
+      m(5)
+      m(5)
+      assert.equal(called, 1)
+      m(3)
+      m(3)
+      assert.equal(called, 2)
+      m.clearCache()
+      m(5)
+      assert.equal(called, 3)
     })
   })
 })
