@@ -582,22 +582,22 @@ export function diff(a, b) {
 }
 
 /**
- * Merge, deep merge a and b
+ * Aggregate, deep merge a and b
  * @param {object} a - Object to merge into
  * @param {object} b - Object with diffs to merge
- * @return {object} c - Result of merge
+ * @return {object} c - Result of aggregation
  */
-export function merge(a, b) {
+export function aggregate(a, b) {
   if (!a && b) return b
 
   if (isArray(b)) {
-    return b.map((value, i) => merge(a[i], value))
+    return b.map((value, i) => aggregate(a[i], value))
   }
 
   if (isObject(b)) {
     const result = deepCopy(a)
     for (const key of Reflect.ownKeys(b)) {
-      result[key] = merge(a[key], b[key])
+      result[key] = aggregate(a[key], b[key])
     }
     return result
   }
@@ -616,7 +616,7 @@ export function aggregateOn(keyMap, ...objects) {
   let result = {}
 
   for (const current of objects) {
-    result = merge(result, current)
+    result = aggregate(result, current)
 
     for (const [oldKey, newKey] of entries(keyMap)) {
       if (!current[oldKey]) continue
@@ -639,38 +639,53 @@ export function aggregateOn(keyMap, ...objects) {
 export const unique = (...items) => Array.from(new Set(items.flat()))
 
 /**
- * Aggregate, combine all keys
+ * Merge, combine all keys
  * @param {object} a - Object one
  * @param {object} b - Object two
- * @returns {object} c - Result of aggregation
+ * @returns {object} c - Result of merger
  */
-export function aggregate(a, b) {
-  const result = {}
-  const keys = unique([...Reflect.ownKeys(a), ...Reflect.ownKeys(b)])
+export function merge(a, b) {
+  if (!a && b) return deepCopy(b)
+  if (!b && a) return deepCopy(a)
 
-  for (const key of keys) {
-    const [aVal, bVal] = [a[key], b[key]]
-
-    // If a === b just deepCopy b
-    if (aVal === bVal) {
-      result[key] = deepCopy(bVal)
-    }
-
-    // if both are arrays, merge them with unique elements
-    else if (isArray(aVal) && isArray(bVal)) {
-      result[key] = unique([...aVal, ...bVal])
-    }
-
-    // If both are objects, aggregate them
-    else if (isObject(aVal) && isObject(bVal)) {
-      result[key] = aggregate(aVal, bVal)
-    } else if (bVal === undefined) {
-      result[key] = deepCopy(aVal)
-    } else {
-      result[key] = deepCopy(bVal)
-    }
+  if (isArray(a) && isArray(b)) {
+    return unique(a, b).map(value => deepCopy(value))
   }
-  return result
+
+  if (!isArray(a) && isArray(b)) {
+    return b.map(value => deepCopy(value))
+  }
+
+  if (isObject(a) && isObject(b)) {
+    const result = {}
+    const keys = unique([...Reflect.ownKeys(a), ...Reflect.ownKeys(b)])
+
+    for (const key of keys) {
+      const [aVal, bVal] = [a[key], b[key]]
+
+      // If a === b just deepCopy b
+      if (aVal === bVal) {
+        result[key] = deepCopy(bVal)
+      }
+
+      // if both are arrays, merge them with unique elements
+      else if (isArray(aVal) && isArray(bVal)) {
+        result[key] = merge(aVal, bVal)
+      }
+
+      // If both are objects, merge them
+      else if (isObject(aVal) && isObject(bVal)) {
+        result[key] = merge(aVal, bVal)
+      } else if (bVal === undefined) {
+        result[key] = deepCopy(aVal)
+      } else {
+        result[key] = deepCopy(bVal)
+      }
+    }
+    return result
+  }
+
+  return b
 }
 
 /**

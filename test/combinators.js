@@ -746,7 +746,7 @@ describe('Combinators', function () {
     it('should merge arrays', function () {
       const a = [1, 2, 3]
       const b = [1, 2, 4]
-      assert.deepEqual(combinators.merge(a, b), [1, 2, 4])
+      assert.deepEqual(combinators.merge(a, b), [1, 2, 3, 4])
     })
     it('should merge objects', function () {
       const a = {
