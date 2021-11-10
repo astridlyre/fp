@@ -16,16 +16,24 @@ export function makeObservable(object) {
       if (target[prop] === value) return value
 
       const result = Reflect.set(...arguments)
-      dispatchChanged(target)
+      dispatchChanged(target, prop)
 
       return result
     },
     get(target, prop) {
       if (prop === 'observe')
-        return () =>
+        /**
+         * Returns an observe function that takes an optional array of props
+         * to observe
+         *
+         * @param {array} Props
+         * @returns {Observable}
+         */
+        return (props = []) =>
           new Observable(observer => {
-            subs.push(observer)
-            return () => subs.splice(subs.indexOf(observer), 1)
+            const sub = { props, observer }
+            subs.push(sub)
+            return () => subs.splice(subs.indexOf(sub), 1)
           })
 
       if (prop === 'clearCache') return () => (cache = Object.create(null))
@@ -38,7 +46,7 @@ export function makeObservable(object) {
 
           if (currentArgs !== lastArgs) {
             cache[prop] = currentArgs
-            dispatchChanged(target)
+            dispatchChanged(target, prop)
           }
 
           return result
@@ -50,15 +58,17 @@ export function makeObservable(object) {
     deleteProperty(target, key) {
       if (!key in target) return false
       delete target[key]
-      dispatchChanged(target)
+      dispatchChanged(target, key)
       return true
     },
   })
 
-  function dispatchChanged(target) {
+  function dispatchChanged(target, prop) {
     for (let i = 0; i < subs.length; i++) {
-      const observer = subs[i]
-      observer.next(target)
+      const { props, observer } = subs[i]
+      if (!props || !props.length || props.includes(prop)) {
+        observer.next(target)
+      }
     }
   }
 }

@@ -1290,7 +1290,7 @@ describe('Observable', function () {
       }
       const observed = Observable.makeObservable(obj)
 
-      observed.observe().subscribe(value => {
+      observed.observe(['setName', 'name']).subscribe(value => {
         called++
         if (called === 1 || called === 3) {
           assert.deepEqual(value.name, 'john')
@@ -1303,6 +1303,26 @@ describe('Observable', function () {
       observed.setName('craig')
       observed.setName('john')
       assert.equal(called, 3)
+      done()
+    })
+
+    it('should not dispatch if not observing prop', function (done) {
+      let called = 0
+      const obj = {
+        name: 'tim',
+        setName(name) {
+          this.name = name
+        },
+        age: 16,
+      }
+      const observed = Observable.makeObservable(obj)
+
+      observed.observe(['name', 'setName']).subscribe(value => {
+        done(new Error('Should not have been called'))
+      })
+
+      observed.age = 17
+      assert.equal(called, 0)
       done()
     })
 
