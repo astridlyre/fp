@@ -31,6 +31,7 @@ export const ClassMixin = (behaviour, sharedBehaviour = {}) => {
 // Class decorators
 export function Define(behaviour) {
   const instanceKeys = Reflect.ownKeys(behaviour)
+
   return function define(clazz) {
     for (const prop of instanceKeys) {
       if (!clazz.prototype[prop]) {
@@ -45,6 +46,7 @@ export function Define(behaviour) {
 
 export function Override(behaviour) {
   const instanceKeys = Reflect.ownKeys(behaviour)
+
   return function override(clazz) {
     for (const prop of instanceKeys) {
       if (clazz.prototype[prop]) {
@@ -66,6 +68,7 @@ export function Override(behaviour) {
 
 export function Prepend(behaviour) {
   const instanceKeys = Reflect.ownKeys(behaviour)
+
   return function prepend(clazz) {
     for (const prop of instanceKeys) {
       if (clazz.prototype[prop]) {
@@ -87,6 +90,7 @@ export function Prepend(behaviour) {
 
 export function Append(behaviour) {
   const instanceKeys = Reflect.ownKeys(behaviour)
+
   return function append(clazz) {
     for (const prop of instanceKeys) {
       if (clazz.prototype[prop]) {
@@ -110,6 +114,7 @@ export function Append(behaviour) {
 export const after = (...fns) =>
   function after(target, name, descriptor) {
     const method = descriptor.value
+
     descriptor.value = function withAfter(...args) {
       const value = method.apply(this, args)
       for (const fn of fns) {
@@ -123,6 +128,7 @@ export const after = (...fns) =>
 export const before = (...fns) =>
   function before(target, name, descriptor) {
     const method = descriptor.value
+
     descriptor.value = function withBefore(...args) {
       for (const fn of fns) {
         fn.apply(this, args)
@@ -135,6 +141,7 @@ export const before = (...fns) =>
 export const provided = (...fns) =>
   function provided(target, name, descriptor) {
     const method = descriptor.value
+
     descriptor.value = function withProvided(...args) {
       for (const fn of fns) if (!fn.apply(this, args)) return
       return method.apply(this, args)
@@ -145,6 +152,7 @@ export const provided = (...fns) =>
 export const unless = (...fns) =>
   function unless(target, name, descriptor) {
     const method = descriptor.value
+
     descriptor.value = function withUnless(...args) {
       for (const fn of fns) if (fn.apply(this, args)) return
       return method.apply(this, args)

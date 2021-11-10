@@ -1,4 +1,4 @@
-import { isFunction, isObject } from '../combinators.js'
+import { isFunction, isObject, stringify } from '../combinators.js'
 
 /**
  * Turns an action creator object into one whose values are wrapped in
@@ -14,7 +14,9 @@ export function bindActionCreators(actionCreators, dispatch) {
   }
 
   if (!isObject(actionCreators)) {
-    throw new Error(`Expected an object or function, but got: ${actionCreators}`)
+    throw new Error(
+      'Expected an object or function, but got: ' + stringify(actionCreators)
+    )
   }
 
   const boundActionCreators = {}
@@ -31,7 +33,7 @@ export function bindActionCreators(actionCreators, dispatch) {
 }
 
 function bindActionCreator(actionCreator, dispatch) {
-  return function boundCreator(...args) {
-    return dispatch(actionCreator.apply(this, args))
+  return function boundCreator() {
+    return dispatch(actionCreator.apply(this, arguments))
   }
 }

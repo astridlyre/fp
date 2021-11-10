@@ -223,6 +223,7 @@ export function isEmpty(x) {
   ) {
     return true
   }
+
   return false
 }
 
@@ -234,13 +235,16 @@ export function isEmpty(x) {
 export function isClass(obj) {
   const isCtorClass =
     obj.constructor && obj.constructor.toString().substring(0, 5) === 'class'
+
   if (obj.prototype === undefined) {
     return isCtorClass
   }
+
   const isPrototypeCtorClass =
     obj.prototype.constructor &&
     obj.prototype.constructor.toString &&
     obj.prototype.constructor.toString().substring(0, 5) === 'class'
+
   return isCtorClass || isPrototypeCtorClass
 }
 
@@ -454,20 +458,27 @@ export const deepProp = curry((path, a) => {
  */
 export const deepSetProp = curry((path, value, a) => {
   if (!Array.isArray(path)) path = path.split('.')
+
   function innerDeepSetProp(path, value, obj) {
     if (path.length === 1) {
       obj[path[0]] = value
       return obj
     }
+
     if (path[0] in obj && isObject(obj[path[0]])) {
       const newObj = obj[path[0]]
       return innerDeepSetProp(path.slice(1), value, newObj)
     }
+
     const newObj = {}
+
     obj[path[0]] = newObj
+
     return innerDeepSetProp(path.slice(1), value, newObj)
   }
+
   const aux = deepCopy(a)
+
   return innerDeepSetProp(path, value, aux), aux
 })
 
@@ -508,6 +519,7 @@ function diffObjects(oldObj, newObj) {
     }
     return result
   }
+
   return innerDiffObjects(oldObj, newObj, {})
 }
 
@@ -520,6 +532,7 @@ function diffObjects(oldObj, newObj) {
  */
 function diffArrays(oldArr, newArr) {
   const result = []
+
   if (oldArr === newArr) return result
 
   for (let i = 0; i < newArr.length; i++) {
@@ -550,9 +563,11 @@ export function diff(a, b) {
  */
 export function merge(a, b) {
   if (!a && b) return b
+
   if (isArray(b)) {
     return b.map((value, i) => merge(a[i], value))
   }
+
   if (isObject(b)) {
     const result = deepCopy(a)
     for (const key of Reflect.ownKeys(b)) {
@@ -560,6 +575,7 @@ export function merge(a, b) {
     }
     return result
   }
+
   return b
 }
 
@@ -575,11 +591,14 @@ export function aggregateOn(keyMap, ...objects) {
 
   for (const current of objects) {
     result = merge(result, current)
+
     for (const [oldKey, newKey] of entries(keyMap)) {
       if (!current[oldKey]) continue
+
       result[newKey] = result[newKey]
         ? unique(result[newKey], current[oldKey])
         : unique(result[oldKey], current[oldKey])
+
       delete result[oldKey]
     }
   }
@@ -602,6 +621,7 @@ export const unique = (...items) => Array.from(new Set(items.flat()))
 export function aggregate(a, b) {
   const result = {}
   const keys = unique([...Reflect.ownKeys(a), ...Reflect.ownKeys(b)])
+
   for (const key of keys) {
     const [aVal, bVal] = [a[key], b[key]]
 
@@ -635,9 +655,11 @@ export function aggregate(a, b) {
  */
 export const groupBy = curry((key, arr) => {
   const result = {}
+
   for (const item of arr) {
     ;(result[item[key]] || (result[item[key]] = [])).push(item)
   }
+
   return values(result)
 })
 
@@ -663,6 +685,7 @@ export const keyBy = curry((key, arr) =>
 export const deepJoin = curry((keyA, keyB, a, b) => {
   const objA = keyBy(keyA, a)
   const objB = keyBy(keyB, b)
+
   return values(aggregate(objA, objB))
 })
 
@@ -794,6 +817,7 @@ export function keys(iterable) {
  */
 export const rename = curry((keyMap, a) => {
   const result = deepCopy(a)
+
   for (const [oldKey, newKey] of entries(keyMap)) {
     if (isMap(result)) {
       result.set(newKey, a.get(oldKey))
@@ -803,6 +827,7 @@ export const rename = curry((keyMap, a) => {
       delete result[oldKey]
     }
   }
+
   return result
 })
 
@@ -937,9 +962,11 @@ export const partition = (arr, a, b) =>
 export const zipMap = (f, ...iters) => {
   const min = Math.min(...pluck('length')(iters))
   const result = []
+
   for (let i = 0; i < min; i++) {
     result.push(f(...pluck(i)(iters)))
   }
+
   return result
 }
 
@@ -1005,11 +1032,14 @@ export const tryCatch = curry((f, g) => {
 export const range = (start, end, step = start < end ? 1 : -1) => {
   let index = -1
   let length = Math.max(Math.ceil((end - start) / (step || 1)), 0)
+
   const result = new Array(length)
+
   while (length--) {
     result[++index] = start
     start += step
   }
+
   return result
 }
 
@@ -1022,6 +1052,7 @@ export const range = (start, end, step = start < end ? 1 : -1) => {
 export function once(fn) {
   let done = false
   let result
+
   return function once() {
     return !done ? ((done = true), (result = fn.apply(this, arguments)), result) : result
   }
@@ -1034,7 +1065,7 @@ export function once(fn) {
  */
 export function memoize(fn) {
   let cache = Object.create(null)
-  const toKey = key => JSON.stringify(key)
+
   const isPrimitive = x =>
     typeof x === 'number' || typeof x === 'string' || typeof x === 'boolean'
 
@@ -1042,7 +1073,8 @@ export function memoize(fn) {
     const key =
       arguments.length === 1 && isPrimitive(arguments[0])
         ? arguments[0]
-        : toKey(arguments)
+        : JSON.stringify(arguments)
+
     return key in cache ? cache[key] : (cache[key] = fn.apply(this, arguments))
   }
 
@@ -1062,6 +1094,7 @@ export function memoize(fn) {
  */
 export const debounce = delay => {
   let pending = false
+
   return function debounce(fn) {
     if (pending) clearTimeout(pending)
     pending = setTimeout(() => fn.call(this), delay)
@@ -1077,10 +1110,13 @@ export const debounce = delay => {
 export const accumulate = delay => {
   const stack = []
   let pending = false
+
   return function accumulate(fn) {
     return event => {
       if (pending) clearTimeout(pending)
+
       stack.push(event)
+
       pending = setTimeout(() => {
         pending = false
         fn.call(this, stack.slice())
@@ -1208,9 +1244,11 @@ export function deepFreeze(obj) {
 export function deepCopyArray(arr, offset = 0) {
   const len = Math.max(0, arr.length - offset)
   const newArray = new Array(len)
+
   for (let i = 0; i < len; i++) {
     newArray[i] = deepCopy(arr[i + offset])
   }
+
   return newArray
 }
 
@@ -1221,9 +1259,12 @@ export function deepCopyArray(arr, offset = 0) {
  */
 export function deepCopy(obj) {
   if (isArray(obj)) return deepCopyArray(obj)
+
   let aux = obj
+
   if (obj && typeof obj === 'object') {
     aux = new obj.constructor()
+
     if (isMap(aux)) {
       for (const key of obj.keys()) {
         const keyCopy = deepCopy(key)

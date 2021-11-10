@@ -18,10 +18,10 @@ export class ValidationError {
  */
 export const withValidation = curry(
   (validator, selector, onSucces, onFailure) =>
-    (...args) => {
-      if (!validator(selector(...args))) {
+    function validate() {
+      if (!validator(selector.apply(this, arguments))) {
         return onFailure(new ValidationError('Validation failed', validator.errors))
       }
-      return onSucces(...args)
+      return onSucces.apply(this, arguments)
     }
 )

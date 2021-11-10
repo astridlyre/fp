@@ -8,6 +8,7 @@ import { combineReducers } from './combineReducers.js'
 export const Reducer = {
   builder() {
     const cases = []
+
     return {
       case(type, handler) {
         if (isFunction(type)) {

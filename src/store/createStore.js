@@ -1,4 +1,4 @@
-import { isFunction, isUndefined } from '../combinators.js'
+import { isFunction, isUndefined, stringify } from '../combinators.js'
 import { $$observable, Observable } from '../rx.js'
 import { isPlainObject } from './isPlainObject.js'
 
@@ -23,19 +23,18 @@ export function createStore(reducer, initialState, enhancer) {
 
   if (!isUndefined(enhancer)) {
     if (!isFunction(enhancer)) {
-      throw new Error(`Expected enhancer to be a function, got: ${enhancer}`)
+      throw new Error('Expected enhancer to be a function, got: ' + stringify(enhancer))
     }
 
     return enhancer(createStore)(reducer, initialState)
   }
 
   if (!isFunction(reducer)) {
-    throw new Error(`Expected reducer to be a function, got: ${reducer}`)
+    throw new Error('Expected reducer to be a function, got: ' + stringify(reducer))
   }
 
   let currentState = initialState
   let isDispatching = false
-
   let currentListeners = []
   let nextListeners = currentListeners
 
@@ -56,6 +55,7 @@ export function createStore(reducer, initialState, enhancer) {
     if (isDispatching) {
       throw new Error('Unable to get state while reducer is executing')
     }
+
     return currentState
   }
 
@@ -64,7 +64,7 @@ export function createStore(reducer, initialState, enhancer) {
    */
   function subscribe(listener) {
     if (!isFunction(listener)) {
-      throw new Error(`Expected listener to be a function, received: ${listener}`)
+      throw new Error('Expected listener to be a function, got: ' + stringify(listener))
     }
 
     if (isDispatching) {
@@ -84,6 +84,7 @@ export function createStore(reducer, initialState, enhancer) {
       }
 
       isSubscribed = false
+
       ensureCanMutateNextListeners()
       const index = nextListeners.indexOf(listener)
       nextListeners.splice(index, 1)
@@ -115,7 +116,10 @@ export function createStore(reducer, initialState, enhancer) {
     }
 
     const listeners = (currentListeners = nextListeners)
-    for (const listener of listeners) {
+
+    for (let i = 0; i < listeners.length; i++) {
+      const listener = listeners[i]
+
       listener()
     }
 

@@ -14,16 +14,29 @@ const STATUS_PENDING = 'pending'
  * @returns {function} Action creator
  */
 export function createAsyncThunk(typePrefix, payloadCreator, options) {
+  // Create thunk states
   const pending = createPending(typePrefix)
   const fulfilled = createFulfilled(typePrefix)
   const rejected = createRejected(typePrefix)
 
-  /**
-   * Create an action
-   */
+  // perform an actionCreator with the arg provided, returns a thunk
   function actionCreator(arg) {
-    return (dispatch, getState, extra) => {
+    /**
+     * Async Thunk
+     *
+     * @param {function} Dispatch
+     * @param {function} Get State
+     * @param {any} Optional extra argument
+     *
+     * @returns {promise}
+     */
+    return function asyncThunk(dispatch, getState, extra) {
       const requestId = nanoid()
+
+      if (typeof AbortController === 'undefined') {
+        throw new Error('This environment does not support AbortController')
+      }
+
       const abortController = new AbortController()
 
       let abortReason
@@ -39,6 +52,8 @@ export function createAsyncThunk(typePrefix, payloadCreator, options) {
         let finalAction
 
         try {
+          // If there is an option.condition() callback, verify the arg, if
+          // condition fails, bail
           if (options?.condition?.(arg, { getState, extra }) === false) {
             throw {
               name: 'ConditionError',
@@ -48,6 +63,7 @@ export function createAsyncThunk(typePrefix, payloadCreator, options) {
 
           started = true
 
+          // Dispatch initial pending action
           dispatch(
             pending(
               requestId,
@@ -56,36 +72,37 @@ export function createAsyncThunk(typePrefix, payloadCreator, options) {
             )
           )
 
-          finalAction = await Promise.race([
-            abortedPromise,
-            Promise.resolve(
-              payloadCreator(arg, {
-                dispatch,
-                getState,
-                extra,
-                requestId,
-                signal: abortController.signal,
-                rejectWithValue: (value, meta) => ({
-                  value,
-                  meta,
-                  status: STATUS_REJECTED,
-                }),
-                fulfillWithValue: (value, meta) => ({
-                  value,
-                  meta,
-                  status: STATUS_FULFILLED,
-                }),
-              }).then(result => {
-                if (result.status === STATUS_REJECTED) {
-                  throw result
-                }
-                if (result.status === STATUS_FULFILLED) {
-                  return fulfilled(result.payload, requestId, arg, result.meta)
-                }
-                return fulfilled(result, requestId, arg)
-              })
-            ),
-          ])
+          const actionPromise = Promise.resolve(
+            payloadCreator(arg, {
+              dispatch,
+              getState,
+              extra,
+              requestId,
+              signal: abortController.signal,
+              rejectWithValue: (value, meta) => ({
+                value,
+                meta,
+                status: STATUS_REJECTED,
+              }),
+              fulfillWithValue: (value, meta) => ({
+                value,
+                meta,
+                status: STATUS_FULFILLED,
+              }),
+            }).then(result => {
+              if (result.status === STATUS_REJECTED) {
+                throw result
+              }
+
+              if (result.status === STATUS_FULFILLED) {
+                return fulfilled(result.payload, requestId, arg, result.meta)
+              }
+
+              return fulfilled(result, requestId, arg)
+            })
+          )
+
+          finalAction = await Promise.race([abortedPromise, actionPromise])
         } catch (err) {
           finalAction =
             err.status === STATUS_REJECTED
@@ -100,6 +117,7 @@ export function createAsyncThunk(typePrefix, payloadCreator, options) {
           finalAction.meta.condition
 
         if (!skipDispatch) dispatch(finalAction)
+
         return finalAction
       })()
 
@@ -139,6 +157,16 @@ function unwrapResult(action) {
  * Create a fulfilled action
  */
 function createFulfilled(typePrefix) {
+  /**
+   * Returns a *fulfilled* actionCreator
+   *
+   * @param {any} Payload
+   * @param {string} Request ID
+   * @param {any} Arg
+   * @param {object} Metadata
+   *
+   * @returns {object} Action object
+   */
   return createAction(
     typePrefix + '/' + STATUS_FULFILLED,
     (payload, requestId, arg, meta) => ({
@@ -157,6 +185,15 @@ function createFulfilled(typePrefix) {
  * Create a pending action
  */
 function createPending(typePrefix) {
+  /**
+   * Returns a *pending* actionCreator
+   *
+   * @param {string} Request ID
+   * @param {any} Arg
+   * @param {object} Metadata
+   *
+   * @returns {object} Action object
+   */
   return createAction(typePrefix + '/' + STATUS_PENDING, (requestId, arg, meta) => ({
     payload: undefined,
     meta: {
@@ -172,6 +209,17 @@ function createPending(typePrefix) {
  * Create a rejected action
  */
 function createRejected(typePrefix) {
+  /**
+   * Returns a *rejected* actionCreator
+   *
+   * @param {error} Error or reason for rejection
+   * @param {string} Request ID
+   * @param {any} Arg
+   * @param {any} Payload
+   * @param {object} Metadata
+   *
+   * @returns {object} Action object
+   */
   return createAction(
     typePrefix + '/' + STATUS_REJECTED,
     (error, requestId, arg, payload, meta) => ({

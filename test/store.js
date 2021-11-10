@@ -1,15 +1,13 @@
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
-import { store } from '../src/index.js'
-
-const {
+import {
   createStore,
   Reducer,
   createAction,
   createAsyncThunk,
   createConfiguredStore,
   createSelector,
-} = store
+} from '../src/index.js'
 
 const testReducer = Reducer.builder()
   .case('ADD', (state, action) => ({

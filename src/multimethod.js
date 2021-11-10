@@ -21,7 +21,7 @@ const extractDispatchAndMethods = methods =>
   isFunction(methods[0]) ? [methods[0], methods.slice(1)] : [defaultDispatch, methods]
 
 const initialHandler = handlers =>
-  last(handlers)[0] === DEFAULT_DISPATCH ? last(handlers)[1] : null
+  last(handlers).key === DEFAULT_DISPATCH ? last(handlers).handler : null
 
 /**
  * Method, create a method inside a call to multi()
@@ -31,9 +31,9 @@ const initialHandler = handlers =>
  */
 export function method(key, handler) {
   if (handler === undefined) {
-    return [DEFAULT_DISPATCH, key]
+    return { key: DEFAULT_DISPATCH, handler: key }
   }
-  return [key, handler]
+  return { key, handler }
 }
 
 /**
@@ -46,33 +46,35 @@ export function multi(...initialMethods) {
   // multiMethod function takes variable arguments and returns the result of
   // calling any handler that can handle the arguments
   function multiMethod() {
-    let handler = initialHandler(multiMethod[handlersKey])
+    let method = initialHandler(multiMethod[handlersKey])
+
     for (let i = 0; i < multiMethod[handlersKey].length; i++) {
-      const key = multiMethod[handlersKey][i][0]
-      const method = multiMethod[handlersKey][i][1]
+      const { key, handler } = multiMethod[handlersKey][i]
 
       if (
         (isFunction(key) && arguments[0]?.constructor === key) ||
         (isFunction(key) && !isClass(key) && key.apply(null, arguments)) ||
         deepEqual(multiMethod[dispatchKey].apply(null, arguments), key)
       ) {
-        handler = method
+        method = handler
         break
       }
     }
 
-    if (handler) {
-      return isFunction(handler) ? handler.apply(null, arguments) : handler
+    if (method) {
+      return isFunction(method) ? method.apply(null, arguments) : method
     }
 
     throw new NoHandlerError(`No handlers for args (${JSON.stringify(arguments)})`)
   }
 
   const [dispatch, methods] = extractDispatchAndMethods(initialMethods)
+
   multiMethod[dispatchKey] = dispatch
   multiMethod[handlersKey] = methods
+
   for (const pair of methods) {
-    if (pair[0] === DEFAULT_DISPATCH) {
+    if (pair.key === DEFAULT_DISPATCH) {
       multiMethod[handlersKey].push(pair)
     } else {
       multiMethod[handlersKey] = [pair].concat(multiMethod[handlersKey])
@@ -82,12 +84,12 @@ export function multi(...initialMethods) {
   multiMethod.map = function map(fn) {
     return multi(
       multiMethod[dispatchKey],
-      ...multiMethod[handlersKey].map(([key, handler]) => [
+      ...multiMethod[handlersKey].map(({ key, handler }) => ({
         key,
-        function mappedHandler() {
+        handler: function mappedHandler() {
           return fn(handler.apply(null, arguments))
         },
-      ])
+      }))
     )
   }
 
