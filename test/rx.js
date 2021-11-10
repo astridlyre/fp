@@ -1398,5 +1398,80 @@ describe('Observable', function () {
       })
       observed.genName().next()
     })
+
+    it('should allow observing computed values', function (done) {
+      const obj = {
+        todos: [],
+        get unfinishedTodosCount() {
+          return this.todos.filter(todo => !todo.finished).length
+        },
+      }
+      const observed = Observable.makeObservable(obj)
+
+      observed.observe().subscribe(value => {
+        assert.deepEqual(value.todos, [{ name: 'Clean cat', finished: false }])
+        assert.equal(value.unfinishedTodosCount, 1)
+        done()
+      })
+
+      observed.todos.push({ name: 'Clean cat', finished: false })
+    })
+
+    it('should allow observing maps', function (done) {
+      const obj = {
+        people: new Map(),
+        addPerson(name, details) {
+          this.people.set(name, details)
+        },
+      }
+      const observed = Observable.makeObservable(obj)
+
+      observed.observe().subscribe(value => {
+        assert.deepEqual(value.people, new Map([['kevin', { age: 15 }]]))
+        done()
+      })
+
+      observed.people.set('kevin', { age: 15 })
+    })
+
+    it('should allow observing objects within arrays within objects', function (done) {
+      const obj = {
+        people: [{ name: 'tim', likes: ['cats'] }],
+      }
+      const observed = Observable.makeObservable(obj)
+
+      observed.observe().subscribe(value => {
+        assert.deepEqual(value, { people: [{ name: 'tim', likes: ['cats', 'dogs'] }] })
+        done()
+      })
+
+      observed.people[0].likes.push('dogs')
+    })
+
+    it('should allow reassigning properties and still observe them', function (done) {
+      let called = 0
+      const obj = {
+        list: ['a'],
+      }
+      const observed = Observable.makeObservable(obj)
+      observed.observe().subscribe(value => {
+        called++
+        if (called === 1) {
+          assert.deepEqual(value, { list: ['hello'] })
+        } else if (called === 2) {
+          assert.deepEqual(value, { list: ['hello', 'world'] })
+        } else if (called === 3) {
+          assert.deepEqual(value, { list: ['cat'] })
+        } else {
+          assert.deepEqual(value, { list: ['cat', 'dog'] })
+          done()
+        }
+      })
+      assert.equal(observed.isObserved(), true)
+      observed.list = ['hello']
+      observed.list.push('world')
+      observed.list = ['cat']
+      observed.list.push('dog')
+    })
   })
 })

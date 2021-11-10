@@ -1,9 +1,11 @@
 import {
+  isObject,
   isFunction,
   isAsyncFunction,
   isGeneratorFunction,
   isAsyncGeneratorFunction,
 } from '../combinators.js'
+import { Observable } from '../rx.js'
 
 /**
  * Wrap an existing object in an Observable to update any subscribers when
@@ -40,8 +42,6 @@ export function makeObservable(object) {
             subs.push(sub)
             return () => subs.splice(subs.indexOf(sub), 1)
           })
-
-      if (prop === 'clearCache') return () => (cache = Object.create(null))
 
       if (isAsyncFunction(target[prop])) {
         return async function wrappedMethod() {
@@ -97,11 +97,40 @@ export function makeObservable(object) {
         }
       }
 
+      if (isObject(target[prop])) {
+        const cached = cache[prop] ?? {}
+        let { observed, original } = cached
+
+        // The target object must have changed, resub
+        if (original !== target[prop]) {
+          observed?.unsubscribe()
+          observed = undefined
+          original = target[prop]
+        }
+
+        if (!observed) {
+          observed = Observable.makeObservable(target[prop])
+          observed.observe().subscribe(() => dispatchChanged(target, prop))
+        }
+
+        return observed
+      }
+
+      if (prop === 'clearCache') return () => (cache = Object.create(null))
+      if (prop === 'isObserved') return () => subs.length > 0
+
       return Reflect.get(...arguments)
     },
     deleteProperty(target, key) {
       if (!key in target) return false
       delete target[key]
+
+      if (isObject(cache[key])) {
+        cache[key].observed?.unsubscribe()
+        delete cache[key].observed
+        delete cache[key].original
+        delete cache[key]
+      }
       dispatchChanged(target, key)
       return true
     },
