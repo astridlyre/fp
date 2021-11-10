@@ -1,4 +1,4 @@
-import { isFunction, isUndefined, stringify } from '../combinators.js'
+import { isFunction, diff, isUndefined, stringify } from '../combinators.js'
 import { $$observable, Observable } from '../rx.js'
 import { isPlainObject } from './isPlainObject.js'
 
@@ -33,6 +33,7 @@ export function createStore(reducer, initialState, enhancer) {
     throw new Error('Expected reducer to be a function, got: ' + stringify(reducer))
   }
 
+  let previousState = initialState
   let currentState = initialState
   let isDispatching = false
   let currentListeners = []
@@ -61,8 +62,18 @@ export function createStore(reducer, initialState, enhancer) {
 
   /**
    * Subscribe a listener to store updates
+   *
+   * @param {function} Can Handle function to determine which slice of state
+   * updates trigger a subscription push
+   * @param {function} Listener function
+   *
+   * @returns {function} Unsubscribe function
    */
-  function subscribe(listener) {
+  function subscribe(selector, listener) {
+    if (!isFunction(selector)) {
+      throw new Error('Expected selector to be a function, got: ' + stringify(canHandle))
+    }
+
     if (!isFunction(listener)) {
       throw new Error('Expected listener to be a function, got: ' + stringify(listener))
     }
@@ -72,7 +83,7 @@ export function createStore(reducer, initialState, enhancer) {
     }
 
     ensureCanMutateNextListeners()
-    nextListeners.push(listener)
+    nextListeners.push({ selector, listener })
 
     let isSubscribed = true
 
@@ -86,7 +97,7 @@ export function createStore(reducer, initialState, enhancer) {
       isSubscribed = false
 
       ensureCanMutateNextListeners()
-      const index = nextListeners.indexOf(listener)
+      const index = nextListeners.findIndex(obj => obj.listener === listener)
       nextListeners.splice(index, 1)
       currentListeners = null
     }
@@ -110,17 +121,24 @@ export function createStore(reducer, initialState, enhancer) {
 
     try {
       isDispatching = true
+      previousState = currentState
       currentState = reducer(currentState, action)
     } finally {
       isDispatching = false
     }
 
+    const changed = diff(previousState, currentState)
     const listeners = (currentListeners = nextListeners)
 
     for (let i = 0; i < listeners.length; i++) {
-      const listener = listeners[i]
-
-      listener()
+      const { selector, listener } = listeners[i]
+      try {
+        if (selector(changed)) {
+          listener()
+        }
+      } catch {
+        continue
+      }
     }
 
     return action
@@ -129,10 +147,15 @@ export function createStore(reducer, initialState, enhancer) {
   /**
    * Creates a simple observable from state updates, compatible with the
    * Observable proposal
+   *
+   * @param {function} Selector function, to determine when to push state
+   * updates to observer.
+   *
+   * @returns {Observable}
    */
-  function observe() {
+  function observe(selector = x => x) {
     return new Observable(observer => {
-      return subscribe(() => observer.next(getState()))
+      return subscribe(selector, () => observer.next(selector(getState())))
     })
   }
 

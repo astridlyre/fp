@@ -1193,4 +1193,131 @@ describe('Observable', function () {
       createAsyncStream(['hello', 'world']).subscribe(stream)
     })
   })
+
+  describe('makeObservable', function () {
+    it('should make regular object observable', function (done) {
+      const obj = { name: 'tim' }
+      const observed = Observable.makeObservable(obj)
+
+      observed.observe().subscribe(value => {
+        assert.deepEqual(value, { name: 'john' })
+        done()
+      })
+
+      observed.name = 'john'
+    })
+
+    it('should dispatch when making new property', function (done) {
+      const obj = { name: 'tim' }
+      const observed = Observable.makeObservable(obj)
+
+      observed.observe().subscribe(value => {
+        assert.deepEqual(value, { name: 'tim', age: 5 })
+        done()
+      })
+
+      observed.age = 5
+    })
+
+    it('should dispatch when property deleted', function (done) {
+      const obj = { name: 'tim', age: 5 }
+      const observed = Observable.makeObservable(obj)
+
+      observed.observe().subscribe(value => {
+        assert.deepEqual(value, { name: 'tim' })
+        done()
+      })
+
+      delete observed.age
+    })
+
+    it('should observe an array', function (done) {
+      const arr = [1, 2, 3]
+      const observed = Observable.makeObservable(arr)
+
+      observed.observe().subscribe(value => {
+        assert.deepEqual(value, [1, 2, 3, 4])
+        done()
+      })
+      observed.push(4)
+    })
+
+    it('should observe method calls', function (done) {
+      const obj = {
+        name: 'tim',
+        setName(name) {
+          this.name = name
+        },
+      }
+      const observed = Observable.makeObservable(obj)
+
+      observed.observe().subscribe(value => {
+        assert.equal(value.name, 'john')
+        done()
+      })
+
+      observed.setName('john')
+    })
+
+    it('should not dispatch twice if called with same args', function (done) {
+      let called = 0
+      const obj = {
+        name: 'tim',
+        setName(name) {
+          this.name = name
+        },
+      }
+      const observed = Observable.makeObservable(obj)
+
+      observed.observe().subscribe(value => {
+        called++
+        assert.deepEqual(value.name, 'john')
+      })
+
+      observed.setName('john')
+      observed.setName('john')
+      assert.equal(called, 1)
+      done()
+    })
+
+    it('should dispatch if called with different args', function (done) {
+      let called = 0
+      const obj = {
+        name: 'tim',
+        setName(name) {
+          this.name = name
+        },
+      }
+      const observed = Observable.makeObservable(obj)
+
+      observed.observe().subscribe(value => {
+        called++
+        if (called === 1 || called === 3) {
+          assert.deepEqual(value.name, 'john')
+        } else {
+          assert.deepEqual(value.name, 'craig')
+        }
+      })
+
+      observed.setName('john')
+      observed.setName('craig')
+      observed.setName('john')
+      assert.equal(called, 3)
+      done()
+    })
+
+    it('should not dispatch if a prop is accessed only', function (done) {
+      let called = 0
+      const obj = { name: 'tim' }
+      const observed = Observable.makeObservable(obj)
+      observed.observe().subscribe(value => {
+        called++
+        done(new Error('Expected not to be called'))
+      })
+
+      observed.name
+      assert.equal(called, 0)
+      done()
+    })
+  })
 })

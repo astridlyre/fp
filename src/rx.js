@@ -17,6 +17,7 @@ import { interval } from './rx/interval.js'
 import { listen } from './rx/listen.js'
 import { map } from './rx/map.js'
 import { mapTo } from './rx/mapTo.js'
+import { makeObservable } from './rx/observe.js'
 import { merge } from './rx/merge.js'
 import { flatMap } from './rx/flatMap.js'
 import { pick } from './rx/pick.js'
@@ -82,6 +83,7 @@ const additionalProperties = {
   listen,
   merge,
   subject,
+  makeObservable,
 }
 
 for (const [prop, value] of Object.entries(additionalProperties)) {

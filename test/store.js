@@ -86,28 +86,51 @@ describe('Store', function () {
     it('should allow listening for actions', function (done) {
       const store = createStore(testReducer, { values: [] })
       store
-        .observe()
-        .map(state => ({
-          ...state,
-          values: state.values.map(value => value.toUpperCase()),
-        }))
+        .observe(state => state.values)
+        .map(values => values.map(value => value.toUpperCase()))
         .subscribe(value => {
-          assert.deepEqual(value, { values: ['HELLO'] })
+          assert.deepEqual(value, ['HELLO'])
           done()
         })
 
       store.dispatch({ type: 'ADD', payload: 'hello' })
+    })
+
+    it('should allow not trigger observer for actions not specified', function (done) {
+      const reducer = Reducer.builder()
+        .case('CHANGE_NAME', (state, action) => ({ ...state, name: action.payload }))
+        .case('ADD_VALUE', (state, action) => ({
+          ...state,
+          values: state.values.concat(action.payload),
+        }))
+        .init({ name: '', values: [] })
+        .build()
+
+      const store = createStore(reducer)
+      store
+        .observe(state => state.values)
+        .map(values => values.map(value => value.toUpperCase()))
+        .subscribe(values => {
+          assert.deepEqual(values, ['HELLO'])
+          done()
+        })
+
+      store.dispatch({ type: 'CHANGE_NAME', payload: 'tim' })
+      store.dispatch({ type: 'ADD_VALUE', payload: 'hello' })
     })
   })
 
   describe('subscribe', function () {
     it('should allow subscribing to updates', function (done) {
       const store = createConfiguredStore(testReducer, { values: [] })
-      store.subscribe(() => {
-        const state = store.getState()
-        assert.deepEqual(state, { values: ['cat', 'dog'] })
-        done()
-      })
+      store.subscribe(
+        state => 'values' in state,
+        () => {
+          const state = store.getState()
+          assert.deepEqual(state, { values: ['cat', 'dog'] })
+          done()
+        }
+      )
       store.dispatch({ type: 'ADD', payload: ['cat', 'dog'] })
     })
 
@@ -119,7 +142,7 @@ describe('Store', function () {
         assert.deepEqual(state, { values: ['cat', 'dog'] })
         count++
       }
-      const unsub = store.subscribe(handler)
+      const unsub = store.subscribe(state => 'values' in state, handler)
       store.dispatch({ type: 'ADD', payload: ['cat', 'dog'] })
       unsub()
       store.dispatch({ type: 'ADD', payload: ['snake', 'plance'] })
@@ -170,19 +193,21 @@ describe('asyncThunk', function () {
 
       let pending = 0
       store.dispatch(thunk('hello'))
-      store.observe().subscribe(state => {
-        try {
-          if (pending) {
-            assert.deepEqual(state, { values: [] })
-            pending++
-          } else {
-            assert.deepEqual(state, { values: ['hello'] })
-            done()
+      store
+        .observe(state => state.values)
+        .subscribe(values => {
+          try {
+            if (pending) {
+              assert.deepEqual(values, [])
+              pending++
+            } else {
+              assert.deepEqual(values, ['hello'])
+              done()
+            }
+          } catch (err) {
+            done(err)
           }
-        } catch (err) {
-          done(err)
-        }
-      })
+        })
     })
   })
 

@@ -500,6 +500,8 @@ export const deepPick = curry((paths, a) =>
  */
 function diffObjects(oldObj, newObj) {
   if (oldObj === newObj) return {}
+  if (!oldObj) return newObj
+  if (!newObj) return oldObj
 
   function innerDiffObjects(oldObj, newObj, result) {
     if (oldObj === newObj) return result
