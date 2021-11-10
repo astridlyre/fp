@@ -1,4 +1,9 @@
-import { isFunction } from '../combinators.js'
+import {
+  isFunction,
+  isAsyncFunction,
+  isGeneratorFunction,
+  isAsyncGeneratorFunction,
+} from '../combinators.js'
 
 /**
  * Wrap an existing object in an Observable to update any subscribers when
@@ -37,6 +42,45 @@ export function makeObservable(object) {
           })
 
       if (prop === 'clearCache') return () => (cache = Object.create(null))
+
+      if (isAsyncFunction(target[prop])) {
+        return async function wrappedMethod() {
+          const result = await target[prop]?.apply(target, arguments)
+          const currentArgs = JSON.stringify(arguments)
+          const lastArgs = cache[prop]
+
+          if (currentArgs !== lastArgs) {
+            cache[prop] = currentArgs
+            dispatchChanged(target, prop)
+          }
+
+          return result
+        }
+      }
+
+      if (isGeneratorFunction(target[prop])) {
+        return function* wrappedMethod() {
+          const generator = target[prop]?.apply(target, arguments)
+
+          do {
+            const { done, value } = generator.next()
+            dispatchChanged(target, prop)
+            yield { done, value }
+          } while (!done)
+        }
+      }
+
+      if (isAsyncGeneratorFunction(target[prop])) {
+        return async function* wrappedMethod() {
+          const generator = target[prop]?.apply(target, arguments)
+
+          do {
+            const { done, value } = await generator.next()
+            dispatchChanged(target, prop)
+            yield { done, value }
+          } while (!done)
+        }
+      }
 
       if (isFunction(target[prop])) {
         return function wrappedMethod() {

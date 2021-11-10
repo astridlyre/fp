@@ -1339,5 +1339,64 @@ describe('Observable', function () {
       assert.equal(called, 0)
       done()
     })
+
+    it('should allow observing generator functions', function (done) {
+      let called = 0
+      const obj = {
+        name: 'tim',
+        *nameGen() {
+          called++
+          yield (this.name = Math.random() * 1000)
+        },
+      }
+      const observed = Observable.makeObservable(obj)
+      observed.observe().subscribe(value => {
+        assert.notDeepEqual(value.name, 'tim')
+        assert.equal(called, 1)
+        done()
+      })
+      ;[...observed.nameGen()]
+    })
+
+    it('should allow observing async functions', function (done) {
+      let called = 0
+      const obj = {
+        name: 'tim',
+        async changeName(newName) {
+          called++
+          return new Promise(resolve =>
+            setTimeout(() => resolve((this.name = newName)), 1)
+          )
+        },
+      }
+      const observed = Observable.makeObservable(obj)
+      observed.observe().subscribe(value => {
+        assert.deepEqual(value.name, 'john')
+        assert.equal(called, 1)
+        done()
+      })
+      observed.changeName('john')
+    })
+
+    it('should allow observing async generator functions', function (done) {
+      let called = 0
+      const obj = {
+        name: 'tim',
+        async *genName() {
+          called++
+          const newName = await new Promise(resolve =>
+            setTimeout(() => resolve(Math.random() * 10000))
+          )
+          while (true) yield (this.name = newName)
+        },
+      }
+      const observed = Observable.makeObservable(obj)
+      observed.observe().subscribe(value => {
+        assert.notEqual(value.name, 'tim')
+        assert.equal(called, 1)
+        done()
+      })
+      observed.genName().next()
+    })
   })
 })

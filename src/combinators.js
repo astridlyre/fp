@@ -195,6 +195,30 @@ export const isInstanceOf = curry((a, b) => b instanceof a)
 export const isFunction = f => f && typeof f === 'function'
 
 /**
+ * IsAsyncFunction, checks if f is an async function
+ * @param {any} f
+ * @returns {boolean}
+ */
+export const isAsyncFunction = f =>
+  isFunction(f) && f[Symbol.toStringTag] === 'AsyncFunction'
+
+/**
+ * IsGeneratorFunction, checks if f is a generator function
+ * @param {any} f
+ * @returns {boolean}
+ */
+export const isGeneratorFunction = f =>
+  isFunction(f) && f[Symbol.toStringTag] === 'GeneratorFunction'
+
+/**
+ * isAsyncGeneratorFunction, checks if f is an async generator
+ * @param {any}
+ * @returns {boolean}
+ */
+export const isAsyncGeneratorFunction = f =>
+  isFunction(f) && f[Symbol.toStringTag] === 'AsyncGeneratorFunction'
+
+/**
  * IsSet, checks if s is a Set
  * @param {any} s
  * @returns {boolean}
