@@ -7,7 +7,7 @@ import {
   createAsyncThunk,
   createConfiguredStore,
   createSelector,
-} from '../src/index.js'
+} from '../dist/index.js'
 
 const testReducer = Reducer.builder()
   .case('ADD', (state, action) => ({

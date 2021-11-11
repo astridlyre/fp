@@ -1,4 +1,4 @@
-export const LazyCollection = {
+export const Collection = {
   map(fn) {
     return Object.assign(
       {
@@ -12,7 +12,7 @@ export const LazyCollection = {
           }
         },
       },
-      LazyCollection
+      Collection
     )
   },
   reduce(fn, seed) {
@@ -40,7 +40,7 @@ export const LazyCollection = {
           }
         },
       },
-      LazyCollection
+      Collection
     )
   },
   find(fn) {
@@ -59,7 +59,7 @@ export const LazyCollection = {
           }
         },
       },
-      LazyCollection
+      Collection
     )
   },
   until(fn) {
@@ -76,7 +76,7 @@ export const LazyCollection = {
           }
         },
       },
-      LazyCollection
+      Collection
     )
   },
   first() {
@@ -91,7 +91,7 @@ export const LazyCollection = {
           return iterator
         },
       },
-      LazyCollection
+      Collection
     )
   },
   take(numberToTake) {
@@ -109,7 +109,7 @@ export const LazyCollection = {
           }
         },
       },
-      LazyCollection
+      Collection
     )
   },
   drop(numberToDrop) {
@@ -135,7 +135,7 @@ export const Numbers = Object.assign(
       while (true) yield n++
     },
   },
-  LazyCollection
+  Collection
 )
 
 const EMPTY = { isEmpty: () => true }
@@ -160,7 +160,7 @@ export const Pair = (car, cdr = EMPTY) =>
         }
       },
     },
-    LazyCollection
+    Collection
   )
 
 Pair.from = iterable =>
@@ -197,7 +197,7 @@ export const Stack = () =>
         }
       },
     },
-    LazyCollection
+    Collection
   )
 
 Stack.from = function from(iterable) {
@@ -209,5 +209,9 @@ Stack.from = function from(iterable) {
 }
 
 export function Lazy(target) {
-  return Object.assign(target, LazyCollection)
+  return Object.assign(target, Collection)
 }
+
+Lazy.Collection = Collection
+Lazy.Stack = Stack
+Lazy.Numbers = Numbers

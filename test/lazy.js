@@ -1,4 +1,4 @@
-import { Lazy, Numbers } from '../src/lazy.js'
+import { Lazy, Numbers } from '../dist/index.js'
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
 
