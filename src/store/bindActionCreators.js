@@ -1,4 +1,5 @@
-import { isFunction, isObject, stringify } from '../combinators.js'
+import { isFunction, isObject } from '../functions/predicates.ts'
+import { stringify } from '../functions/utils.ts'
 
 /**
  * Turns an action creator object into one whose values are wrapped in

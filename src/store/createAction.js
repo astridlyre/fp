@@ -1,5 +1,5 @@
 import { isPlainObject } from './isPlainObject.js'
-import { isString } from '../combinators.js'
+import { isString } from '../functions/predicates.ts'
 
 /**
  * A utility function for making an action creator for a given type

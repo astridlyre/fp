@@ -1,4 +1,5 @@
-import { isFunction, isUndefined, keys } from '../combinators.js'
+import { isFunction, isUndefined } from '../functions/predicates.ts'
+import { keys } from '../functions/objects.ts'
 import { INIT } from './createStore.js'
 
 /**

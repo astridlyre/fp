@@ -1,4 +1,6 @@
-import { deepEqual, isFunction, last, isClass } from './combinators.js'
+import { deepEqual } from '../functions/utils'
+import { isFunction, isClass } from '../functions/predicates'
+import { last } from '../functions/arrays'
 
 // Helper functions
 const handlersKey = Symbol('handlers key')

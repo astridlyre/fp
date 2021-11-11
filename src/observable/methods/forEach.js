@@ -1,4 +1,4 @@
-import { curry } from '../combinators.js'
+import { curry } from '../../functions/utils.ts'
 
 /**
  * ForEach, syntactic sugar for Observable.subscribe()

@@ -228,10 +228,10 @@ describe('Combinators', function () {
     })
   })
 
-  describe('invert', function () {
-    it('should invert sign of function result', function () {
+  describe('negate', function () {
+    it('should negate sign of function result', function () {
       const x = y => y + 1
-      assert.equal(combinators.invert(x)(5), -6)
+      assert.equal(combinators.negate(x)(5), -6)
     })
   })
 
@@ -526,7 +526,6 @@ describe('Combinators', function () {
     })
     it('should multiply numbers', function () {
       assert.equal(combinators.multiply(3)(3), 9)
-      assert.equal(combinators.multiplyRight(5)(3), 15)
     })
     it('should divide numbers', function () {
       assert.equal(combinators.divide(5)(2), 2.5)

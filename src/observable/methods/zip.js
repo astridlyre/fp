@@ -1,4 +1,6 @@
-import { isFunction, head, values } from '../combinators.js'
+import { values } from '../../functions/objects.ts'
+import { isFunction } from '../../functions/predicates.ts'
+import { head } from '../../functions/arrays.ts'
 import { placeholder } from './utils.js'
 
 /**

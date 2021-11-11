@@ -1,4 +1,4 @@
-import { values } from '../combinators.js'
+import { values } from '../../functions/objects.ts'
 import { placeholder } from './utils.js'
 
 /**

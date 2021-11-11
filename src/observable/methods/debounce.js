@@ -1,4 +1,4 @@
-import { last } from '../combinators.js'
+import { last } from '../../functions/arrays.ts'
 import { placeholder } from './utils.js'
 
 /**

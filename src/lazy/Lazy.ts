@@ -1,3 +1,8 @@
+/**
+ * Lazy Collection is a Collection data-type that is essentially just mapping
+ * Symbol.iterator. It can be mixed in to any existing iterable object, such as
+ * an Array.
+ */
 interface ICollection {
   map: (mapper: (element: any) => any) => ICollection
   reduce: (reducer: (accumulator: any, element: any) => any, seed: any) => any

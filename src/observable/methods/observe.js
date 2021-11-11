@@ -4,8 +4,8 @@ import {
   isAsyncFunction,
   isGeneratorFunction,
   isAsyncGeneratorFunction,
-} from '../combinators.js'
-import { Observable } from '../rx.js'
+} from '../../functions/predicates.ts'
+import { Observable } from '../Observable.js'
 
 /**
  * Wrap an existing object in an Observable to update any subscribers when

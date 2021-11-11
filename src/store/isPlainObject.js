@@ -1,4 +1,4 @@
-import { isObject } from '../combinators.js'
+import { isObject } from '../functions/predicates.ts'
 /**
  * Checks to see if something appears to be a plain object
  *

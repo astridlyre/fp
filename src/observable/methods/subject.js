@@ -1,4 +1,4 @@
-import { isFunction } from '../combinators.js'
+import { isFunction } from '../../functions/predicates.ts'
 
 /**
  * Subject

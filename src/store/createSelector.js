@@ -1,4 +1,6 @@
-import { head, isArray, isFunction, memoize } from '../combinators.js'
+import { isArray, isFunction } from '../functions/predicates.ts'
+import { memoize } from '../functions/utils.ts'
+import { head } from '../functions/arrays.ts'
 
 /**
  * createSelector takes some function and memoizes it

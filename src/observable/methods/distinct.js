@@ -1,4 +1,4 @@
-import { deepEqual } from '../combinators.js'
+import { deepEqual } from '../../functions/utils.ts'
 import { withNext, placeholder } from './utils.js'
 
 /**

@@ -1,4 +1,4 @@
-import { deepProp } from '../combinators.js'
+import { deepProp } from '../../functions/objects.ts'
 import { withNext, placeholder } from './utils.js'
 
 /**

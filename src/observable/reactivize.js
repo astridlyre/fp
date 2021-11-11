@@ -1,4 +1,4 @@
-import { Observable, $$observable } from './rx.js'
+import { Observable, $$observable } from './Observable.js'
 import { EventEmitter } from 'events'
 export { EventEmitter }
 

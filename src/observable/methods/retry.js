@@ -1,4 +1,4 @@
-import { isNumber } from '../combinators.js'
+import { isNumber } from '../../functions/predicates.ts'
 import { placeholder } from './utils.js'
 
 // Defaults: method 'expo' for exponential time increase, anything else for

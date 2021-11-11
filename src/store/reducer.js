@@ -1,5 +1,5 @@
-import { isFunction } from '../combinators.js'
-import { multi, method } from '../multimethod.ts'
+import { isFunction } from '../functions/predicates.ts'
+import { multi, method } from '../multimethod/multimethod.ts'
 import { combineReducers } from './combineReducers.js'
 
 /**

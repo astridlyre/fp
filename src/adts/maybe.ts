@@ -1,4 +1,6 @@
-import { identity, isFunction, compose, composeAsync } from './combinators.js'
+import { identity, compose } from '../functions/utils'
+import { composeAsync } from '../functions/async'
+import { isFunction } from '../functions/predicates'
 
 // Maybe
 function throwError(err: Error): Error {

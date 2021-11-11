@@ -1,4 +1,4 @@
-import { isFunction } from '../combinators.js'
+import { isFunction } from '../functions/predicates.ts'
 
 /**
  * Creates a middleware function that accepts an optional 'extra argument' to

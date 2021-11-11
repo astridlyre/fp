@@ -1,429 +1,87 @@
+export const Observable: any;
 /**
- * IsEmpty
- * @param {any} x
- * @returns {boolean}
+ * Prop, access a property in an object
  */
-export function isEmpty(x: any): boolean;
+export const prop: (this: any, ...args: any[]) => any;
+/**
+ * SetPropM, sets a property in an object **MUTATES**
+ */
+export const setPropM: (this: any, ...args: any[]) => any;
+/**
+ * SetProp, returns a copy of an object with new property name set to value
+ */
+export const setProp: (this: any, ...args: any[]) => any;
+/**
+ * Set, set key in object a to value
+ */
+export const set: (this: any, ...args: any[]) => any;
+/**
+ * Props, gets an array of property names from an object, shallow
+ */
+export const props: (this: any, ...args: any[]) => any;
+/**
+ * Pick, returns an object with only the selected property names, shallow
+ */
+export const pick: (this: any, ...args: any[]) => any;
+/**
+ * DeepProp, get a property from any object, deep
+ */
+export const deepProp: (this: any, ...args: any[]) => any;
+/**
+ * DeepSetProp, set a property in an object, returns a copy, deep
+ */
+export const deepSetProp: (this: any, ...args: any[]) => any;
+/**
+ * DeepPick, returns an object with only deep properties paths
+ */
+export const deepPick: (this: any, ...args: any[]) => any;
 /**
  * Diff, get the naive difference between a and b
  * Only diffs simple objects, arrays and primitives. Maybe I'll extend it to
  * support Maps and Sets later.
- * @param {object} a - Object to compare
- * @param {object} b - Object to compare
- * @returns {object} c - Object that is difference between a and b
  */
-export function diff(a: object, b: object): object;
+export function diff(a: any, b: any): any;
 /**
  * Aggregate, deep merge a and b
- * @param {object} a - Object to merge into
- * @param {object} b - Object with diffs to merge
- * @return {object} c - Result of aggregation
  */
-export function aggregate(a: object, b: object): object;
+export function aggregate(a: any, b: any): any;
 /**
  * AggregateOn, combine many objects into one with aggregated keys
  * TODO: Try to improve the algorithm
- * @param {string} key to Aggregate
- * @param {object} Objects to aggregate
- * @returns {object} Result of Aggregating on key
  */
-export function aggregateOn(keyMap: any, ...objects: any[]): object;
+export function aggregateOn(keyMap: any, ...objects: any[]): any;
 /**
  * Merge, combine all keys
- * @param {object} a - Object one
- * @param {object} b - Object two
- * @returns {object} c - Result of merger
  */
-export function merge(a: object, b: object): object;
+export function merge(a: any, b: any): any;
 /**
  * Entries, eagerly get entries of an object or iterable
- * @param {iterable} {object} Object that implements entries() or is iterable
- * @returns {array} Array of [key, value] entries
  */
-export function entries(iterable: any): any;
+export function entries(iterable: any[]): [number, any][] | [string, any][];
 /**
  * Values, eagerly get values of an object or iterable
- * @param {iterable} {object} Object that implements values() or is iterable
- * @returns {array} Array of values
  */
-export function values(iterable: any): any;
+export function values(iterable: any[]): any[];
 /**
  * Keys, eagerly get keys of an object or iterable
- * @param {iterable} {object} Object that implements keys() or is iterable
- * @returns {array} Array of keys
  */
-export function keys(iterable: any): any;
+export function keys(iterable: any[]): string[] | number[];
 /**
- * Once
- * @param {function} fn - Function to run only once
- * @returns {function} once - Function fn will be called once, and thereafter
- * will return the cached result of the call
+ * Rename object's keys using a keymap
  */
-export function once(fn: Function): Function;
-/**
- * Memoize
- * @param {function} fn - Function to memoize
- * @returns {function} memorize - Memoized function fn
- */
-export function memoize(fn: Function): Function;
-/**
- * FunctionalMixin
- * @param {object} behaviour - Desired mixin behaviour
- * @param {object} sharedBehaviour - Desired behaviour to add to prototype
- * @returns {function} mixin - Function which takes argument target, which is
- * the object to mix behaviour into
- */
-export function FunctionalMixin(behaviour: object, sharedBehaviour?: object): Function;
+export const rename: (this: any, ...args: any[]) => any;
 /**
  * DeepFreeze
- * @param {object} obj - Object to deep freeze
- * @returns {object} obj - Object that was deep frozen
  */
-export function deepFreeze(obj: object): object;
+export function deepFreeze(obj: any): any;
 /**
  * DeepCopyArray
- * @param {array} Arr
- * @param {number} offset
- * @returns {array} new Array
  */
-export function deepCopyArray(arr: any, offset?: number): any;
+export function deepCopyArray(arr: any[], offset?: number): any[];
 /**
  * DeepCopy
- * @param {object} obj - Object to deep copy
- * @returns {object} aux - Copy of Object obj
  */
-export function deepCopy(obj: object): object;
-/**
- * DeepEqual
- * @param {any} a
- * @param {any} b
- */
-export function deepEqual(a: any, b: any): boolean;
-export function identity(x: any): any;
-export function constant(a: any): any;
-export function arity(fn: Function, n: number): Function;
-export function unary(fn: Function): Function;
-export function binary(fn: Function): Function;
-export function ternary(fn: Function): Function;
-export function callFirst(fn: Function, larg: any): Function;
-export function callLast(fn: Function, rarg: any): Function;
-/**
- * Demethodize, convert a method to a standalone function
- * @param {method} method - Method to demethodize
- * @returns {function} method bound to use as regular function
- */
-export const demethodize: (thisArg: any, ...argArray: any[]) => any;
-export function len(a: any): number;
-export function compose(...fns: any[]): Function;
-export function pipe(...fns: Function): Function;
-export function curry(fn: Function): Function;
-export function isNumber(b: any): boolean;
-export function isBoolean(b: any): boolean;
-export function isNull(x: any): boolean;
-export function isString(b: any): boolean;
-export function isObject(x: any): boolean;
-export function isArray(a: any): boolean;
-/**
- * IsInstanceOf, checks if a is instanceof b
- * @param {any} a
- * @param {any} b
- * @returns {boolean}
- */
-export const isInstanceOf: Function;
-export function isFunction(f: any): boolean;
-export function isSet(s: any): boolean;
-export function isMap(m: any): boolean;
-/**
- * Tap, run a side effect fn and then return x
- * @param {function} fn - Side effect to run
- * @param {any} x - Value to return
- */
-export const tap: Function;
-/**
- * Not, negate the result of a function
- * @param {function} f - Function to negate
- * @param {any} a - Argument for function f
- */
-export const not: Function;
-/**
- * Invert, reverse the sign of a numerical result of a function
- * @param {function} f - Function to reverse the sign of result
- * @param {any} a - Argument for function f
- */
-export const invert: Function;
-export function flip2(f: Function): Function;
-export function flip3(f: Function): Function;
-/**
- * Tee, logs argument and returns it
- * @param {any}
- * @returns {any}
- */
-export const tee: any;
-export function log(fn: Function, logger?: Function): Function;
-/**
- * Transduce, combine multiple maps, filters, into a more efficient operation
- * @param {array} arr - Array to reduce
- * @param {array} fns - Array of functions to apply to arr
- * @param {function} reducer - Reducer function to apply to arr
- * @param {any} initial - Initial value to pass to reducer
- */
-export const transduce: Function;
-export function mapTR(fn: Function): Function;
-export function filterTR(fn: Function): Function;
-/**
- * Prop, access a property in an object
- * @param {string} name - Property name
- * @param {object} a - Object to get property in
- */
-export const prop: Function;
-export function send(name: string, ...args: any): Function;
-export function bound(name: string, ...args: any): Function;
-/**
- * SetPropM, sets a property in an object **MUTATES**
- * @param {string} name - Property name
- * @param {value} value - New value to set
- * @param {object} a - Object to mutate with new value
- * @returns {object} a
- */
-export const setPropM: Function;
-/**
- * SetProp, returns a copy of an object with new property name set to value
- * @param {name} name - Property name
- * @param {value} value - New value to set
- * @param {object} a - Object to set value in
- * @returns {object} Copy of a with new value set
- */
-export const setProp: Function;
-/**
- * Set, set key in object a to value
- * @param {string} Key name
- * @param {any} Value
- * @returns {object} Object with new value set
- */
-export const set: Function;
-/**
- * Props, gets an array of property names from an object, shallow
- * @param {array} names - Array of property names
- * @param {object} a - Object to get property names from
- * @returns {array} Array of values
- */
-export const props: Function;
-/**
- * Pick, returns an object with only the selected property names, shallow
- * @param {array} names - Array of property names
- * @param {object} a - Object to get property names from
- * @returns {object} A new object with only properties names
- */
-export const pick: Function;
-export function invoke(fn: Function, ...args: any): Function;
-/**
- * DeepProp, get a property from any object, deep
- * @param {string | array} path - A path of properties or an Array of
- * properties to get
- * @param {object} a - Object to get properties from
- * @returns {any} Value of property access
- */
-export const deepProp: Function;
-/**
- * DeepSetProp, set a property in an object, returns a copy, deep
- * @param {string | array} path - A path of properties or an Array of
- * properties to set
- * @param {any} value - The value to set
- * @param {object} a - Object to set new property in
- * @returns {object} A copy of Object a, with new property set
- */
-export const deepSetProp: Function;
-/**
- * DeepPick, returns an object with only deep properties paths
- * @param {array} paths - An array of string paths of property names
- * @param {object} a - The Object to pick properties from
- * @returns {object} A copy of Object a with only properties paths
- */
-export const deepPick: Function;
-export function unique(...items: any[]): any;
-/**
- * GroupBy, group a collection of objects into a multi-dimensional array by key
- * @param {string} key - Property to group by
- * @param {array} arr - Array of objects to group
- * @returns {array} entries grouped by key
- */
-export const groupBy: Function;
-/**
- * KeyBy, convert array into object, assumes each key is unique otherwise the
- * last object wins
- * @param {string} key - Property to key by
- * @param {array} arr - Array of objects to key
- * @returns {object} Array arr mapped to an object by key
- */
-export const keyBy: Function;
-/**
- * deepJoin, deep join two arrays on keyA and keyB
- * @param {string} keyA
- * @param {string} keyB
- * @param {array} array a
- * @param {array} array b
- * @returns {object} The result of keying both arrays
- */
-export const deepJoin: Function;
-export function toJSON(x: any): string;
-export function fromJSON(x: any): any;
-export const stringify: {
-    (value: any, replacer?: ((this: any, key: string, value: any) => any) | undefined, space?: string | number | undefined): string;
-    (value: any, replacer?: (string | number)[] | null | undefined, space?: string | number | undefined): string;
-};
-export const parse: (text: string, reviver?: ((this: any, key: string, value: any) => any) | undefined) => any;
-export const toString: StringConstructor;
-export function toInteger(s: any): number;
-/**
- * PadStart
- * @param {any} x - Base to stringify
- * @param {number} reps - Length to pad up to
- * @param {string} fill - Fill characters
- * @returns {string}
- */
-export const padStart: Function;
-/**
- * PadEnd
- * @param {any} x - Base to stringify
- * @param {number} reps - Length to pad up to
- * @param {string} fill - Fill characters
- * @returns {string}
- */
-export const padEnd: Function;
-/**
- * ForEach
- * @param {function} f - Function to run on value(s) of M
- * @param {array} M - Monad / iterable that implements forEach
- * @returns {undefined}
- */
-export const forEach: Function;
-/**
- * Map
- * @param {function} f - Mapper function
- * @param {array} M - Monad / iterable that implements map
- * @returns {array}
- */
-export const map: Function;
-/**
- * Filter
- * @param {function} p - Predicate to filter with
- * @param {array} M - Monad / iterable to filter
- * @returns {array}
- */
-export const filter: Function;
-/**
- * Reduce
- * @param {function} reducer - Reducer function
- * @param {any} seed - Initial value
- * @param {array} M - Monad / iterable to reduce
- * @returns {any}
- */
-export const reduce: Function;
-/**
- * ReduceRight
- * @param {function} reducer - Reducer function
- * @param {any} seed - Initial value
- * @param {array} M - Monad / iterable to reduce
- * @returns {any}
- */
-export const reduceRight: Function;
-/**
- * Pluck
- * @param {string} prop - Property to pluck
- * @param {array} M - Monad / iterable to pluck prop out of
- * @returns {array}
- */
-export const pluck: Function;
-/**
- * Rename
- * @param {object} Key map of keys to rename
- * @param {object} a - Object to rename
- * @returns {object} Copy of a with renamed keys
- */
-export const rename: Function;
-export function deepMap(fn: Function): Function;
-export function composeM(...Ms: any[]): Function;
-export const liftA2: Function;
-export const liftA3: Function;
-export const liftA4: Function;
-export const apply: Function;
-export function composeAsync(...fns: any[]): Function;
-export function pipeAsync(...fns: any[]): Function;
-export function mapAsync(f: any, a: any): any;
-export function reduceAsync(f: Function, init: any, a: any): any;
-export function filterAsync(f: Function, a: any): any;
-export function flat(M: any): any;
-export const flatMap: Function;
-export const fold: Function;
-export const getOrElseThrow: Function;
-/**
- * Math functions
- * Provides a set of functions for common math operations
- */
-export const eq: Function;
-export const add: Function;
-export const addRight: Function;
-export const subtract: Function;
-export const subtractRight: Function;
-export const multiply: Function;
-export const multiplyRight: Function;
-export const divide: Function;
-export const divideRight: Function;
-export function roundTo(n: any): (x: any) => number;
-export function pow(base: any, power: any): any;
-export function head(a: any): any;
-export function last(a: any): any;
-export const every: Function;
-export const some: Function;
-export const find: Function;
-export function sum(...args: any[]): any;
-export function average(ns: any): number;
-export const join: Function;
-export function partition(arr: any, a: Function, b: Function): any;
-export function zipMap(f: Function, ...iters: any[]): any;
-/**
- * SortBy
- * @param {function} f - Sorter function (a, b) => a - b
- * @param {array} a - Array to sort
- * @returns {array} Copy of array a, sorted with f
- */
-export const sortBy: Function;
-/**
- * Match
- * @param {regexp} re - Matcher RegExp
- * @param {string} s - String to test
- * @returns {boolean}
- */
-export const match: Function;
-/**
- * Replace
- * @param {regexp} {string} - Regexp or String to match and replace
- * @param {string} Replacer string
- * @param {string} s - String to perform search and replace on
- * @returns {string}
- */
-export const replace: Function;
-/**
- * Split
- * @param {string} sep - Separater string
- * @param {string} s - String to split
- * @returns {array}
- */
-export const split: Function;
-export function toLowerCase(s: any): any;
-export function toUpperCase(s: any): any;
-export const prepend: Function;
-export const append: Function;
-/**
- * TryCatch
- * @param {function} f - Try function, may throw
- * @param {function} g - Catch function, to catch error
- * @returns {any} Calls g if function f throws
- */
-export const tryCatch: Function;
-export function range(start: number, end: number, step?: number): any;
-export function debounce(delay: number): Function;
-export function accumulate(delay: number): Function;
+export function deepCopy(obj: any): any;
 /**
  * Immutable
  * @param {object} Object to seal and deep freeze
@@ -431,32 +89,383 @@ export function accumulate(delay: number): Function;
  */
 export const immutable: Function;
 /**
- * Applies various middleware function to the store dispatch
- *
- * @param {function} Middleware functions
- * @returns {function} A store enhancer that applies middleware
+ * IsNumber, checks if x is a Number
  */
-export function applyMiddleware(...middlewares: any[]): Function;
-export const Observable: any;
+export const isNumber: (b: any) => boolean;
 /**
- * Checks to see if something appears to be a plain object
- *
- * @param {object} Object to check
- * @returns {boolean}
+ * IsBoolean, checks if x is a Boolean
  */
-export function isPlainObject(obj: any): boolean;
+export const isBoolean: (b: any) => boolean;
 /**
- * Create a stateful store for managing application state
- *
- * @param {function} Reducer function
- * @param {object} Initial state
- * @returns {object} State store
+ * IsNull, checks if x is null
  */
-export function createStore(reducer: any, initialState: any, enhancer: any): object;
-export function thunk({ dispatch, getState }: {
-    dispatch: any;
-    getState: any;
-}): (next: any) => (action: any) => any;
+export const isNull: (x: any) => boolean;
+/**
+ * IsUndefined, checks if x is undefined
+ */
+export const isUndefined: (x: any) => boolean;
+/**
+ * IsString, checks if x is a String
+ */
+export const isString: (b: any) => boolean;
+/**
+ * IsObject, checks if x is an Object
+ */
+export const isObject: (x: any) => boolean;
+/**
+ * IsArray, checks if x is an Array
+ */
+export const isArray: (a: any) => boolean;
+/**
+ * IsInstanceOf, checks if a is instanceof b
+ */
+export const isInstanceOf: (this: any, ...args: any[]) => any;
+/**
+ * IsFunction, checks if f is a Function
+ */
+export const isFunction: (f: any) => any;
+/**
+ * IsAsyncFunction, checks if f is an async function
+ */
+export const isAsyncFunction: (f: any) => any;
+/**
+ * IsGeneratorFunction, checks if f is a generator function
+ */
+export const isGeneratorFunction: (f: any) => any;
+/**
+ * isAsyncGeneratorFunction, checks if f is an async generator
+ */
+export const isAsyncGeneratorFunction: (f: any) => any;
+/**
+ * IsSet, checks if s is a Set
+ */
+export const isSet: (s: any) => boolean;
+/**
+ * IsMap, checks if m is a Map
+ */
+export const isMap: (m: any) => boolean;
+/**
+ * IsEmpty
+ */
+export function isEmpty(x: any): boolean;
+/**
+ * IsClass
+ */
+export function isClass(obj: any): any;
+/**
+ * Identity, x => x
+ */
+export const identity: (x: any) => any;
+/**
+ * Constant, x => y => x
+ */
+export const constant: (a: any) => (b: any) => any;
+/**
+ * Arity, turn a function into one with n arguments
+ */
+export const arity: (fn: Function, n: number) => (this: any, ...args: any[]) => any;
+/**
+ * Unary, turn a function into one with 1 argument
+ */
+export const unary: (fn: Function) => (this: any, ...args: any[]) => any;
+/**
+ * Binary, turn a function into one with 2 arguments
+ */
+export const binary: (fn: Function) => (this: any, ...args: any[]) => any;
+/**
+ * Ternary, turn a function into one with 3 arguments
+ */
+export const ternary: (fn: Function) => (this: any, ...args: any[]) => any;
+/**
+ * Call First, partially apply a function's leftmost argument
+ */
+export const callFirst: (fn: Function, larg: any) => (this: any, ...args: any) => any;
+/**
+ * Call Last, partially apply a function's rightmost argument
+ */
+export const callLast: (fn: Function, rarg: any) => (this: any, ...args: any) => any;
+/**
+ * Demethodize, convert a method to a standalone function
+ */
+export const demethodize: (thisArg: any, ...argArray: any[]) => any;
+/**
+ * Len, provides a simple way to get the length/size of something
+ */
+export const len: (a: any) => any;
+/**
+ * Compose, combine any number of functions together, right to left
+ * Any number of functions fns to compose
+ *  A function composed of fns
+ */
+export function compose(...fns: Function[]): Function;
+/**
+ * Pipe, combine any number of functions together, left to right
+ * fns to pipe
+ * A function pipe of fns
+ */
+export function pipe(...fns: Function[]): Function;
+/**
+ * Curry, automatically curry a function, only works with non-variadic functions
+ *
+ * Takes fn - Function to curry
+ * Returns partially applied function, or result of calling
+ * function fn if arguments are greater than or equal to total arity of function fn.
+ */
+export function curry(fn: Function): (this: any, ...args: any[]) => any;
+/**
+ * Tap, run a side effect fn and then return x
+ */
+export const tap: (this: any, ...args: any[]) => any;
+/**
+ * Not, negate the result of a function
+ */
+export const not: (this: any, ...args: any[]) => any;
+/**
+ * Negate, reverse the sign of a numerical result of a function
+ */
+export const negate: (this: any, ...args: any[]) => any;
+/**
+ * Flip2, flip the position of a function's arguments
+ */
+export const flip2: (f: Function) => (this: any, ...args: any[]) => any;
+/**
+ * Flip3, flip the first argument to the last argument
+ */
+export const flip3: (f: Function) => (this: any, ...args: any[]) => any;
+/**
+ * Tee, logs argument and returns it
+ * @param {any}
+ * @returns {any}
+ */
+export const tee: any;
+/**
+ * Log, spy on the execution of a function fn with logger
+ */
+export const log: (fn: Function, logger?: (...data: any[]) => void) => (this: any, ...args: any[]) => any;
+/**
+ * Transduce, combine multiple maps, filters, into a more efficient operation
+ */
+export const transduce: (this: any, ...args: any[]) => any;
+/**
+ * MapTR, create a map transducer
+ */
+export const mapTR: (fn: Function) => (reducer: Function) => (acc: any, val: any) => any;
+/**
+ * filterTR, create a filter transducer
+ */
+export const filterTR: (fn: Function) => (reducer: Function) => (acc: any, val: any) => any;
+/**
+ * Send, returns a function that applies instance method name with args
+ */
+export const send: (name: string, ...args: any[]) => (instance: any) => any;
+/**
+ * Bound, returns a bound method or calls method with args
+ */
+export const bound: (name: string, ...args: any[]) => (instance: any) => any;
+/**
+ * Invoke, returns a function that takes a context to call function fn with args in
+ */
+export const invoke: (fn: Function, ...args: any[]) => (instance: any) => any;
+/**
+ * Unique, get only unique items
+ */
+export function unique(...items: any[]): any[];
+/**
+ * GroupBy, group a collection of objects into a multi-dimensional array by key
+ */
+export const groupBy: (this: any, ...args: any[]) => any;
+/**
+ * KeyBy, convert array into object, assumes each key is unique otherwise the
+ * last object wins
+ */
+export const keyBy: (this: any, ...args: any[]) => any;
+/**
+ * Stringifying functions
+ * Provides helper functions to stringify and parse JSON, along with numbers
+ * and strings
+ */
+export const toJSON: (x: any) => string;
+export const fromJSON: (x: any) => any;
+export const stringify: {
+    (value: any, replacer?: ((this: any, key: string, value: any) => any) | undefined, space?: string | number | undefined): string;
+    (value: any, replacer?: (string | number)[] | null | undefined, space?: string | number | undefined): string;
+};
+export const parse: (text: string, reviver?: ((this: any, key: string, value: any) => any) | undefined) => any;
+export const toString: StringConstructor;
+export const toInteger: (s: string) => number;
+/**
+ * TryCatch
+ */
+export const tryCatch: (this: any, ...args: any[]) => any;
+/**
+ * Once will return the cached result of the call
+ */
+export function once(fn: Function): (this: any, ...args: any[]) => any;
+/**
+ * Memoize a function
+ */
+export function memoize(fn: Function): {
+    (this: any, ...args: any[]): any;
+    clearCache(): any;
+};
+/**
+ * Debounce a function
+ */
+export const debounce: (delay: number) => (this: any, fn: Function) => void;
+/**
+ * Accumulate returns a function that will be called with all accumulated events after delay
+ */
+export const accumulate: (delay: number) => (this: any, fn: Function) => (event: any) => void;
+/**
+ * DeepEqual
+ * @param {any} a
+ * @param {any} b
+ */
+export function deepEqual(a: any, b: any): boolean;
+/**
+ * ComposeM
+ */
+export function composeM(...Ms: any): any;
+export const liftA2: (this: any, ...args: any[]) => any;
+export const liftA3: (this: any, ...args: any[]) => any;
+export const liftA4: (this: any, ...args: any[]) => any;
+export const apply: (this: any, ...args: any[]) => any;
+export const flat: (M: any) => any;
+export const flatMap: (this: any, ...args: any[]) => any;
+export const fold: (this: any, ...args: any[]) => any;
+export const getOrElseThrow: (this: any, ...args: any[]) => any;
+/**
+ * Array functions
+ * Provides a set of functions for common array operations
+ */
+export const head: (a: string | any[]) => any;
+export const last: (a: string | any[]) => any;
+export const every: (this: any, ...args: any[]) => any;
+export const some: (this: any, ...args: any[]) => any;
+export const find: (this: any, ...args: any[]) => any;
+export const sum: (...args: number[]) => number;
+export const average: (ns: number[]) => number;
+export const join: (this: any, ...args: any[]) => any;
+/**
+ * Partition, divide an array into two
+ */
+export const partition: (arr: any[], a: (value: any) => boolean, b: (value: any) => boolean) => any;
+/**
+ * ZipMap
+ */
+export const zipMap: <X>(f: Function, ...iters: Iterable<X>[]) => any[];
+/**
+ * SortBy
+ */
+export const sortBy: (this: any, ...args: any[]) => any;
+/**
+ * ForEach
+ * @param {function} f - Function to run on value(s) of M
+ * @param {array} M - Monad / iterable that implements forEach
+ * @returns {undefined}
+ */
+export const forEach: (this: any, ...args: any[]) => any;
+/**
+ * Map
+ */
+export const map: (this: any, ...args: any[]) => any;
+/**
+ * Filter
+ */
+export const filter: (this: any, ...args: any[]) => any;
+/**
+ * Reduce
+ */
+export const reduce: (this: any, ...args: any[]) => any;
+/**
+ * ReduceRight
+ */
+export const reduceRight: (this: any, ...args: any[]) => any;
+/**
+ * Pluck
+ */
+export const pluck: Function;
+/**
+ * DeepMap
+ */
+export const deepMap: (fn: Function) => (tree: any[]) => any[];
+/**
+ * Range
+ */
+export const range: (start: number, end: number, step?: number) => any[];
+/**
+ * deepJoin, deep join two arrays on keyA and keyB
+ */
+export const deepJoin: (this: any, ...args: any[]) => any;
+/**
+ * ComposeAsync
+ */
+export const composeAsync: (...fns: Function[]) => Function;
+/**
+ * PipeAsync
+ */
+export const pipeAsync: (...fns: Function[]) => Function;
+/**
+ * MapAsync
+ */
+export const mapAsync: (f: <X>(value: any) => Promise<X>, a: any[]) => Promise<unknown[]>;
+/**
+ * ReduceAsync
+ */
+export const reduceAsync: (f: <X>(value: any) => Promise<X>, init: any, a: any[]) => Promise<any>;
+/**
+ * FilterAsync
+ */
+export const filterAsync: (f: <X>(value: any) => Promise<X>, a: any) => Promise<any>;
+/**
+ * Math functions
+ * Provides a set of functions for common math operations
+ */
+export const eq: (this: any, ...args: any[]) => any;
+export const add: (this: any, ...args: any[]) => any;
+export const addRight: (this: any, ...args: any[]) => any;
+export const subtract: (this: any, ...args: any[]) => any;
+export const subtractRight: (this: any, ...args: any[]) => any;
+export const multiply: (this: any, ...args: any[]) => any;
+export const divide: (this: any, ...args: any[]) => any;
+export const divideRight: (this: any, ...args: any[]) => any;
+export const roundTo: (n: number) => (x: number) => number;
+export const pow: (base: number, power: number) => number;
+/**
+ * Match
+ */
+export const match: (this: any, ...args: any[]) => any;
+/**
+ * Replace
+ */
+export const replace: (this: any, ...args: any[]) => any;
+/**
+ * Split
+ */
+export const split: (this: any, ...args: any[]) => any;
+export const toLowerCase: (s: string) => string;
+export const toUpperCase: (s: string) => string;
+export const prepend: (this: any, ...args: any[]) => any;
+export const append: (this: any, ...args: any[]) => any;
+/**
+ * PadStart
+ */
+export const padStart: (this: any, ...args: any[]) => any;
+/**
+ * PadEnd
+ */
+export const padEnd: (this: any, ...args: any[]) => any;
+/**
+ * FunctionalMixin takes a behaviour object and a target, which is the object to mix behaviour into
+ */
+export function FunctionalMixin(behaviour: any, sharedBehaviour?: {}): (target: any) => any;
+/**
+ * WithValidation
+ * @param {function} validator - Function to validate data
+ * @param {function} fn - Function to wrap with validation
+ * @returns {function} Wrapped function fn with validation logic
+ */
+export const withValidation: (this: any, ...args: any[]) => any;
 export interface Maybe {
     isJust: boolean;
     isNothing: boolean;
@@ -682,7 +691,7 @@ export function createClient(apiEndpoint: any, options?: {
  * @param {iterable} iterable
  * @returns {function} Generator iterator function
  */
-export const mapWith: Function;
+export const mapWith: (this: any, ...args: any[]) => any;
 /**
  * MapAllWith
  * @param {function} fn - Mapper function
@@ -690,7 +699,7 @@ export const mapWith: Function;
  * @returns {function} Generator iterator function that applies mapper to all
  * elements and then yields the result of their individual iteration
  */
-export const mapAllWith: Function;
+export const mapAllWith: (this: any, ...args: any[]) => any;
 /**
  * FilterWith
  * @param {function} fn - Filter function
@@ -698,14 +707,14 @@ export const mapAllWith: Function;
  * @returns {function} Generator iterator function that filters elements by
  * function fn
  */
-export const filterWith: Function;
+export const filterWith: (this: any, ...args: any[]) => any;
 /**
  * Compact
  * @param {iterable} iterable
  * @returns {function} Generator iterator function that removes nullable
  * values
  */
-export const compact: Function;
+export const compact: (this: any, ...args: any[]) => any;
 /**
  * UntilWith
  * @param {function} fn - Tester function
@@ -713,7 +722,7 @@ export const compact: Function;
  * @returns {function} Generator iterator function that returns elements until
  * the result of fn(element) is true
  */
-export const untilWith: Function;
+export const untilWith: (this: any, ...args: any[]) => any;
 /**
  * First
  * @param {iterable} iterable
@@ -733,7 +742,7 @@ export function rest<X>(iterable: Iterable<X>): Iterable<X>;
  * @returns {function} Generator iterator function that yields numberToTake
  * number elements from iteratable
  */
-export const take: Function;
+export const take: (this: any, ...args: any[]) => any;
 /**
  * Drop
  * @param {number} numberToDrop
@@ -741,7 +750,7 @@ export const take: Function;
  * @returns {function} Generator iterator function that yields elements once
  * numberToDrop elements have been dropped
  */
-export const drop: Function;
+export const drop: (this: any, ...args: any[]) => any;
 /**
  * Zip
  * @param {iterable} iterables
@@ -764,7 +773,7 @@ export function zipWith<X>(zipper: (...elements: any) => any, ...iterables: Iter
  * @param {iterable} iterable
  * @returns {any} Result of reducing iterable with reducer
  */
-export const reduceWith: Function;
+export const reduceWith: (this: any, ...args: any[]) => any;
 /**
  * MemoizeIter
  * @param {function} generator - Iterator function
@@ -786,6 +795,11 @@ export function beforeAll(behaviour: any, ...methodNames: any[]): (clazz: any) =
 export function afterAll(behaviour: any, ...methodNames: any[]): (clazz: any) => any;
 export function SubclassFactory(behaviour: any): (superclass: any) => any;
 export function FactoryFactory(c: any): (...args: any[]) => any;
+/**
+ * Lazy Collection is a Collection data-type that is essentially just mapping
+ * Symbol.iterator. It can be mixed in to any existing iterable object, such as
+ * an Array.
+ */
 interface ICollection {
     map: (mapper: (element: any) => any) => ICollection;
     reduce: (reducer: (accumulator: any, element: any) => any, seed: any) => any;
@@ -842,23 +856,6 @@ export function method(key: any, handler: (...args: any) => any | undefined): IH
  * Returns dispatch function
  */
 export function multi(...initialMethods: any[]): MultiMethod;
-interface IValidationError {
-    message: string;
-}
-export interface ValidationError extends Error {
-    errors: IValidationError[];
-}
-export class ValidationError extends Error {
-    constructor(message: string, errors: IValidationError[]);
-    get messages(): string[];
-}
-/**
- * WithValidation
- * @param {function} validator - Function to validate data
- * @param {function} fn - Function to wrap with validation
- * @returns {function} Wrapped function fn with validation logic
- */
-export const withValidation: Function;
 export function createFilterStream(fn: any): any;
 export function createMapStream(fn: any): any;
 export function createReduceStream(reducer: any, initialValue: any): any;
@@ -885,6 +882,13 @@ export class LimitedParallelStream {
     _onComplete(err: any): void;
 }
 export const actionListener: object;
+/**
+ * Checks to see if something appears to be a plain object
+ *
+ * @param {object} Object to check
+ * @returns {boolean}
+ */
+export function isPlainObject(obj: any): boolean;
 /**
  * A utility function for making an action creator for a given type
  *
@@ -914,6 +918,14 @@ export function createAsyncThunk(typePrefix: string, payloadCreator: Function, o
  */
 export function bindActionCreators(actionCreators: any, dispatch: any): object;
 /**
+ * Create a stateful store for managing application state
+ *
+ * @param {function} Reducer function
+ * @param {object} Initial state
+ * @returns {object} State store
+ */
+export function createStore(reducer: any, initialState: any, enhancer: any): object;
+/**
  * Turns an object with various reducer functions into a single reducer
  * function.
  *
@@ -928,6 +940,10 @@ export function combineReducers(reducers: any): Function;
  * @returns {function} Selector function
  */
 export function createSelector(...fns: any[]): Function;
+export function thunk({ dispatch, getState }: {
+    dispatch: any;
+    getState: any;
+}): (next: any) => (action: any) => any;
 export const createConfiguredStore: any;
 
 //# sourceMappingURL=index.d.ts.map

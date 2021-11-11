@@ -1,138 +1,160 @@
-import { applyMiddleware } from './store/applyMiddleware'
-import { createStore } from './store/createStore'
-import { thunk } from './store/thunk'
-import * as rx from './rx'
+import * as rx from './observable/Observable.js'
 
 export {
   accumulate,
-  add,
-  addRight,
-  aggregate,
-  aggregateOn,
-  append,
-  apply,
   arity,
-  average,
   binary,
   bound,
   callFirst,
   callLast,
   compose,
-  composeAsync,
-  composeM,
   constant,
   curry,
   debounce,
-  deepCopy,
   deepEqual,
-  deepFreeze,
-  deepJoin,
-  deepMap,
-  deepCopyArray,
-  deepPick,
-  deepProp,
-  deepSetProp,
   demethodize,
-  diff,
-  divide,
-  divideRight,
-  entries,
-  eq,
-  every,
-  filter,
-  filterAsync,
   filterTR,
-  find,
-  flat,
-  flatMap,
   flip2,
   flip3,
-  fold,
-  forEach,
   fromJSON,
-  FunctionalMixin,
-  getOrElseThrow,
   groupBy,
-  head,
   identity,
-  immutable,
-  invert,
   invoke,
-  isArray,
-  isBoolean,
-  isEmpty,
-  isFunction,
-  isInstanceOf,
-  isMap,
-  isNull,
-  isNumber,
-  isObject,
-  isSet,
-  isString,
-  join,
   keyBy,
-  keys,
-  last,
   len,
-  liftA2,
-  liftA3,
-  liftA4,
   log,
-  map,
-  mapAsync,
   mapTR,
-  match,
   memoize,
-  merge,
-  multiply,
-  multiplyRight,
+  negate,
   not,
   once,
-  padEnd,
-  padStart,
   parse,
-  partition,
-  pick,
   pipe,
-  pipeAsync,
-  pluck,
-  pow,
-  prepend,
-  prop,
-  props,
-  range,
-  reduce,
-  reduceAsync,
-  reduceRight,
-  rename,
-  replace,
-  roundTo,
   send,
-  set,
-  setProp,
-  setPropM,
-  some,
-  sortBy,
-  split,
   stringify,
-  subtract,
-  subtractRight,
-  sum,
   tap,
   tee,
   ternary,
   toInteger,
   toJSON,
-  toLowerCase,
   toString,
-  toUpperCase,
   transduce,
   tryCatch,
   unary,
   unique,
-  values,
+} from './functions/utils'
+
+export {
+  isNumber,
+  isBoolean,
+  isNull,
+  isUndefined,
+  isString,
+  isObject,
+  isArray,
+  isInstanceOf,
+  isFunction,
+  isAsyncFunction,
+  isGeneratorFunction,
+  isAsyncGeneratorFunction,
+  isSet,
+  isMap,
+  isEmpty,
+  isClass,
+} from './functions/predicates'
+
+export {
+  composeM,
+  liftA2,
+  liftA3,
+  liftA4,
+  apply,
+  flat,
+  flatMap,
+  fold,
+  getOrElseThrow,
+  head,
+  last,
+  every,
+  some,
+  find,
+  sum,
+  average,
+  join,
+  partition,
   zipMap,
-} from './combinators'
+  sortBy,
+  forEach,
+  map,
+  filter,
+  reduce,
+  reduceRight,
+  pluck,
+  deepMap,
+  range,
+  deepJoin,
+} from './functions/arrays'
+
+export {
+  composeAsync,
+  pipeAsync,
+  mapAsync,
+  filterAsync,
+  reduceAsync,
+} from './functions/async'
+
+export {
+  eq,
+  add,
+  addRight,
+  subtract,
+  subtractRight,
+  multiply,
+  divide,
+  divideRight,
+  roundTo,
+  pow,
+} from './functions/math'
+
+export {
+  prop,
+  setPropM,
+  setProp,
+  set,
+  props,
+  pick,
+  deepProp,
+  deepSetProp,
+  deepPick,
+  diff,
+  aggregate,
+  aggregateOn,
+  merge,
+  entries,
+  values,
+  keys,
+  rename,
+  deepFreeze,
+  deepCopyArray,
+  deepCopy,
+  immutable,
+} from './functions/objects'
+
+export {
+  match,
+  replace,
+  split,
+  toLowerCase,
+  toUpperCase,
+  prepend,
+  append,
+  padStart,
+  padEnd,
+} from './functions/strings'
+
+export { FunctionalMixin } from './mixins/functionalMixin'
+export { withValidation } from './mixins/withValidation'
+
 export {
   Enum,
   Failure,
@@ -147,8 +169,9 @@ export {
   Triple,
   Try,
   TryAsync,
-} from './maybe'
-export { createClient } from './fetch'
+} from './adts/maybe'
+export { createClient } from './fetch/fetch'
+
 export {
   compact,
   drop,
@@ -163,7 +186,8 @@ export {
   untilWith,
   zip,
   zipWith,
-} from './iterators'
+} from './iterators/iterators'
+
 export {
   after,
   afterAll,
@@ -180,14 +204,16 @@ export {
   SubclassFactory,
   unless,
   wrapWith,
-} from './classes'
+} from './decorators/classes'
 
-export { Lazy, Collection, Numbers, Stack } from './lazy'
-export { Observable } from './rx'
+export { Lazy, Collection, Numbers, Stack } from './lazy/Lazy'
+
+export { Observable } from './observable/Observable'
+export { EventEmitter, reactivize } from './observable/reactivize'
 export { rx }
-export { EventEmitter, reactivize } from './reactivize'
-export { multi, method } from './multimethod'
-export { withValidation, ValidationError } from './hofs'
+
+export { multi, method } from './multimethod/multimethod'
+
 export {
   createFilterStream,
   createFork,
@@ -196,7 +222,8 @@ export {
   createReduceStream,
   LimitedParallelStream,
   ParallelStream,
-} from './node-streams'
+} from './streams/node-streams'
+
 export { actionListener } from './store/actionListener'
 export { createAsyncThunk } from './store/asyncThunk'
 export { bindActionCreators } from './store/bindActionCreators'
@@ -204,6 +231,7 @@ export { combineReducers } from './store/combineReducers'
 export { createAction } from './store/createAction'
 export { createSelector } from './store/createSelector'
 export { isPlainObject } from './store/isPlainObject'
+export { createStore } from './store/createStore'
+export { thunk } from './store/thunk'
 export { Reducer } from './store/reducer'
-export { thunk, createStore, applyMiddleware }
-export const createConfiguredStore = applyMiddleware(thunk)(createStore)
+export { createConfiguredStore } from './store/store'

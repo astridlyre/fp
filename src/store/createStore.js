@@ -1,5 +1,7 @@
-import { isFunction, diff, isUndefined, stringify } from '../combinators.js'
-import { $$observable, Observable } from '../rx.js'
+import { isFunction, isUndefined } from '../functions/predicates.ts'
+import { stringify } from '../functions/utils.ts'
+import { diff } from '../functions/objects.ts'
+import { $$observable, Observable } from '../observable/Observable.js'
 import { isPlainObject } from './isPlainObject.js'
 
 export const INIT = '@@ACTION/INIT'

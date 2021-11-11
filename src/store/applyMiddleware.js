@@ -1,4 +1,4 @@
-import { compose } from '../combinators.js'
+import { compose } from '../functions/utils.ts'
 
 /**
  * Applies various middleware function to the store dispatch
