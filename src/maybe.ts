@@ -1,39 +1,47 @@
-import { isFunction, compose, composeAsync } from './combinators.js'
+import { identity, isFunction, compose, composeAsync } from './combinators.js'
 
 // Maybe
-function throwError(error) {
-  throw error
+function throwError(err: Error): Error {
+  throw err
 }
-function errorWith(str) {
+function errorWith(str: string): TypeError {
   throw new TypeError(str)
+}
+
+export interface Maybe {
+  isJust: boolean
+  isNothing: boolean
+  merge(): Maybe
+  call(content: Maybe, ...args: any): Function
+  map(mapper: (value: any) => any): Maybe
 }
 
 export class Maybe {
   #value;
   [Symbol.toStringTag] = 'Maybe'
 
-  constructor(v) {
+  constructor(v?: any) {
     this.#value = v
   }
   get() {
     return this.value ?? errorWith('Unable to get from a Maybe#Nothing')
   }
-  getOrElse(defaultValue) {
+  getOrElse(defaultValue: any) {
     return this.value ?? defaultValue
   }
-  getOrElseThrow(error) {
+  getOrElseThrow(error: Error) {
     return this.value ?? throwError(error)
   }
   get value() {
     return this.#value
   }
-  static of(v) {
+  static of(v: any): Maybe {
     return v == null ? new Nothing(v) : new Just(v)
   }
-  static fromEmpty(v) {
-    return Maybe.of(v).map(x => (x.length === 0 ? null : x))
+  static fromEmpty(v: any): Maybe {
+    return Maybe.of(v).map((x: string | []) => (x.length === 0 ? null : x))
   }
-  [Symbol.toPrimitive](hint) {
+  [Symbol.toPrimitive](hint: string) {
     switch (hint) {
       case 'string':
         return this.toString()
@@ -55,19 +63,19 @@ export class Just extends Maybe {
   get isNothing() {
     return false
   }
-  fold(fn = x => x) {
+  fold(fn = identity): any {
     return fn(this.value)
   }
-  filter(fn = x => x) {
-    return fn(this.value) ? new Just(a) : new Nothing()
+  filter(fn = identity): Maybe {
+    return fn(this.value) ? new Just(this.value) : new Nothing()
   }
-  map(fn) {
+  map(fn: (x: any) => any): Maybe {
     return Maybe.of(fn(this.value))
   }
-  flatMap(fn) {
+  flatMap(fn: (x: any) => Maybe): Maybe {
     return Maybe.of(fn(this.value).merge())
   }
-  ap(Ma) {
+  ap(Ma: Maybe): Maybe {
     return Ma.isNothing
       ? Ma
       : isFunction(this.value)
@@ -116,24 +124,32 @@ export class Nothing extends Maybe {
   }
 }
 
+export interface Result {
+  map(mapper: (value: any) => any): Result
+  get(): any
+  isFailure: boolean
+  isSuccess: boolean
+  merge(): any
+}
+
 export class Result {
   #value
-  constructor(v) {
+  constructor(v?: any) {
     this.#value = v
   }
   get value() {
     return this.#value
   }
-  static of(v, error = 'Null argument provided') {
+  static of(v: any, error = 'Null argument provided'): Result {
     return v == null ? new Failure(error) : new Success(v)
   }
-  static fromEmpty(a) {
-    return Result.of(a).map(x => (x.length === 0 ? null : x))
+  static fromEmpty(a: any) {
+    return Result.of(a).map((x: string | []) => (x.length === 0 ? null : x))
   }
-  static fromPromise(p) {
+  static fromPromise<X>(p: Promise<X>) {
     return p.then(result => new Success(result)).catch(err => new Failure(err.message))
   }
-  [Symbol.toPrimitive](hint) {
+  [Symbol.toPrimitive](hint: string) {
     switch (hint) {
       case 'string':
         return this.toString()
@@ -142,7 +158,7 @@ export class Result {
         return this.get()
     }
   }
-  *[Symbol.iterator]() {
+  *[Symbol.iterator](): Generator {
     yield this.isFailure ? new Failure(this.#value) : undefined
     yield this.isSuccess ? new Success(this.#value) : undefined
   }
@@ -170,7 +186,7 @@ export class Failure extends Result {
   merge() {
     errorWith('Unable to merge from a Result#Failure')
   }
-  getOrElse(defaultValue) {
+  getOrElse(defaultValue: any) {
     return defaultValue
   }
   getOrElseThrow() {
@@ -191,13 +207,13 @@ export class Success extends Result {
   get isFailure() {
     return false
   }
-  map(fn) {
+  map(fn: (value: any) => any): Result {
     return Result.of(fn(this.value))
   }
-  flatMap(fn) {
+  flatMap(fn: (value: any) => Result): Result {
     return Result.of(fn(this.value).merge())
   }
-  ap(Rs) {
+  ap(Rs: Result): Result {
     return Rs.isFailure
       ? Rs
       : isFunction(this.value)
@@ -229,14 +245,14 @@ export class Success extends Result {
 }
 
 export class Try {
-  constructor(fn, msg) {
+  constructor(fn: () => any, msg: string) {
     try {
       return new Success(fn())
-    } catch (e) {
+    } catch (e: any) {
       return new Failure(msg || e.message)
     }
   }
-  static of(fn, msg) {
+  static of(fn: () => any, msg: string) {
     return new Try(fn, msg)
   }
 }
@@ -245,29 +261,30 @@ export class TryAsync {
   constructor() {
     throw new Error('Must use static method of')
   }
-  static async of(fn, msg) {
+  static async of(fn: <X>() => Promise<X>, msg: string) {
     try {
       const result = await fn()
       return new Success(result)
-    } catch (e) {
+    } catch (e: any) {
       return new Failure(msg || e.message)
     }
   }
 }
 
 export class IO {
+  unsafePerformIO: Function;
   [Symbol.toStringTag] = 'IO'
 
-  constructor(fn) {
+  constructor(fn: Function) {
     this.unsafePerformIO = fn
   }
-  map(fn) {
+  map(fn: (value: Function) => Function) {
     return new IO(compose(fn, this.unsafePerformIO))
   }
-  flatMap(fn) {
+  flatMap(fn: (value: Function) => Function) {
     return this.map(fn).merge()
   }
-  ap(f) {
+  ap(f: any) {
     return this.flatMap(fn => f.map(fn))
   }
   merge() {
@@ -279,22 +296,23 @@ export class IO {
   toJSON() {
     return { type: 'IO', value: this.unsafePerformIO }
   }
-  static of(x) {
+  static of(x: any) {
     return new IO(() => x)
   }
 }
 
 export class IOAsync {
+  unsafePerformIO: Function;
   [Symbol.toStringTag] = 'IOAsync'
 
-  constructor(fn) {
+  constructor(fn: Function) {
     this.unsafePerformIO = fn
   }
-  async map(fn) {
+  async map(fn: (value: Function) => Function) {
     return new IO(composeAsync(fn, this.unsafePerformIO))
   }
-  async flatMap(fn) {
-    return await this.map(fn).merge()
+  async flatMap(fn: (value: Function) => Function) {
+    return await (this.map(fn) as any).merge()
   }
   async merge() {
     return new IOAsync(async () => await this.unsafePerformIO().unsafePerformIO())
@@ -305,7 +323,7 @@ export class IOAsync {
   toJSON() {
     return { type: 'IOAsync', value: this.unsafePerformIO }
   }
-  static of(fn) {
+  static of<X>(fn: Promise<X>) {
     return new IOAsync(async () => await fn)
   }
 }
@@ -315,7 +333,7 @@ export class Pair {
   #right;
   [Symbol.toStringTag] = 'Pair'
 
-  constructor(left, right) {
+  constructor(left: any, right: any) {
     this.#left = left
     this.#right = right
   }
@@ -328,10 +346,10 @@ export class Pair {
   get() {
     return { left: this.#left, right: this.#right }
   }
-  map(fn) {
+  map(fn: (value: any) => any) {
     return new Pair(fn(this.#left), fn(this.#right))
   }
-  flatMap(fn) {
+  flatMap(fn: (left: any, right: any) => [left: any, right: any]) {
     return new Pair(...fn(this.#left, this.#right))
   }
   toString() {
@@ -344,10 +362,10 @@ export class Pair {
     yield this.#left
     yield this.#right
   }
-  static of(left, right) {
+  static of(left: any, right: any) {
     return new Pair(left, right)
   }
-  static eq(pairA, pairB) {
+  static eq(pairA: Pair, pairB: Pair) {
     return pairA.left === pairB.left && pairA.right === pairB.right
   }
 }
@@ -358,7 +376,7 @@ export class Triple {
   #right;
   [Symbol.toStringTag] = 'Triple'
 
-  constructor(left, middle, right) {
+  constructor(left: any, middle: any, right: any) {
     this.#left = left
     this.#middle = middle
     this.#right = right
@@ -375,10 +393,12 @@ export class Triple {
   get() {
     return { left: this.#left, middle: this.#middle, right: this.#right }
   }
-  map(fn) {
+  map(fn: (value: any) => any) {
     return new Triple(fn(this.#left), fn(this.#middle), fn(this.#right))
   }
-  flatMap(fn) {
+  flatMap(
+    fn: (left: any, middle: any, right: any) => [left: any, middle: any, right: any]
+  ) {
     return new Triple(...fn(this.#left, this.#middle, this.#right))
   }
   toString() {
@@ -392,10 +412,10 @@ export class Triple {
     yield this.#middle
     yield this.#right
   }
-  static of(left, middle, right) {
+  static of(left: any, middle: any, right: any) {
     return new Triple(left, middle, right)
   }
-  static eq(tripleA, tripleB) {
+  static eq(tripleA: Triple, tripleB: Triple) {
     return (
       tripleA.left === tripleB.left &&
       tripleA.middle === tripleB.middle &&
@@ -408,10 +428,10 @@ export class Enum {
   #types = new Set();
   [Symbol.toStringTag] = 'Enum'
 
-  constructor(types) {
+  constructor(types: string[]) {
     types.forEach(type => this.#types.add(type))
   }
-  has(type) {
+  has(type: string) {
     return this.#types.has(type)
   }
   toString() {
@@ -423,7 +443,7 @@ export class Enum {
   [Symbol.iterator]() {
     return this.#types[Symbol.iterator]
   }
-  static of(...types) {
+  static of(...types: string[]) {
     return new Enum(types)
   }
 }

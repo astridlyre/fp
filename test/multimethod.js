@@ -1,4 +1,4 @@
-import { method, multi } from '../src/multimethod.js'
+import { method, multi } from '../dist/index.js'
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
 

@@ -1,4 +1,4 @@
-import * as combinators from '../src/combinators.js'
+import * as combinators from '../dist/index.js'
 import { describe, it } from 'mocha'
 import { AssertionError, strict as assert } from 'assert'
 

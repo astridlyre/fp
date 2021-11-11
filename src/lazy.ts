@@ -1,9 +1,21 @@
-export const Collection = {
-  map(fn) {
+interface ICollection {
+  map: (mapper: (element: any) => any) => ICollection
+  reduce: (reducer: (accumulator: any, element: any) => any, seed: any) => any
+  filter: (predicate: (element: any) => boolean) => ICollection
+  find: (searcher: (element: any) => boolean) => ICollection
+  until: (searcher: (element: any) => boolean) => ICollection
+  first: () => any
+  rest: () => ICollection
+  take: (numberToTake: number) => ICollection
+  drop: (numberToDrop: number) => ICollection
+}
+
+export const Collection: ICollection = {
+  map(this: ICollection, fn: (element: any) => any): ICollection {
     return Object.assign(
       {
         [Symbol.iterator]: () => {
-          const iterator = this[Symbol.iterator]()
+          const iterator = (this as any)[Symbol.iterator]()
           return {
             next: () => {
               const { done, value } = iterator.next()
@@ -15,26 +27,34 @@ export const Collection = {
       Collection
     )
   },
-  reduce(fn, seed) {
-    const iterator = this[Symbol.iterator]()
+
+  reduce(
+    this: ICollection,
+    reducer: (accumulator: any, element: any) => any,
+    seed: any
+  ): any {
+    const iterator = (this as any)[Symbol.iterator]()
+
     let iterationResult
     let accumulator = seed
+
     while (((iterationResult = iterator.next()), !iterationResult.done)) {
-      accumulator = fn(accumulator, iterationResult.value)
+      accumulator = reducer(accumulator, iterationResult.value)
     }
     return accumulator
   },
-  filter(fn) {
+
+  filter(this: ICollection, predicate: (element: any) => boolean): ICollection {
     return Object.assign(
       {
         [Symbol.iterator]: () => {
-          const iterator = this[Symbol.iterator]()
+          const iterator = (this as any)[Symbol.iterator]()
           return {
             next: () => {
               let done, value
               do {
                 ;({ done, value } = iterator.next())
-              } while (!done && !fn(value))
+              } while (!done && !predicate(value))
               return { done, value }
             },
           }
@@ -43,17 +63,18 @@ export const Collection = {
       Collection
     )
   },
-  find(fn) {
+
+  find(this: ICollection, searcher: (element: any) => boolean): ICollection {
     return Object.assign(
       {
         [Symbol.iterator]: () => {
-          const iterator = this[Symbol.iterator]()
+          const iterator = (this as any)[Symbol.iterator]()
           return {
             next: () => {
               let done, value
               do {
                 ;({ done, value } = iterator.next())
-              } while (!done && !fn(value))
+              } while (!done && !searcher(value))
               return { done, value }
             },
           }
@@ -62,15 +83,16 @@ export const Collection = {
       Collection
     )
   },
-  until(fn) {
+
+  until(this: ICollection, searcher: (element: any) => boolean): ICollection {
     return Object.assign(
       {
         [Symbol.iterator]: () => {
-          const iterator = this[Symbol.iterator]()
+          const iterator = (this as any)[Symbol.iterator]()
           return {
             next: () => {
               let { done, value } = iterator.next()
-              done = done || fn(value)
+              done = done || searcher(value)
               return { done, value: done ? undefined : value }
             },
           }
@@ -79,14 +101,16 @@ export const Collection = {
       Collection
     )
   },
-  first() {
-    return this[Symbol.iterator]().next().value
+
+  first(this: ICollection): any {
+    return (this as any)[Symbol.iterator]().next().value
   },
-  rest() {
+
+  rest(this: ICollection): ICollection {
     return Object.assign(
       {
         [Symbol.iterator]: () => {
-          const iterator = this[Symbol.iterator]()
+          const iterator = (this as any)[Symbol.iterator]()
           iterator.next()
           return iterator
         },
@@ -94,11 +118,12 @@ export const Collection = {
       Collection
     )
   },
-  take(numberToTake) {
+
+  take(this: ICollection, numberToTake: number): ICollection {
     return Object.assign(
       {
         [Symbol.iterator]: () => {
-          const iterator = this[Symbol.iterator]()
+          const iterator = (this as any)[Symbol.iterator]()
           let remainingElements = numberToTake
           return {
             next: () => {
@@ -112,10 +137,11 @@ export const Collection = {
       Collection
     )
   },
-  drop(numberToDrop) {
+
+  drop(this: ICollection, numberToDrop: number): ICollection {
     return Object.assign({
       [Symbol.iterator]: () => {
-        const iterator = this[Symbol.iterator]()
+        const iterator = (this as any)[Symbol.iterator]()
         while (numberToDrop-- > 0) iterator.next()
         return {
           next: () => {
@@ -138,48 +164,25 @@ export const Numbers = Object.assign(
   Collection
 )
 
-const EMPTY = { isEmpty: () => true }
+interface IStack extends ICollection {
+  array: any[]
+  index: number
+  push: (value: any) => any
+  pop: () => any
+  isEmpty: () => boolean
+}
 
-export const Pair = (car, cdr = EMPTY) =>
-  Object.assign(
-    {
-      car,
-      cdr,
-      isEmpty: () => false,
-      [Symbol.iterator]() {
-        let currentPair = this
-        return {
-          next: () => {
-            if (currentPair.isEmpty()) return { done: true }
-            else {
-              const value = currentPair.car
-              currentPair = currentPair.cdr
-              return { done: false, value }
-            }
-          },
-        }
-      },
-    },
-    Collection
-  )
-
-Pair.from = iterable =>
-  (function iterationToList(iteration) {
-    const { done, value } = iteration.next()
-    return done ? EMPTY : Pair(value, iterationToList(iteration))
-  })(iterable[Symbol.iterator]())
-
-export const Stack = () =>
+export const Stack = (): IStack =>
   Object.assign(
     {
       array: [],
       index: -1,
-      push(value) {
-        return (this.array[(this.index += 1)] = value)
+      push(value: any) {
+        return ((this.array[(this.index += 1)] as any) = value)
       },
       pop() {
         const value = this.array[this.index]
-        this.array[this.index] = undefined
+        ;(this.array[this.index] as any) = undefined
         if (this.index >= 0) this.index -= 1
         return value
       },
@@ -200,7 +203,7 @@ export const Stack = () =>
     Collection
   )
 
-Stack.from = function from(iterable) {
+Stack.from = function from<X>(iterable: Iterable<X>): IStack {
   const stack = this()
   for (let element of iterable) {
     stack.push(element)
@@ -208,7 +211,7 @@ Stack.from = function from(iterable) {
   return stack
 }
 
-export function Lazy(target) {
+export function Lazy<X>(target: Iterable<X>): ICollection {
   return Object.assign(target, Collection)
 }
 

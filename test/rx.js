@@ -1,5 +1,5 @@
-import { EventEmitter } from '../src/reactivize.js'
-import { Observable } from '../src/rx.js'
+import { EventEmitter } from '../dist/index.js'
+import { Observable } from '../dist/index.js'
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
 import { Readable } from 'stream'

@@ -1,7 +1,7 @@
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
-import * as iterators from '../src/iterators.js'
-import { compose } from '../src/combinators.js'
+import * as iterators from '../dist/index.js'
+import { compose } from '../dist/index.js'
 
 describe('iterators', function () {
   describe('mapWith', function () {

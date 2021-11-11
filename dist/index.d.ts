@@ -81,6 +81,13 @@ export function FunctionalMixin(behaviour: object, sharedBehaviour?: object): Fu
  */
 export function deepFreeze(obj: object): object;
 /**
+ * DeepCopyArray
+ * @param {array} Arr
+ * @param {number} offset
+ * @returns {array} new Array
+ */
+export function deepCopyArray(arr: any, offset?: number): any;
+/**
  * DeepCopy
  * @param {object} obj - Object to deep copy
  * @returns {object} aux - Copy of Object obj
@@ -266,7 +273,7 @@ export const stringify: {
 };
 export const parse: (text: string, reviver?: ((this: any, key: string, value: any) => any) | undefined) => any;
 export const toString: StringConstructor;
-export function toInteger(s: any): any;
+export function toInteger(s: any): number;
 /**
  * PadStart
  * @param {any} x - Base to stringify
@@ -450,121 +457,143 @@ export function thunk({ dispatch, getState }: {
     dispatch: any;
     getState: any;
 }): (next: any) => (action: any) => any;
+export interface Maybe {
+    isJust: boolean;
+    isNothing: boolean;
+    merge(): Maybe;
+    call(content: Maybe, ...args: any): Function;
+    map(mapper: (value: any) => any): Maybe;
+}
 export class Maybe {
-    static of(v: any): Nothing | Just;
-    static fromEmpty(v: any): Nothing | Just;
-    constructor(v: any);
+    #private;
+    [Symbol.toStringTag]: string;
+    constructor(v?: any);
     get(): any;
     getOrElse(defaultValue: any): any;
-    getOrElseThrow(error: any): any;
+    getOrElseThrow(error: Error): any;
     get value(): any;
-    #private;
+    static of(v: any): Maybe;
+    static fromEmpty(v: any): Maybe;
+    [Symbol.toPrimitive](hint: string): any;
+    [Symbol.iterator](): Generator<Nothing | Just | undefined, void, unknown>;
 }
 export class Just extends Maybe {
     get isJust(): boolean;
     get isNothing(): boolean;
     fold(fn?: (x: any) => any): any;
-    filter(fn?: (x: any) => any): Nothing | Just;
-    map(fn: any): Nothing | Just;
-    flatMap(fn: any): Nothing | Just;
-    ap(Ma: any): any;
+    filter(fn?: (x: any) => any): Maybe;
+    map(fn: (x: any) => any): Maybe;
+    flatMap(fn: (x: any) => Maybe): Maybe;
+    ap(Ma: Maybe): Maybe;
     merge(): any;
+    toString(): string;
     toJSON(): {
         type: string;
         value: any;
     };
-    #private;
 }
 export class Nothing extends Maybe {
     get isJust(): boolean;
     get isNothing(): boolean;
-    map(): Nothing;
-    flatMap(): Nothing;
-    ap(): Nothing;
-    fold(): Nothing;
+    map(): this;
+    flatMap(): this;
+    ap(): this;
+    fold(): this;
+    toString(): string;
     toJSON(): {
         type: string;
         value: {};
     };
-    #private;
+}
+export interface Result {
+    map(mapper: (value: any) => any): Result;
+    get(): any;
+    isFailure: boolean;
+    isSuccess: boolean;
+    merge(): any;
 }
 export class Result {
-    static of(v: any, error?: string): any;
-    static fromEmpty(a: any): any;
-    static fromPromise(p: any): any;
-    constructor(v: any);
-    get value(): any;
     #private;
+    constructor(v?: any);
+    get value(): any;
+    static of(v: any, error?: string): Result;
+    static fromEmpty(a: any): Result;
+    static fromPromise<X>(p: Promise<X>): Promise<Failure | Success>;
+    [Symbol.toPrimitive](hint: string): any;
+    [Symbol.iterator](): Generator;
 }
 export class Failure extends Result {
     get isSuccess(): boolean;
     get isFailure(): boolean;
-    map(): Failure;
-    flatMap(): Failure;
-    ap(): Failure;
+    map(): this;
+    flatMap(): this;
+    ap(): this;
     get(): void;
     merge(): void;
     getOrElse(defaultValue: any): any;
     getOrElseThrow(): void;
+    toString(): string;
     toJSON(): {
         type: string;
         value: any;
     };
-    #private;
 }
 export class Success extends Result {
     get isSuccess(): boolean;
     get isFailure(): boolean;
-    map(fn: any): any;
-    flatMap(fn: any): any;
-    ap(Rs: any): any;
+    map(fn: (value: any) => any): Result;
+    flatMap(fn: (value: any) => Result): Result;
+    ap(Rs: Result): Result;
     get(): any;
     getOrElse(): any;
     getOrElseThrow(): any;
     merge(): any;
+    toString(): string;
     toJSON(): {
         type: string;
         value: any;
     };
-    #private;
 }
 export class Try {
-    static of(fn: any, msg: any): Try;
-    constructor(fn: any, msg: any);
+    constructor(fn: () => any, msg: string);
+    static of(fn: () => any, msg: string): Try;
 }
 export class TryAsync {
-    static of(fn: any, msg: any): Promise<Failure | Success>;
+    constructor();
+    static of(fn: <X>() => Promise<X>, msg: string): Promise<Failure | Success>;
 }
 export class IO {
-    static of(x: any): IO;
-    constructor(fn: any);
-    unsafePerformIO: any;
-    map(fn: any): IO;
-    flatMap(fn: any): IO;
+    unsafePerformIO: Function;
+    [Symbol.toStringTag]: string;
+    constructor(fn: Function);
+    map(fn: (value: Function) => Function): IO;
+    flatMap(fn: (value: Function) => Function): IO;
     ap(f: any): IO;
     merge(): IO;
     toString(): string;
     toJSON(): {
         type: string;
-        value: any;
+        value: Function;
     };
+    static of(x: any): IO;
 }
 export class IOAsync {
-    static of(fn: any): IOAsync;
-    constructor(fn: any);
-    unsafePerformIO: any;
-    map(fn: any): Promise<IO>;
-    flatMap(fn: any): Promise<any>;
+    unsafePerformIO: Function;
+    [Symbol.toStringTag]: string;
+    constructor(fn: Function);
+    map(fn: (value: Function) => Function): Promise<IO>;
+    flatMap(fn: (value: Function) => Function): Promise<any>;
     merge(): Promise<IOAsync>;
     toString(): string;
     toJSON(): {
         type: string;
-        value: any;
+        value: Function;
     };
+    static of<X>(fn: Promise<X>): IOAsync;
 }
 export class Pair {
-    static of(left: any, right: any): Pair;
-    static eq(pairA: any, pairB: any): boolean;
+    #private;
+    [Symbol.toStringTag]: string;
     constructor(left: any, right: any);
     get left(): any;
     get right(): any;
@@ -572,8 +601,8 @@ export class Pair {
         left: any;
         right: any;
     };
-    map(fn: any): Pair;
-    flatMap(fn: any): Pair;
+    map(fn: (value: any) => any): Pair;
+    flatMap(fn: (left: any, right: any) => [left: any, right: any]): Pair;
     toString(): string;
     toJSON(): {
         type: string;
@@ -582,11 +611,13 @@ export class Pair {
             right: any;
         };
     };
-    #private;
+    [Symbol.iterator](): Generator<any, void, unknown>;
+    static of(left: any, right: any): Pair;
+    static eq(pairA: Pair, pairB: Pair): boolean;
 }
 export class Triple {
-    static of(left: any, middle: any, right: any): Triple;
-    static eq(tripleA: any, tripleB: any): boolean;
+    #private;
+    [Symbol.toStringTag]: string;
     constructor(left: any, middle: any, right: any);
     get left(): any;
     get middle(): any;
@@ -596,8 +627,8 @@ export class Triple {
         middle: any;
         right: any;
     };
-    map(fn: any): Triple;
-    flatMap(fn: any): Triple;
+    map(fn: (value: any) => any): Triple;
+    flatMap(fn: (left: any, middle: any, right: any) => [left: any, middle: any, right: any]): Triple;
     toString(): string;
     toJSON(): {
         type: string;
@@ -607,18 +638,22 @@ export class Triple {
             right: any;
         };
     };
-    #private;
+    [Symbol.iterator](): Generator<any, void, unknown>;
+    static of(left: any, middle: any, right: any): Triple;
+    static eq(tripleA: Triple, tripleB: Triple): boolean;
 }
 export class Enum {
-    static of(...types: any[]): Enum;
-    constructor(types: any);
-    has(type: any): any;
+    #private;
+    [Symbol.toStringTag]: string;
+    constructor(types: string[]);
+    has(type: string): boolean;
     toString(): string;
     toJSON(): {
         type: string;
-        value: any[];
+        value: unknown[];
     };
-    #private;
+    [Symbol.iterator](): () => IterableIterator<unknown>;
+    static of(...types: string[]): Enum;
 }
 export function createClient(apiEndpoint: any, options?: {
     storageKey: string;
@@ -641,33 +676,6 @@ export function createClient(apiEndpoint: any, options?: {
         abort: () => void;
     };
 };
-/**
- * Rest
- * @param {iterable} iterable
- * @returns {function} Generator iterator function skipping the first element
- */
-export function rest(iterable: any): Function;
-/**
- * Zip
- * @param {iterable} iterables
- * @returns {function} Generator iterator function that yields an array of
- * the combined values of each iterator of iterables
- */
-export function zip(...iterables: any): Function;
-/**
- * ZipWith
- * @param {function} zipper - Function to apply to values
- * @param {iterable} iterables - Iterables to zip
- * @returns {function} Generator iterator function that yields the result
- * of applying zipper function to elements of iterables
- */
-export function zipWith(zipper: Function, ...iterables: any): Function;
-/**
- * MemoizeIter
- * @param {function} generator - Iterator function
- * @returns {function} Memoized generator function
- */
-export function memoizeIter(generator: Function): Function;
 /**
  * MapWith
  * @param {function} fn - Mapper function
@@ -706,7 +714,18 @@ export const compact: Function;
  * the result of fn(element) is true
  */
 export const untilWith: Function;
-export function first(iterable: any): any;
+/**
+ * First
+ * @param {iterable} iterable
+ * @returns {any} First element of iterable
+ */
+export const first: <X>(iterable: Iterable<X>) => any;
+/**
+ * Rest
+ * @param {iterable} iterable
+ * @returns {function} Generator iterator function skipping the first element
+ */
+export function rest<X>(iterable: Iterable<X>): Iterable<X>;
 /**
  * Take
  * @param {number} numberToTake
@@ -724,6 +743,21 @@ export const take: Function;
  */
 export const drop: Function;
 /**
+ * Zip
+ * @param {iterable} iterables
+ * @returns {function} Generator iterator function that yields an array of
+ * the combined values of each iterator of iterables
+ */
+export function zip<X>(...iterables: Iterable<X>[]): Iterable<X>;
+/**
+ * ZipWith
+ * @param {function} zipper - Function to apply to values
+ * @param {iterable} iterables - Iterables to zip
+ * @returns {function} Generator iterator function that yields the result
+ * of applying zipper function to elements of iterables
+ */
+export function zipWith<X>(zipper: (...elements: any) => any, ...iterables: Iterable<X>[]): Iterable<X>;
+/**
  * ReduceWith
  * @param {function} fn - Reducer function
  * @param {any} seed - Initial value
@@ -731,6 +765,12 @@ export const drop: Function;
  * @returns {any} Result of reducing iterable with reducer
  */
 export const reduceWith: Function;
+/**
+ * MemoizeIter
+ * @param {function} generator - Iterator function
+ * @returns {function} Memoized generator function
+ */
+export function memoizeIter(generator: (...args: any) => Generator): (...args: any) => Generator;
 export function Define(behaviour: any): (clazz: any) => void;
 export function Override(behaviour: any): (clazz: any) => any;
 export function Prepend(behaviour: any): (clazz: any) => any;
@@ -746,27 +786,71 @@ export function beforeAll(behaviour: any, ...methodNames: any[]): (clazz: any) =
 export function afterAll(behaviour: any, ...methodNames: any[]): (clazz: any) => any;
 export function SubclassFactory(behaviour: any): (superclass: any) => any;
 export function FactoryFactory(c: any): (...args: any[]) => any;
-export function Lazy(target: any): any;
+interface ICollection {
+    map: (mapper: (element: any) => any) => ICollection;
+    reduce: (reducer: (accumulator: any, element: any) => any, seed: any) => any;
+    filter: (predicate: (element: any) => boolean) => ICollection;
+    find: (searcher: (element: any) => boolean) => ICollection;
+    until: (searcher: (element: any) => boolean) => ICollection;
+    first: () => any;
+    rest: () => ICollection;
+    take: (numberToTake: number) => ICollection;
+    drop: (numberToDrop: number) => ICollection;
+}
+export const Collection: ICollection;
+export const Numbers: {
+    [Symbol.iterator](): Generator<number, never, unknown>;
+} & ICollection;
+interface IStack extends ICollection {
+    array: any[];
+    index: number;
+    push: (value: any) => any;
+    pop: () => any;
+    isEmpty: () => boolean;
+}
+export const Stack: {
+    (): IStack;
+    from<X>(iterable: Iterable<X>): IStack;
+};
+export function Lazy<X>(target: Iterable<X>): ICollection;
 export { EventEmitter };
 export function reactivize(obj: any): any;
+declare const handlersKey: unique symbol;
+declare const dispatchKey: unique symbol;
+declare const isMethodObject: unique symbol;
+interface IHandler {
+    key: any;
+    handler: (...args: any) => any;
+    [isMethodObject]: boolean;
+}
+type MultiMethod = {
+    [dispatchKey]: (...args: any) => any;
+    [handlersKey]: IHandler[];
+    map: (...args: any) => any;
+};
 /**
  * Method, create a method inside a call to multi()
- * @param {function} {any} key / function key
- * @param {function} {any} handler / value to return)
- * @returns {array} [key, handler]
+ * Param key / function key
+ * Param handler / value to return)
+ * Returns Handler
  */
-export function method(key: any, handler: any): any;
+export function method(key: any, handler: (...args: any) => any | undefined): IHandler;
 /**
  * multi, create a multimethod function
- * @param {function} dispatch - Optional custom dispatch function
- * @param {function} initialMethods - Method functions (args, handler)
- * @returns {function} dispatch function
+ * Takes a dispatch - Optional custom dispatch function
+ * And initialMethods - Method functions (args, handler)
+ * Returns dispatch function
  */
-export function multi(...initialMethods: Function): Function;
-export class ValidationError {
-    constructor(message: any, errors: any);
-    errors: any;
-    get messages(): any;
+export function multi(...initialMethods: any[]): MultiMethod;
+interface IValidationError {
+    message: string;
+}
+export interface ValidationError extends Error {
+    errors: IValidationError[];
+}
+export class ValidationError extends Error {
+    constructor(message: string, errors: IValidationError[]);
+    get messages(): string[];
 }
 /**
  * WithValidation

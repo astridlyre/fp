@@ -1,7 +1,7 @@
-import { applyMiddleware } from './store/applyMiddleware.js'
-import { createStore } from './store/createStore.js'
-import { thunk } from './store/thunk.js'
-import * as rx from './rx.js'
+import { applyMiddleware } from './store/applyMiddleware'
+import { createStore } from './store/createStore'
+import { thunk } from './store/thunk'
+import * as rx from './rx'
 
 export {
   accumulate,
@@ -28,6 +28,7 @@ export {
   deepFreeze,
   deepJoin,
   deepMap,
+  deepCopyArray,
   deepPick,
   deepProp,
   deepSetProp,
@@ -131,7 +132,7 @@ export {
   unique,
   values,
   zipMap,
-} from './combinators.js'
+} from './combinators'
 export {
   Enum,
   Failure,
@@ -146,8 +147,8 @@ export {
   Triple,
   Try,
   TryAsync,
-} from './maybe.js'
-export { createClient } from './fetch.js'
+} from './maybe'
+export { createClient } from './fetch'
 export {
   compact,
   drop,
@@ -162,7 +163,7 @@ export {
   untilWith,
   zip,
   zipWith,
-} from './iterators.js'
+} from './iterators'
 export {
   after,
   afterAll,
@@ -179,14 +180,14 @@ export {
   SubclassFactory,
   unless,
   wrapWith,
-} from './classes.js'
+} from './classes'
 
-export { Lazy, Collection, Numbers, Stack } from './lazy.js'
-export { Observable } from './rx.js'
+export { Lazy, Collection, Numbers, Stack } from './lazy'
+export { Observable } from './rx'
 export { rx }
-export { EventEmitter, reactivize } from './reactivize.js'
-export { multi, method } from './multimethod.js'
-export { withValidation, ValidationError } from './hofs.js'
+export { EventEmitter, reactivize } from './reactivize'
+export { multi, method } from './multimethod'
+export { withValidation, ValidationError } from './hofs'
 export {
   createFilterStream,
   createFork,
@@ -195,14 +196,14 @@ export {
   createReduceStream,
   LimitedParallelStream,
   ParallelStream,
-} from './node-streams.js'
-export { actionListener } from './store/actionListener.js'
-export { createAsyncThunk } from './store/asyncThunk.js'
-export { bindActionCreators } from './store/bindActionCreators.js'
-export { combineReducers } from './store/combineReducers.js'
-export { createAction } from './store/createAction.js'
-export { createSelector } from './store/createSelector.js'
-export { isPlainObject } from './store/isPlainObject.js'
-export { Reducer } from './store/reducer.js'
+} from './node-streams'
+export { actionListener } from './store/actionListener'
+export { createAsyncThunk } from './store/asyncThunk'
+export { bindActionCreators } from './store/bindActionCreators'
+export { combineReducers } from './store/combineReducers'
+export { createAction } from './store/createAction'
+export { createSelector } from './store/createSelector'
+export { isPlainObject } from './store/isPlainObject'
+export { Reducer } from './store/reducer'
 export { thunk, createStore, applyMiddleware }
 export const createConfiguredStore = applyMiddleware(thunk)(createStore)
