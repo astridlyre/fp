@@ -5,20 +5,12 @@ import { isFunction } from '../combinators.js'
  * be injected later.
  */
 function createThunkMiddleware(extraArgument) {
-  const middleware =
-    ({ dispatch, getState }) =>
-    next =>
-    action => {
-      //If a function was passed to store.dispatch, call it and return the
-      // result
-      if (isFunction(action)) {
-        return action(dispatch, getState, extraArgument)
-      }
-      //Otherwise, pass the action down the middleware chain
-      return next(action)
-    }
+  function middleware({ dispatch, getState }) {
+    return next => action =>
+      isFunction(action) ? action(dispatch, getState, extraArgument) : next(action)
+  }
+  middleware.withExtraArgument = createThunkMiddleware
   return middleware
 }
 
 export const thunk = createThunkMiddleware()
-thunk.withExtraArgument = createThunkMiddleware

@@ -74,10 +74,10 @@ export function Prepend(behaviour) {
       if (clazz.prototype[prop]) {
         const overriddenMethodFunction = clazz.prototype[prop]
         Object.defineProperty(clazz.prototype, prop, {
-          value(...args) {
-            const prependValue = behaviour[prop].apply(this, args)
+          value(/*...args*/) {
+            const prependValue = behaviour[prop].apply(this, arguments)
             if (prependValue === undefined || !!prependValue) {
-              return overriddenMethodFunction.apply(this, args)
+              return overriddenMethodFunction.apply(this, arguments)
             }
           },
           writable: true,
@@ -96,9 +96,9 @@ export function Append(behaviour) {
       if (clazz.prototype[prop]) {
         const overriddenMethodFunction = clazz.prototype[prop]
         Object.defineProperty(clazz.prototype, prop, {
-          value(...args) {
-            const returnedValue = overriddenMethodFunction.apply(this, args)
-            behaviour[prop].apply(this, args)
+          value(/*..args*/) {
+            const returnedValue = overriddenMethodFunction.apply(this, arguments)
+            behaviour[prop].apply(this, arguments)
             return returnedValue
           },
           writable: true,
@@ -115,10 +115,10 @@ export const after = (...fns) =>
   function after(target, name, descriptor) {
     const method = descriptor.value
 
-    descriptor.value = function withAfter(...args) {
-      const value = method.apply(this, args)
+    descriptor.value = function withAfter(/*...args*/) {
+      const value = method.apply(this, arguments)
       for (const fn of fns) {
-        fn.apply(this, args)
+        fn.apply(this, arguments)
       }
       return value
     }
@@ -129,11 +129,11 @@ export const before = (...fns) =>
   function before(target, name, descriptor) {
     const method = descriptor.value
 
-    descriptor.value = function withBefore(...args) {
+    descriptor.value = function withBefore(/*...args*/) {
       for (const fn of fns) {
-        fn.apply(this, args)
+        fn.apply(this, arguments)
       }
-      return method.apply(this, args)
+      return method.apply(this, arguments)
     }
   }
 
@@ -142,9 +142,9 @@ export const provided = (...fns) =>
   function provided(target, name, descriptor) {
     const method = descriptor.value
 
-    descriptor.value = function withProvided(...args) {
-      for (const fn of fns) if (!fn.apply(this, args)) return
-      return method.apply(this, args)
+    descriptor.value = function withProvided(/*...args*/) {
+      for (const fn of fns) if (!fn.apply(this, arguments)) return
+      return method.apply(this, arguments)
     }
   }
 
@@ -153,9 +153,9 @@ export const unless = (...fns) =>
   function unless(target, name, descriptor) {
     const method = descriptor.value
 
-    descriptor.value = function withUnless(...args) {
-      for (const fn of fns) if (fn.apply(this, args)) return
-      return method.apply(this, args)
+    descriptor.value = function withUnless(/*...args*/) {
+      for (const fn of fns) if (fn.apply(this, arguments)) return
+      return method.apply(this, arguments)
     }
   }
 
@@ -184,9 +184,9 @@ export const beforeAll =
     for (const methodName of methodNames) {
       const method = clazz.prototype[methodName]
       Object.defineProperty(clazz.prototype, methodName, {
-        value(...args) {
-          behaviour.apply(this, args)
-          return method.apply(this, args)
+        value(/*...args*/) {
+          behaviour.apply(this, arguments)
+          return method.apply(this, arguments)
         },
         writable: true,
       })
@@ -200,9 +200,9 @@ export const afterAll =
     for (const methodName of methodNames) {
       const method = clazz.prototype[methodName]
       Object.defineProperty(clazz.prototype, methodName, {
-        value(...args) {
-          const returnedValue = method.apply(this, args)
-          behaviour.apply(this, args)
+        value(/*...args*/) {
+          const returnedValue = method.apply(this, arguments)
+          behaviour.apply(this, arguments)
           return returnedValue
         },
         writable: true,

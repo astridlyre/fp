@@ -139,7 +139,7 @@ export function makeObservable(object) {
   function dispatchChanged(target, prop) {
     for (let i = 0; i < subs.length; i++) {
       const { props, observer } = subs[i]
-      if (!props || !props.length || props.includes(prop)) {
+      if (!props?.length || props.includes(prop)) {
         observer.next(target)
       }
     }

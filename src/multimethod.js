@@ -4,24 +4,21 @@ class NoHandlerError {
   constructor(message) {
     Error.call(this, message)
     Error.captureStackTrace(this)
-    this.args = args
   }
 }
 
 // Helper functions
 const handlersKey = Symbol('handlers key')
 const dispatchKey = Symbol('dispatch key')
-const DEFAULT_DISPATCH = 'MULTI:DEFAULT_DISPATCH'
+const isMethodObject = Symbol('is method object')
+const DEFAULT_METHOD = 'MULTI:DEFAULT_METHOD'
 
 const defaultDispatch = function defaultDispatch() {
   return arguments.length === 1 ? arguments[0] : Array.from(arguments)
 }
 
-const extractDispatchAndMethods = methods =>
-  isFunction(methods[0]) ? [methods[0], methods.slice(1)] : [defaultDispatch, methods]
-
 const initialHandler = handlers =>
-  last(handlers).key === DEFAULT_DISPATCH ? last(handlers).handler : null
+  last(handlers).key === DEFAULT_METHOD ? last(handlers).handler : null
 
 /**
  * Method, create a method inside a call to multi()
@@ -31,9 +28,9 @@ const initialHandler = handlers =>
  */
 export function method(key, handler) {
   if (handler === undefined) {
-    return { key: DEFAULT_DISPATCH, handler: key }
+    return { key: DEFAULT_METHOD, handler: key, [isMethodObject]: true }
   }
-  return { key, handler }
+  return { key, handler, [isMethodObject]: true }
 }
 
 /**
@@ -68,18 +65,26 @@ export function multi(...initialMethods) {
     throw new NoHandlerError(`No handlers for args (${JSON.stringify(arguments)})`)
   }
 
-  const [dispatch, methods] = extractDispatchAndMethods(initialMethods)
+  const dispatchers = []
+  const methods = []
+  let defaultMethod = null
 
-  multiMethod[dispatchKey] = dispatch
-  multiMethod[handlersKey] = methods
+  for (let i = 0; i < initialMethods.length; i++) {
+    const method = initialMethods[i]
 
-  for (const pair of methods) {
-    if (pair.key === DEFAULT_DISPATCH) {
-      multiMethod[handlersKey].push(pair)
+    if (isFunction(method)) {
+      dispatchers.push(method)
+    } else if (method.key === DEFAULT_METHOD) {
+      defaultMethod = method
     } else {
-      multiMethod[handlersKey] = [pair].concat(multiMethod[handlersKey])
+      methods.push(method)
     }
   }
+
+  const dispatch = last(dispatchers) ?? defaultDispatch
+
+  multiMethod[dispatchKey] = dispatch
+  multiMethod[handlersKey] = defaultMethod ? methods.concat(defaultMethod) : methods
 
   multiMethod.map = function map(fn) {
     return multi(
