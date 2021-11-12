@@ -16,6 +16,11 @@ interface ICollection {
   drop: (numberToDrop: number) => ICollection
 }
 
+/**
+ * Lazy Collection is a Collection data-type that is essentially just mapping
+ * Symbol.iterator. It can be mixed in to any existing iterable object, such as
+ * an Array.
+ */
 export const Collection: ICollection = {
   map(this: ICollection, fn: (element: any) => any): ICollection {
     return Object.assign(
@@ -59,7 +64,7 @@ export const Collection: ICollection = {
             next: () => {
               let done, value
               do {
-                ({ done, value } = iterator.next())
+                ;({ done, value } = iterator.next())
               } while (!done && !predicate(value))
               return { done, value }
             },
@@ -79,7 +84,7 @@ export const Collection: ICollection = {
             next: () => {
               let done, value
               do {
-                ({ done, value } = iterator.next())
+                ;({ done, value } = iterator.next())
               } while (!done && !searcher(value))
               return { done, value }
             },
@@ -178,6 +183,11 @@ interface IStack extends ICollection {
   isEmpty: () => boolean
 }
 
+/**
+ * Lazy Stack is a Stack data-type that is essentially just mapping
+ * Symbol.iterator. It features the most common stack methods, such as
+ * push() and pop()
+ */
 export const Stack = (): IStack =>
   Object.assign(
     {
@@ -217,6 +227,11 @@ Stack.from = function from<X>(iterable: Iterable<X>): IStack {
   return stack
 }
 
+/**
+ * Lazy Collection is a Collection data-type that is essentially just mapping
+ * Symbol.iterator. It can be mixed in to any existing iterable object, such as
+ * an Array.
+ */
 export function Lazy<X>(target: Iterable<X>): ICollection {
   return Object.assign(target, Collection)
 }

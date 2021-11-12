@@ -2758,7 +2758,7 @@ function $d76f3352348d1758$export$13e2537ceeaf8a3a(...initialMethods) {
                 break;
             }
         }
-        if (method) return $77d07aef6f69d2ce$export$f6e2535fb5126e54(method) ? method.apply(null, arguments) : method;
+        if (method) return typeof method === 'function' ? method.apply(null, arguments) : method;
         throw new $d76f3352348d1758$var$NoHandlerError(`No handlers for args (${JSON.stringify(arguments)})`);
     }
     const dispatchers = [];
@@ -2766,7 +2766,7 @@ function $d76f3352348d1758$export$13e2537ceeaf8a3a(...initialMethods) {
     let defaultMethod = null;
     for(let i1 = 0; i1 < initialMethods.length; i1++){
         const method = initialMethods[i1];
-        if ($77d07aef6f69d2ce$export$f6e2535fb5126e54(method)) dispatchers.push(method);
+        if (typeof method === 'function') dispatchers.push(method);
         else if (method.key === $d76f3352348d1758$var$DEFAULT_METHOD) defaultMethod = method;
         else methods.push(method);
     }

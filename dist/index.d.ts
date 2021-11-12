@@ -1039,29 +1039,30 @@ declare const dispatchKey: unique symbol;
 declare const isMethodObject: unique symbol;
 interface IHandler {
     key: any;
-    handler: (...args: any) => any;
+    handler: ((...args: any) => any) | any;
     [isMethodObject]: boolean;
 }
 interface MultiMethod extends Function {
-    [dispatchKey]: (...args: any) => any;
+    [dispatchKey]: dispatchFunction;
     [handlersKey]: IHandler[];
     map: (...args: any) => any;
 }
+type dispatchFunction = (...args: any[]) => any;
 /**
  * Method, create a method inside a call to multi()
  * Param key / function key
  * Param handler / value to return)
  * Returns Handler
  */
-export function method(handler: (...args: any) => any | undefined): IHandler;
-export function method(key: any, handler: (...args: any) => any | undefined): IHandler;
+export function method(handler: (...args: any) => any): IHandler;
+export function method(key: any, handler: (...args: any) => any): IHandler;
 /**
  * multi, create a multimethod function
  * Takes a dispatch - Optional custom dispatch function
  * And initialMethods - Method functions (args, handler)
  * Returns dispatch function
  */
-export function multi(...initialMethods: any[]): MultiMethod;
+export function multi(...initialMethods: IHandler[]): MultiMethod;
 export function createFilterStream(fn: (value: any) => boolean): any;
 export function createMapStream(fn: (value: any) => any): any;
 export function createReduceStream(reducer: (accumulator: any, value: any) => any, initialValue: any): any;

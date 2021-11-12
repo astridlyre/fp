@@ -8,7 +8,8 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "skipLibCheck": true,
-    "module": "nodenext",
+    "strictNullChecks": true,
+    "module": "esnext",
     "moduleResolution": "node"
   }
 }

@@ -1,7 +1,7 @@
 /* eslint no-unused-vars: 0 */
 import { nanoid } from '../store/nanoid'
 
-enum HTTPMethod {
+const enum HTTPMethod {
   GET = 'GET',
   POST = 'POST',
   PUT = 'PUT',

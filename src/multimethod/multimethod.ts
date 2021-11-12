@@ -17,17 +17,19 @@ class NoHandlerError extends Error {
 
 export interface IHandler {
   key: any
-  handler: (...args: any) => any
+  handler: ((...args: any) => any) | any
   [isMethodObject]: boolean
 }
 
 export interface MultiMethod extends Function {
-  [dispatchKey]: (...args: any) => any
+  [dispatchKey]: dispatchFunction
   [handlersKey]: IHandler[]
   map: (...args: any) => any
 }
 
-const defaultDispatch = function defaultDispatch() {
+type dispatchFunction = (...args: any[]) => any
+
+const defaultDispatch: dispatchFunction = function defaultDispatch() {
   return arguments.length === 1 ? arguments[0] : Array.from(arguments)
 }
 
@@ -40,9 +42,9 @@ const initialHandler = (handlers: IHandler[]) =>
  * Param handler / value to return)
  * Returns Handler
  */
-export function method(handler: (...args: any) => any | undefined): IHandler
-export function method(key: any, handler: (...args: any) => any | undefined): IHandler
-export function method(key: any, handler?: (...args: any) => any | undefined): IHandler {
+export function method(handler: (...args: any) => any): IHandler
+export function method(key: any, handler: (...args: any) => any): IHandler
+export function method(key: any, handler?: (...args: any) => any): IHandler {
   if (handler === undefined) {
     return { key: DEFAULT_METHOD, handler: key, [isMethodObject]: true } as IHandler
   }
@@ -55,11 +57,11 @@ export function method(key: any, handler?: (...args: any) => any | undefined): I
  * And initialMethods - Method functions (args, handler)
  * Returns dispatch function
  */
-export function multi(...initialMethods: any[]): MultiMethod {
+export function multi(...initialMethods: IHandler[]): MultiMethod {
   // multiMethod function takes variable arguments and returns the result of
   // calling any handler that can handle the arguments
   function multiMethod() {
-    let method: (...args: any) => any = initialHandler(multiMethod[handlersKey])
+    let method: (...args: any[]) => any = initialHandler(multiMethod[handlersKey])
 
     for (let i = 0; i < multiMethod[handlersKey].length; i++) {
       const { key, handler } = multiMethod[handlersKey][i]
@@ -75,7 +77,7 @@ export function multi(...initialMethods: any[]): MultiMethod {
     }
 
     if (method) {
-      return isFunction(method) ? method.apply(null, arguments as any) : method
+      return typeof method === 'function' ? method.apply(null, arguments as any) : method
     }
 
     throw new NoHandlerError(`No handlers for args (${JSON.stringify(arguments)})`)
@@ -83,13 +85,14 @@ export function multi(...initialMethods: any[]): MultiMethod {
 
   const dispatchers = []
   const methods = []
+
   let defaultMethod = null
 
   for (let i = 0; i < initialMethods.length; i++) {
     const method = initialMethods[i]
 
-    if (isFunction(method)) {
-      dispatchers.push(method)
+    if (typeof method === 'function') {
+      dispatchers.push(method as dispatchFunction)
     } else if (method.key === DEFAULT_METHOD) {
       defaultMethod = method
     } else {
@@ -97,20 +100,20 @@ export function multi(...initialMethods: any[]): MultiMethod {
     }
   }
 
-  const dispatch: (...args: any) => any = last(dispatchers) ?? defaultDispatch
+  const dispatch: dispatchFunction = last(dispatchers) ?? defaultDispatch
 
   multiMethod[dispatchKey] = dispatch
   multiMethod[handlersKey] = defaultMethod ? methods.concat(defaultMethod) : methods
 
   multiMethod.map = function map(fn: (...args: any) => any) {
     return multi(
-      multiMethod[dispatchKey],
+      multiMethod[dispatchKey] as any,
       ...multiMethod[handlersKey].map(
         ({ key, handler }) =>
           ({
             key,
             handler: function mappedHandler() {
-              return fn(handler.apply(null, arguments))
+              return fn(handler.apply(null, arguments as any))
             },
           } as IHandler)
       )
@@ -121,5 +124,8 @@ export function multi(...initialMethods: any[]): MultiMethod {
 }
 
 multi.extend = function extend(multiMethod: MultiMethod, ...methods: any[]) {
-  return multi(multiMethod[dispatchKey], ...methods.concat(multiMethod[handlersKey]))
+  return multi(
+    multiMethod[dispatchKey] as any,
+    ...methods.concat(multiMethod[handlersKey])
+  )
 }
