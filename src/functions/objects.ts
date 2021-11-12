@@ -4,21 +4,21 @@ import { isFunction, isObject, isMap, isArray, isSet } from './predicates'
  * Prop, access a property in an object
  */
 export const prop = curry(
-  (name: string, a: any) =>
+  (name: PropertyKey, a: any) =>
     a && (name in a ? (isFunction(a[name]) ? a[name].call(a) : a[name]) : void 0)
 )
 
 /**
  * SetPropM, sets a property in an object **MUTATES**
  */
-export const setPropM = curry((name: string, value: any, a: any): object =>
+export const setPropM = curry((name: PropertyKey, value: any, a: any): object =>
   isObject(a) ? ((a[name] = value), a) : a
 )
 
 /**
  * SetProp, returns a copy of an object with new property name set to value
  */
-export const setProp = curry((name: string, value: any, a: object): object =>
+export const setProp = curry((name: PropertyKey, value: any, a: object): object =>
   a && name in a ? { ...a, [name]: value } : { ...a }
 )
 
@@ -26,7 +26,7 @@ export const setProp = curry((name: string, value: any, a: object): object =>
  * Set, set key in object a to value
  */
 export const set = curry(
-  (key: any, value: any, a: any): object | Map<any, any> => (
+  (key: PropertyKey, value: any, a: any): object | Map<any, any> => (
     isMap(a) ? a.set(key, value) : (a[key] = value), a
   )
 )
@@ -34,16 +34,16 @@ export const set = curry(
 /**
  * Props, gets an array of property names from an object, shallow
  */
-export const props = curry((names: string[], a: object) =>
-  names.map((n: string) => prop(n, a))
+export const props = curry((names: PropertyKey[], a: object) =>
+  names.map(n => prop(n, a))
 )
 
 /**
  * Pick, returns an object with only the selected property names, shallow
  */
-export const pick = curry((names: string[], a: any) =>
+export const pick = curry((names: PropertyKey[], a: any) =>
   names.reduce(
-    (result: any, key: string) => (key in a ? ((result[key] = a[key]), result) : result),
+    (result: any, key) => (key in a ? ((result[key] = a[key]), result) : result),
     {}
   )
 )
@@ -51,7 +51,7 @@ export const pick = curry((names: string[], a: any) =>
 /**
  * DeepProp, get a property from any object, deep
  */
-export const deepProp = curry((path: string | string[], a: object) => {
+export const deepProp = curry((path: string | PropertyKey[], a: object) => {
   if (!Array.isArray(path)) path = path.split('.')
   const [p, ...rest] = path
   return !rest.length ? prop(p, a) : deepProp(rest, prop(p, a))
@@ -60,36 +60,38 @@ export const deepProp = curry((path: string | string[], a: object) => {
 /**
  * DeepSetProp, set a property in an object, returns a copy, deep
  */
-export const deepSetProp = curry((path: string | string[], value: any, a: object) => {
-  if (!Array.isArray(path)) path = path.split('.')
+export const deepSetProp = curry(
+  (path: string | PropertyKey[], value: any, a: object) => {
+    if (!Array.isArray(path)) path = path.split('.')
 
-  function innerDeepSetProp(path: string[], value: any, obj: any): object {
-    if (path.length === 1) {
-      obj[path[0]] = value
-      return obj
-    }
+    function innerDeepSetProp(path: PropertyKey[], value: any, obj: any): object {
+      if (path.length === 1) {
+        obj[path[0]] = value
+        return obj
+      }
 
-    if (path[0] in obj && isObject(obj[path[0]])) {
-      const newObj = obj[path[0]]
+      if (path[0] in obj && isObject(obj[path[0]])) {
+        const newObj = obj[path[0]]
+        return innerDeepSetProp(path.slice(1), value, newObj)
+      }
+
+      const newObj = {}
+
+      obj[path[0]] = newObj
+
       return innerDeepSetProp(path.slice(1), value, newObj)
     }
 
-    const newObj = {}
+    const aux = deepCopy(a)
 
-    obj[path[0]] = newObj
-
-    return innerDeepSetProp(path.slice(1), value, newObj)
+    return innerDeepSetProp(path, value, aux), aux
   }
-
-  const aux = deepCopy(a)
-
-  return innerDeepSetProp(path, value, aux), aux
-})
+)
 
 /**
  * DeepPick, returns an object with only deep properties paths
  */
-export const deepPick = curry((paths: string[], a: object) =>
+export const deepPick = curry((paths: PropertyKey[], a: object) =>
   paths.reduce((result, path) => deepSetProp(path, deepProp(path)(a), result), {})
 )
 
