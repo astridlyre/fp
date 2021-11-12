@@ -14,13 +14,13 @@ class NoHandlerError extends Error {
   }
 }
 
-interface IHandler {
+export interface IHandler {
   key: any
   handler: (...args: any) => any
   [isMethodObject]: boolean
 }
 
-type MultiMethod = {
+export interface MultiMethod {
   [dispatchKey]: (...args: any) => any
   [handlersKey]: IHandler[]
   map: (...args: any) => any
@@ -39,7 +39,9 @@ const initialHandler = (handlers: IHandler[]) =>
  * Param handler / value to return)
  * Returns Handler
  */
-export function method(key: any, handler: (...args: any) => any | undefined): IHandler {
+export function method(handler: (...args: any) => any | undefined): IHandler
+export function method(key: any, handler: (...args: any) => any | undefined): IHandler
+export function method(key: any, handler?: (...args: any) => any | undefined): IHandler {
   if (handler === undefined) {
     return { key: DEFAULT_METHOD, handler: key, [isMethodObject]: true } as IHandler
   }

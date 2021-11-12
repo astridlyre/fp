@@ -7,6 +7,8 @@
     "strict": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "module": "nodenext",
+    "moduleResolution": "node"
   }
 }

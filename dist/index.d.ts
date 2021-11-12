@@ -1,93 +1,5 @@
-export const Observable: any;
-/**
- * Prop, access a property in an object
- */
-export const prop: (this: any, ...args: any[]) => any;
-/**
- * SetPropM, sets a property in an object **MUTATES**
- */
-export const setPropM: (this: any, ...args: any[]) => any;
-/**
- * SetProp, returns a copy of an object with new property name set to value
- */
-export const setProp: (this: any, ...args: any[]) => any;
-/**
- * Set, set key in object a to value
- */
-export const set: (this: any, ...args: any[]) => any;
-/**
- * Props, gets an array of property names from an object, shallow
- */
-export const props: (this: any, ...args: any[]) => any;
-/**
- * Pick, returns an object with only the selected property names, shallow
- */
-export const pick: (this: any, ...args: any[]) => any;
-/**
- * DeepProp, get a property from any object, deep
- */
-export const deepProp: (this: any, ...args: any[]) => any;
-/**
- * DeepSetProp, set a property in an object, returns a copy, deep
- */
-export const deepSetProp: (this: any, ...args: any[]) => any;
-/**
- * DeepPick, returns an object with only deep properties paths
- */
-export const deepPick: (this: any, ...args: any[]) => any;
-/**
- * Diff, get the naive difference between a and b
- * Only diffs simple objects, arrays and primitives. Maybe I'll extend it to
- * support Maps and Sets later.
- */
-export function diff(a: any, b: any): any;
-/**
- * Aggregate, deep merge a and b
- */
-export function aggregate(a: any, b: any): any;
-/**
- * AggregateOn, combine many objects into one with aggregated keys
- * TODO: Try to improve the algorithm
- */
-export function aggregateOn(keyMap: any, ...objects: any[]): any;
-/**
- * Merge, combine all keys
- */
-export function merge(a: any, b: any): any;
-/**
- * Entries, eagerly get entries of an object or iterable
- */
-export function entries(iterable: any[]): [number, any][] | [string, any][];
-/**
- * Values, eagerly get values of an object or iterable
- */
-export function values(iterable: any[]): any[];
-/**
- * Keys, eagerly get keys of an object or iterable
- */
-export function keys(iterable: any[]): string[] | number[];
-/**
- * Rename object's keys using a keymap
- */
-export const rename: (this: any, ...args: any[]) => any;
-/**
- * DeepFreeze
- */
-export function deepFreeze(obj: any): any;
-/**
- * DeepCopyArray
- */
-export function deepCopyArray(arr: any[], offset?: number): any[];
-/**
- * DeepCopy
- */
-export function deepCopy(obj: any): any;
-/**
- * Immutable
- * @param {object} Object to seal and deep freeze
- * @returns {object} Object that is sealed and deep frozen
- */
-export const immutable: Function;
+import { EventEmitter } from "events";
+import { Transform } from "stream";
 /**
  * IsNumber, checks if x is a Number
  */
@@ -323,6 +235,115 @@ export const accumulate: (delay: number) => (this: any, fn: Function) => (event:
  */
 export function deepEqual(a: any, b: any): boolean;
 /**
+ * Prop, access a property in an object
+ */
+export const prop: (this: any, ...args: any[]) => any;
+/**
+ * SetPropM, sets a property in an object **MUTATES**
+ */
+export const setPropM: (this: any, ...args: any[]) => any;
+/**
+ * SetProp, returns a copy of an object with new property name set to value
+ */
+export const setProp: (this: any, ...args: any[]) => any;
+/**
+ * Set, set key in object a to value
+ */
+export const set: (this: any, ...args: any[]) => any;
+/**
+ * Props, gets an array of property names from an object, shallow
+ */
+export const props: (this: any, ...args: any[]) => any;
+/**
+ * Pick, returns an object with only the selected property names, shallow
+ */
+export const pick: (this: any, ...args: any[]) => any;
+/**
+ * DeepProp, get a property from any object, deep
+ */
+export const deepProp: (this: any, ...args: any[]) => any;
+/**
+ * DeepSetProp, set a property in an object, returns a copy, deep
+ */
+export const deepSetProp: (this: any, ...args: any[]) => any;
+/**
+ * DeepPick, returns an object with only deep properties paths
+ */
+export const deepPick: (this: any, ...args: any[]) => any;
+/**
+ * Diff, get the naive difference between a and b
+ * Only diffs simple objects, arrays and primitives. Maybe I'll extend it to
+ * support Maps and Sets later.
+ */
+export function diff(a: any, b: any): any;
+/**
+ * Aggregate, deep merge a and b
+ */
+export function aggregate(a: any, b: any): any;
+/**
+ * AggregateOn, combine many objects into one with aggregated keys
+ * TODO: Try to improve the algorithm
+ */
+export function aggregateOn(keyMap: any, ...objects: any[]): any;
+/**
+ * Merge, combine all keys
+ */
+export function merge(a: any, b: any): any;
+/**
+ * Entries, eagerly get entries of an object or iterable
+ */
+export function entries(iterable: any[]): [number, any][] | [string, any][];
+/**
+ * Values, eagerly get values of an object or iterable
+ */
+export function values(iterable: any[]): any[];
+/**
+ * Keys, eagerly get keys of an object or iterable
+ */
+export function keys(iterable: any[]): string[] | number[];
+/**
+ * Rename object's keys using a keymap
+ */
+export const rename: (this: any, ...args: any[]) => any;
+/**
+ * DeepFreeze
+ */
+export function deepFreeze(obj: any): any;
+/**
+ * DeepCopyArray
+ */
+export function deepCopyArray(arr: any[], offset?: number): any[];
+/**
+ * DeepCopy
+ */
+export function deepCopy(obj: any): any;
+/**
+ * Immutable
+ * @param {object} Object to seal and deep freeze
+ * @returns {object} Object that is sealed and deep frozen
+ */
+export const immutable: Function;
+/**
+ * Buffer
+ * @param {number} count - Size of events to buffer
+ * @param {observable} stream - Stream to buffer
+ * @returns {observable}
+ */
+declare const buffer: (...initialArgs: any[]) => {};
+/**
+ * Concat, append streams
+ * @param {observable} Streams to append
+ * @returns {observable} Concatenated stream
+ */
+declare const concat: (...initialArgs: any[]) => {};
+/**
+ * combine, combine the latest output of each stream
+ * @param {observable} Stream a
+ * @param {observable} Stream b
+ * @returns {observable} Latest combined output of stream a and b
+ */
+declare const combine: (...initialArgs: any[]) => {};
+/**
  * ComposeM
  */
 export function composeM(...Ms: any): any;
@@ -398,6 +419,180 @@ export const range: (start: number, end: number, step?: number) => any[];
  */
 export const deepJoin: (this: any, ...args: any[]) => any;
 /**
+ * Debounce
+ * @param {number} time to aggregate events for
+ * @param {observable} stream - stream to debounce
+ * @returns {observable}
+ */
+declare const _debounce1: (...initialArgs: any[]) => {};
+/**
+ * Distinct, filter only unique consecutive events
+ * @param {observable} Stream to filter distinct
+ * @returns {observable} Stream with unique values only
+ */
+declare const distinct: (...initialArgs: any[]) => {};
+/**
+ * Effect
+ * @param {function} fn - Side effect function to run on each event
+ * @param {observable} stream
+ * @returns {observable}
+ */
+declare const effect: (...initialArgs: any[]) => {};
+/**
+ * Filter
+ * @param {function} predicate - Filter function
+ * @param {observable} stream - Stream to filter
+ * @returns {observable}
+ */
+declare const _filter1: (...initialArgs: any[]) => {};
+/**
+ * ForEach, syntactic sugar for Observable.subscribe()
+ * @param {function} fn - Function to run on each event
+ * @param {observable} stream
+ * @returns {object} unsubscribe object
+ */
+declare const _forEach1: (this: any, ...args: any[]) => any;
+/**
+ * Listen
+ * @param {string} eventName - Event to listen on
+ * @param {HTMLElement} element
+ * @returns {observable}
+ */
+declare const listen: (...initialArgs: any[]) => {};
+/**
+ * Map
+ * @param {function} fn - Mapper function
+ * @parma {observable} stream - Stream to map
+ * @returns {observable}
+ */
+declare const _map1: (...initialArgs: any[]) => {};
+/**
+ * MapTo, map a stream to only output value
+ * @param {any} value
+ * @param {observable} stream
+ * @returns {observable}
+ */
+declare const mapTo: (...initialArgs: any[]) => {};
+/**
+ * Merge, interleave two streams
+ * @param {observable} Stream a
+ * @param {observable} Stream b
+ * @returns {observable} Interleaving stream of a and b
+ */
+declare const _merge1: (...initialArgs: any[]) => {};
+/**
+ * FlatMap
+ * @param {function} fn - Mapping function
+ * @param {observable} stream
+ * @returns {observable}
+ */
+declare const _flatMap1: (...initialArgs: any[]) => {};
+/**
+ * Pick, pick keys from objects of stream
+ * @param {string} key
+ * @param {observable} stream
+ * @returns {observable}
+ */
+declare const _pick1: (...initialArgs: any[]) => {};
+/**
+ * Reduce
+ * @param {function} reducer
+ * @param {any} initialValue
+ * @param {observable} stream
+ * @returns {observable}
+ */
+declare const _reduce1: (...initialArgs: any[]) => {};
+/**
+ * Retry
+ * @param {object} {number}
+ * Configuration object { method: 'linear' | 'expo', retries: n }
+ * @param {observable} Stream to retry incase of errors
+ * @returns {observable}
+ */
+declare const retry: (...initialArgs: any[]) => {};
+/**
+ * Skip
+ */
+declare const skip: (...initialArgs: any[]) => {};
+/**
+ * Share, buffers 100 events by default
+ */
+declare const share: (bufferSize: number, stream: Observable) => {};
+/**
+ * Subject
+ */
+declare const subject: () => {};
+/**
+ * Take
+ * @param {number} numberToTake - Items to take from stream
+ * @param {observable} stream
+ * @returns {observable}
+ */
+declare const _take1: (...initialArgs: any[]) => {};
+/**
+ * Throttle
+ * @param {number} limit - Delay between function calls
+ * @param {observable} stream - Stream to throttle to
+ * @returns {observable}
+ */
+declare const throttle: (...initialArgs: any[]) => {};
+/**
+ * Until, subscribe to a stream until Comparator returns true
+ * @param {function} Comparator function
+ * @param {observable} Stream
+ * @returns {observable} Stream that ends when comparator function returns true
+ */
+declare const until: (...initialArgs: any[]) => {};
+/**
+ * Zip
+ * @param {observable} Streams
+ * @returns {observable} One-to-one zipped streams
+ */
+declare const _zip1: (...initialArgs: any[]) => {};
+export const Observable: any;
+interface Observer {
+    next(value: any): void;
+    error(err: Error): void;
+    complete(): void;
+}
+export interface Observable {
+    fromEvent(emitter: any, event: string, handler: Function): Observable;
+    fromGenerator(generator: GeneratorFunction): Observable;
+    fromPromise<X>(promise: Promise<X>): Observable;
+    fromStream(stream: any): Observable;
+    listen(eventName: string, element: any): Observable;
+    subject(): Observable;
+    makeObservable(obj: any): Observable;
+    _filter1(fn: (value: any) => boolean): Observable;
+    _map1(fn: (value: any) => any): Observable;
+    buffer(size: number): Observable;
+    skip(numberToSkip: number): Observable;
+    _take1(numberToTake: number): Observable;
+    _reduce1(reducer: (accumulator: any, value: any) => any, initialValue: any): Observable;
+    mapTo(value: any): Observable;
+    throttle(limit: number): Observable;
+    _forEach1(f: Function): any;
+    effect(f: Function): Observable;
+    _pick1(prop: PropertyKey): Observable;
+    _debounce1(limit: number): Observable;
+    catch(err: Error): Observable;
+    concat(...streams: Observable[]): Observable;
+    combine(stream: Observable): Observable;
+    _merge1(stream: Observable): Observable;
+    share(bufferSize: number): Observable;
+    switch(): Observable;
+    _flatMap1(fn: (value: any) => any): Observable;
+    distinct(fn: (value: any) => any): Observable;
+    until(fn: (value: any) => boolean): Observable;
+    _zip1(zipper: (...args: any[]) => any, ...streams: Observable[]): Observable;
+    retry(config: any): Observable;
+    finally(f: Function): Observable;
+    subscribe(observer: Observer): Subscription;
+}
+interface Subscription {
+    unsubscribe(): void;
+}
+/**
  * ComposeAsync
  */
 export const composeAsync: (...fns: Function[]) => Function;
@@ -455,10 +650,23 @@ export const padStart: (this: any, ...args: any[]) => any;
  * PadEnd
  */
 export const padEnd: (this: any, ...args: any[]) => any;
+export function Append(behaviour: any): (clazz: any) => any;
+export function Prepend(behaviour: any): (clazz: any) => any;
+export function Define(behaviour: any): (clazz: any) => void;
+export function Override(behaviour: any): (clazz: any) => any;
+export const after: (...fns: Function[]) => (target: any, name: string, descriptor: any) => void;
+export const before: (...fns: Function[]) => (target: any, name: string, descriptor: any) => void;
+export const provided: (...fns: Function[]) => (target: any, name: string, descriptor: any) => void;
+export const unless: (...fns: Function[]) => (target: any, name: string, descriptor: any) => void;
+export const wrapWith: (decorator: Function) => (target: any, name: string, descriptor: any) => void;
+export const aroundAll: (behaviour: any, ...methodNames: string[]) => (clazz: any) => any;
+export const beforeAll: (behaviour: any, ...methodNames: string[]) => (clazz: any) => any;
+export const afterAll: (behaviour: any, ...methodNames: string[]) => (clazz: any) => any;
 /**
  * FunctionalMixin takes a behaviour object and a target, which is the object to mix behaviour into
  */
 export function FunctionalMixin(behaviour: any, sharedBehaviour?: {}): (target: any) => any;
+export const ClassMixin: (behaviour: any, sharedBehaviour?: any) => (classs: any) => any;
 /**
  * WithValidation
  * @param {function} validator - Function to validate data
@@ -466,6 +674,8 @@ export function FunctionalMixin(behaviour: any, sharedBehaviour?: {}): (target: 
  * @returns {function} Wrapped function fn with validation logic
  */
 export const withValidation: (this: any, ...args: any[]) => any;
+export const SubclassFactory: (behaviour: any) => (superclass: any) => any;
+export const FactoryFactory: (c: any) => (...args: any[]) => any;
 export interface Maybe {
     isJust: boolean;
     isNothing: boolean;
@@ -664,24 +874,24 @@ export class Enum {
     [Symbol.iterator](): () => IterableIterator<unknown>;
     static of(...types: string[]): Enum;
 }
-export function createClient(apiEndpoint: any, options?: {
+export function createClient(apiEndpoint: string, options?: {
     storageKey: string;
     toJSON: boolean;
 }): {
-    get(url: any, options: any): {
-        req: Promise<any>;
+    get(url: string, options: any): {
+        req: Promise<unknown>;
         abort: () => void;
     };
-    post(url: any, body: any, options: any): {
-        req: Promise<any>;
+    post(url: string, body: any, options: any): {
+        req: Promise<unknown>;
         abort: () => void;
     };
-    put(url: any, body: any, options: any): {
-        req: Promise<any>;
+    put(url: string, body: any, options: any): {
+        req: Promise<unknown>;
         abort: () => void;
     };
-    delete(url: any, options: any): {
-        req: Promise<any>;
+    delete(url: string, options: any): {
+        req: Promise<unknown>;
         abort: () => void;
     };
 };
@@ -780,21 +990,6 @@ export const reduceWith: (this: any, ...args: any[]) => any;
  * @returns {function} Memoized generator function
  */
 export function memoizeIter(generator: (...args: any) => Generator): (...args: any) => Generator;
-export function Define(behaviour: any): (clazz: any) => void;
-export function Override(behaviour: any): (clazz: any) => any;
-export function Prepend(behaviour: any): (clazz: any) => any;
-export function Append(behaviour: any): (clazz: any) => any;
-export function ClassMixin(behaviour: any, sharedBehaviour?: {}): (classs: any) => any;
-export function after(...fns: any[]): (target: any, name: any, descriptor: any) => void;
-export function before(...fns: any[]): (target: any, name: any, descriptor: any) => void;
-export function provided(...fns: any[]): (target: any, name: any, descriptor: any) => void;
-export function unless(...fns: any[]): (target: any, name: any, descriptor: any) => void;
-export function wrapWith(decorator: any): (target: any, name: any, descriptor: any) => void;
-export function aroundAll(behaviour: any, ...methodNames: any[]): (clazz: any) => any;
-export function beforeAll(behaviour: any, ...methodNames: any[]): (clazz: any) => any;
-export function afterAll(behaviour: any, ...methodNames: any[]): (clazz: any) => any;
-export function SubclassFactory(behaviour: any): (superclass: any) => any;
-export function FactoryFactory(c: any): (...args: any[]) => any;
 /**
  * Lazy Collection is a Collection data-type that is essentially just mapping
  * Symbol.iterator. It can be mixed in to any existing iterable object, such as
@@ -828,7 +1023,7 @@ export const Stack: {
 };
 export function Lazy<X>(target: Iterable<X>): ICollection;
 export { EventEmitter };
-export function reactivize(obj: any): any;
+export const reactivize: (obj: any) => any;
 declare const handlersKey: unique symbol;
 declare const dispatchKey: unique symbol;
 declare const isMethodObject: unique symbol;
@@ -837,17 +1032,18 @@ interface IHandler {
     handler: (...args: any) => any;
     [isMethodObject]: boolean;
 }
-type MultiMethod = {
+interface MultiMethod {
     [dispatchKey]: (...args: any) => any;
     [handlersKey]: IHandler[];
     map: (...args: any) => any;
-};
+}
 /**
  * Method, create a method inside a call to multi()
  * Param key / function key
  * Param handler / value to return)
  * Returns Handler
  */
+export function method(handler: (...args: any) => any | undefined): IHandler;
 export function method(key: any, handler: (...args: any) => any | undefined): IHandler;
 /**
  * multi, create a multimethod function
@@ -856,58 +1052,101 @@ export function method(key: any, handler: (...args: any) => any | undefined): IH
  * Returns dispatch function
  */
 export function multi(...initialMethods: any[]): MultiMethod;
-export function createFilterStream(fn: any): any;
-export function createMapStream(fn: any): any;
-export function createReduceStream(reducer: any, initialValue: any): any;
+export function createFilterStream(fn: (value: any) => boolean): any;
+export function createMapStream(fn: (value: any) => any): any;
+export function createReduceStream(reducer: (accumulator: any, value: any) => any, initialValue: any): any;
+export interface ParallelStream {
+    emit(event: string, ...args: any): any;
+    push(value: any): any;
+}
+export class ParallelStream extends Transform {
+    userTransform: (chunk: any, encoding: string, push: Function, onComplete: Function) => void;
+    running: number;
+    terminate: Function | null;
+    constructor(userTransform: (chunk: any, encoding: string, push: Function, onComplete: Function) => void, options?: {});
+    _transform(chunk: any, encoding: string, callback: Function): void;
+    _flush(callback: Function): void;
+    _onComplete(err: Error): void;
+}
+export interface LimitedParallelStream {
+    emit(event: string, ...args: any): any;
+    push(chunk: any): any;
+}
+export class LimitedParallelStream extends Transform {
+    concurrency: number;
+    userTransform: (chunk: any, encoding: string, push: Function, onComplete: Function) => void;
+    running: number;
+    continue: Function | null;
+    terminate: Function | null;
+    constructor(concurrency: number, userTransform: (chunk: any, encoding: string, push: Function, onComplete: Function) => void, options?: {});
+    _transform(chunk: any, encoding: string, callback: Function): void;
+    _flush(callback: Function): void;
+    _onComplete(err: Error): void;
+}
 export function createFork(stream: any): (...streams: any[]) => void;
 export function createMerge(...sources: any[]): (dest: any) => any[];
-export class ParallelStream {
-    constructor(userTransform: any, options?: {});
-    userTransform: any;
-    running: number;
-    terminate: any;
-    _transform(chunk: any, encoding: any, callback: any): void;
-    _flush(callback: any): void;
-    _onComplete(err: any): void;
-}
-export class LimitedParallelStream {
-    constructor(concurrency: any, userTransform: any, options?: {});
-    concurrency: any;
-    userTransform: any;
-    running: number;
-    continue: any;
-    terminate: any;
-    _transform(chunk: any, encoding: any, callback: any): void;
-    _flush(callback: any): void;
-    _onComplete(err: any): void;
-}
-export const actionListener: object;
 /**
  * Checks to see if something appears to be a plain object
- *
- * @param {object} Object to check
- * @returns {boolean}
  */
 export function isPlainObject(obj: any): boolean;
+interface IAction {
+    type: string;
+    payload?: any;
+    meta?: any;
+    error?: any;
+}
+interface IActionCreator extends Function {
+    match(action: IAction): boolean;
+    toString(): string;
+    type: string;
+}
 /**
  * A utility function for making an action creator for a given type
- *
- * @param {string} Type of action
- * @param {function} Optional variadic prepare function used to return
- *  a payload
- *
- * @returns {function} Action Creator function
  */
-export function createAction(type: any, prepareAction: any): Function;
+export function createAction(type: string, prepareAction: (...args: any[]) => any): {
+    (...args: any[]): IAction;
+    toString(): string;
+    type: string;
+    match(action: IAction): boolean;
+};
+interface IMiddlewareAPI {
+    getState(): any;
+    dispatch(action: IAction, ...args: any[]): any;
+}
+export const actionListener: {
+    middleware(middlewareAPI: IMiddlewareAPI): (next: Function) => (action: IAction) => any;
+    addListener: (actionCreator: IActionCreator, listener: Function) => void;
+    removeListener: (actionCreator: IActionCreator, listener: Function) => void;
+};
 /**
  * Creates an async thunk
- *
- * @param {string} typePrefix
- * @param {function} payloadCreator
- * @param {object} Options object
- * @returns {function} Action creator
  */
-export function createAsyncThunk(typePrefix: string, payloadCreator: Function, options: any): Function;
+export function createAsyncThunk(typePrefix: string, payloadCreator: Function, options: any): ((arg: any) => (dispatch: (action: IAction) => any, getState: () => any, extra: any) => Promise<any> & {
+    abort(reason: any): void;
+    arg: any;
+    requestId: string;
+    unwrap(): Promise<any>;
+}) & {
+    pending: {
+        (...args: any[]): IAction;
+        toString(): string;
+        type: string;
+        match(action: IAction): boolean;
+    };
+    rejected: {
+        (...args: any[]): IAction;
+        toString(): string;
+        type: string;
+        match(action: IAction): boolean;
+    };
+    fulfilled: {
+        (...args: any[]): IAction;
+        toString(): string;
+        type: string;
+        match(action: IAction): boolean;
+    };
+    typePrefix: string;
+};
 /**
  * Turns an action creator object into one whose values are wrapped in
  * a dispatch call so as to enable them to be invoked directly
@@ -916,34 +1155,65 @@ export function createAsyncThunk(typePrefix: string, payloadCreator: Function, o
  * @param {function} Dispatch function
  * @returns {object} Bound action creator object
  */
-export function bindActionCreators(actionCreators: any, dispatch: any): object;
+export function bindActionCreators(actionCreators: any, dispatch: (action: IAction) => any): any;
 /**
  * Create a stateful store for managing application state
- *
- * @param {function} Reducer function
- * @param {object} Initial state
- * @returns {object} State store
  */
-export function createStore(reducer: any, initialState: any, enhancer: any): object;
+export function createStore(reducer: (state: any, action: IAction) => any, initialState?: any, enhancer?: Function): any;
 /**
  * Turns an object with various reducer functions into a single reducer
  * function.
- *
- * @param {object} Reducers object, with values corresponding to reducers
- * @returns {function} A reducer function that invokes each reducer
  */
-export function combineReducers(reducers: any): Function;
+export function combineReducers(reducers: any[]): (state: any, action: IAction) => any;
 /**
  * createSelector takes some function and memoizes it
- *
- * @param {function} Result function
- * @returns {function} Selector function
  */
-export function createSelector(...fns: any[]): Function;
-export function thunk({ dispatch, getState }: {
-    dispatch: any;
-    getState: any;
-}): (next: any) => (action: any) => any;
-export const createConfiguredStore: any;
+export function createSelector(...fns: Function[]): {
+    (this: any, ...args: any[]): any;
+    clearCache(): any;
+} & {
+    resultFunc: Function | undefined;
+    memoizedResultFunc: {
+        (this: any, ...args: any[]): any;
+        clearCache(): any;
+    };
+    dependencies: any;
+    lastResult: () => any;
+    recomputations: () => number;
+    resetRecomputations: () => 0;
+};
+/**
+ * Creates a middleware function that accepts an optional 'extra argument' to
+ * be injected later.
+ */
+declare function createThunkMiddleware(extraArgument?: any): {
+    (api: IMiddlewareAPI): (next: Function) => (action: any) => any;
+    withExtraArgument: typeof createThunkMiddleware;
+};
+export const thunk: {
+    (api: IMiddlewareAPI): (next: Function) => (action: any) => any;
+    withExtraArgument: typeof createThunkMiddleware;
+};
+export interface Reducer {
+    builder(): IReducerBuilder;
+    combineReducers: (...reducers: Reducer[]) => Reducer;
+}
+interface IReducerBuilder {
+    case(type: string, handler: (state: any, action: IAction) => any): IReducerBuilder;
+    init(initialState: any): IReducerBuilder;
+    build(): MultiMethod;
+}
+/**
+ * Reducer offers an easy way to create a reducer function
+ */
+export const Reducer: {
+    builder(): {
+        case(type: any, handler: (state: any, action: IAction) => any): any;
+        init(initialState: any): any;
+        build(): MultiMethod;
+    };
+    combineReducers: typeof combineReducers;
+};
+export const createConfiguredStore: (reducer: (state: any, action: import("store/createAction").IAction) => any, initialState: any) => any;
 
 //# sourceMappingURL=index.d.ts.map

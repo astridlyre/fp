@@ -1,4 +1,4 @@
-import * as rx from './observable/Observable.js'
+import * as rx from './observable/Observable'
 
 export {
   accumulate,
@@ -152,24 +152,32 @@ export {
   padEnd,
 } from './functions/strings'
 
-export { FunctionalMixin } from './mixins/functionalMixin'
-export { withValidation } from './mixins/withValidation'
-
+export { Append } from './decorators/Append'
+export { Prepend } from './decorators/Prepend'
+export { Define } from './decorators/Define'
+export { Override } from './decorators/Override'
 export {
-  Enum,
-  Failure,
-  IO,
-  IOAsync,
-  Just,
-  Maybe,
-  Nothing,
-  Pair,
-  Result,
-  Success,
-  Triple,
-  Try,
-  TryAsync,
-} from './adts/maybe'
+  after,
+  before,
+  provided,
+  unless,
+  wrapWith,
+  beforeAll,
+  afterAll,
+  aroundAll,
+} from './decorators/methods'
+
+export { FunctionalMixin } from './mixins/functionalMixin'
+export { ClassMixin } from './mixins/classMixin'
+export { withValidation } from './mixins/withValidation'
+export { SubclassFactory, FactoryFactory } from './mixins/factories'
+
+export { Maybe, Nothing, Just } from './adts/Maybe'
+export { Result, Failure, Success } from './adts/Result'
+export { Try, TryAsync } from './adts/Try'
+export { IO, IOAsync } from './adts/IO'
+export { Pair, Triple, Enum } from './adts/Records'
+
 export { createClient } from './fetch/fetch'
 
 export {
@@ -187,25 +195,6 @@ export {
   zip,
   zipWith,
 } from './iterators/iterators'
-
-export {
-  after,
-  afterAll,
-  Append,
-  aroundAll,
-  before,
-  beforeAll,
-  ClassMixin,
-  Define,
-  FactoryFactory,
-  Override,
-  Prepend,
-  provided,
-  SubclassFactory,
-  unless,
-  wrapWith,
-} from './decorators/classes'
-
 export { Lazy, Collection, Numbers, Stack } from './lazy/Lazy'
 
 export { Observable } from './observable/Observable'
@@ -222,7 +211,7 @@ export {
   createReduceStream,
   LimitedParallelStream,
   ParallelStream,
-} from './streams/node-streams'
+} from './streams/streams'
 
 export { actionListener } from './store/actionListener'
 export { createAsyncThunk } from './store/asyncThunk'
