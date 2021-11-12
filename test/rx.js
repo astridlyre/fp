@@ -139,7 +139,7 @@ describe('Observable', function () {
           currentTimeout = setTimeout(recur, (num += 5))
         }
         recur()
-        setTimeout(() => clearTimeout(currentTimeout), 100)
+        setTimeout(() => clearTimeout(currentTimeout), 150)
         return () => clearTimeout(currentTimeout)
       })
       const values = []
@@ -156,7 +156,7 @@ describe('Observable', function () {
         } catch (err) {
           done(err)
         }
-      }, 80)
+      }, 90)
     })
   })
 
