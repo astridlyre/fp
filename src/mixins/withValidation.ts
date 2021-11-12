@@ -5,15 +5,15 @@ interface IValidationError {
   message: string
 }
 
-export interface ValidationError extends Error {
-  errors: IValidationError[]
-}
-
 export class ValidationError extends Error {
+  errors: IValidationError[]
+
   constructor(message: string, errors: IValidationError[]) {
     super(message)
     this.errors = errors
+    Object.setPrototypeOf(this, ValidationError.prototype)
   }
+
   get messages() {
     return this.errors.map(e => e.message)
   }

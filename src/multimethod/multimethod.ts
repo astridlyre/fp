@@ -12,6 +12,7 @@ const DEFAULT_METHOD = 'MULTI:DEFAULT_METHOD'
 class NoHandlerError extends Error {
   constructor(message: string) {
     super(message)
+    Object.setPrototypeOf(this, NoHandlerError.prototype)
   }
 }
 

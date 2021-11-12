@@ -9,6 +9,7 @@ const STATUS_PENDING = 'pending'
 class AbortError extends Error {
   constructor(message: string) {
     super(message)
+    Object.setPrototypeOf(this, AbortError.prototype)
   }
 }
 

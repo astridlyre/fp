@@ -1838,6 +1838,7 @@ class $99d0e6444599337d$export$2191b9da168c6cf0 extends Error {
     constructor(message, errors){
         super(message);
         this.errors = errors;
+        Object.setPrototypeOf(this, $99d0e6444599337d$export$2191b9da168c6cf0.prototype);
     }
     get messages() {
         return this.errors.map((e)=>e.message
@@ -2727,6 +2728,7 @@ const $d76f3352348d1758$var$DEFAULT_METHOD = 'MULTI:DEFAULT_METHOD';
 class $d76f3352348d1758$var$NoHandlerError extends Error {
     constructor(message){
         super(message);
+        Object.setPrototypeOf(this, $d76f3352348d1758$var$NoHandlerError.prototype);
     }
 }
 const $d76f3352348d1758$var$defaultDispatch = function defaultDispatch() {
@@ -3020,6 +3022,7 @@ const $9fdb620204b35b03$var$STATUS_PENDING = 'pending';
 class $9fdb620204b35b03$var$AbortError extends Error {
     constructor(message){
         super(message);
+        Object.setPrototypeOf(this, $9fdb620204b35b03$var$AbortError.prototype);
     }
 }
 function $9fdb620204b35b03$export$6abd22dc03e5063f(typePrefix, payloadCreator, options) {
