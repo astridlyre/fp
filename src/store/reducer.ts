@@ -4,6 +4,10 @@ import { multi, method, MultiMethod, IHandler } from '../multimethod/multimethod
 import { combineReducers } from './combineReducers'
 import { IAction } from './createAction'
 
+export interface IReducerFunction {
+  (state: any, action: IAction): any
+}
+
 export interface Reducer {
   builder(): IReducerBuilder
   combineReducers: (...reducers: Reducer[]) => Reducer
@@ -23,7 +27,7 @@ export const Reducer = {
     const cases: IHandler[] = []
 
     return {
-      case(type: any, handler: (state: any, action: IAction) => any) {
+      case(type: any, handler: IReducerFunction) {
         if (isFunction(type)) {
           cases.push(method(type, handler))
         } else {

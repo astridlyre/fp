@@ -19,20 +19,17 @@ export const pipeAsync = (...fns: GenericFunction[]) => fns.reduceRight(composeA
 /**
  * MapAsync
  */
-export const mapAsync = async (f: <X>(value: any) => Promise<X>, a: any[]) =>
+export const mapAsync = async <T>(f: <X>(value: T) => Promise<X>, a: T[]) =>
   await Promise.all(a.map(f))
 
 /**
  * ReduceAsync
  */
-export const reduceAsync = async (
-  f: <X>(value: any) => Promise<X>,
-  init: any,
-  a: any[]
-) => await a.reduce((p, val) => p.then(() => f(val)), Promise.resolve(init))
+export const reduceAsync = async <T>(f: <X>(value: T) => Promise<X>, init: any, a: T[]) =>
+  await a.reduce((p, val) => p.then(() => f(val)), Promise.resolve(init))
 
 /**
  * FilterAsync
  */
-export const filterAsync = async (f: <X>(value: any) => Promise<X>, a: any) =>
+export const filterAsync = async <T>(f: <X>(value: T) => Promise<X>, a: T[]) =>
   await mapAsync(f, a).then(bools => a.filter((_: any, i: number) => Boolean(bools[i])))

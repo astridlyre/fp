@@ -3,14 +3,19 @@ import { isFunction, isUndefined } from '../functions/predicates'
 import { keys } from '../functions/objects'
 import { INIT } from './createStore'
 import { IAction } from './createAction'
+import { IReducerFunction } from './reducer'
+
+export interface IReducerObject {
+  [propKey: PropertyKey]: IReducerFunction
+}
 
 /**
  * Turns an object with various reducer functions into a single reducer
  * function.
  */
-export function combineReducers(reducers: any[]) {
-  const reducerKeys: any = Reflect.ownKeys(reducers)
-  const finalReducers: any = {}
+export function combineReducers(reducers: IReducerObject): IReducerFunction {
+  const reducerKeys = Reflect.ownKeys(reducers)
+  const finalReducers: IReducerObject = {}
 
   for (const key of reducerKeys) {
     if (isFunction(reducers[key])) {
@@ -62,8 +67,8 @@ export function combineReducers(reducers: any[]) {
   }
 }
 
-function assertReducerShape(reducers: any[]) {
-  const keys: any = Reflect.ownKeys(reducers)
+function assertReducerShape(reducers: IReducerObject) {
+  const keys = Reflect.ownKeys(reducers)
 
   for (const key of keys) {
     const reducer = reducers[key]
@@ -71,7 +76,7 @@ function assertReducerShape(reducers: any[]) {
 
     if (typeof initialState === 'undefined') {
       throw new Error(
-        `Reducer for key ${key} returned undefined. ` +
+        `Reducer for key ${key as string} returned undefined. ` +
           'Set null for the return value if you do not ' +
           'want to set a value for this reducer.'
       )

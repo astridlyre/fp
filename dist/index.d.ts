@@ -293,15 +293,15 @@ export function merge(a: any, b: any): any;
 /**
  * Entries, eagerly get entries of an object or iterable
  */
-export function entries(iterable: any[]): [number, any][] | [string, any][];
+export function entries(iterable: any): any[];
 /**
  * Values, eagerly get values of an object or iterable
  */
-export function values(iterable: any[]): any[];
+export function values(iterable: any): any[];
 /**
  * Keys, eagerly get keys of an object or iterable
  */
-export function keys(iterable: any[]): string[] | number[];
+export function keys(iterable: any): any[];
 /**
  * Rename object's keys using a keymap
  */
@@ -361,8 +361,8 @@ export const getOrElseThrow: (this: any, ...args: any[]) => any;
  * Array functions
  * Provides a set of functions for common array operations
  */
-export const head: (a: string | any[]) => any;
-export const last: (a: string | any[]) => any;
+export const head: <T>(a: T[]) => T;
+export const last: <T>(a: T[]) => T;
 export const every: (this: any, ...args: any[]) => any;
 export const some: (this: any, ...args: any[]) => any;
 export const find: (this: any, ...args: any[]) => any;
@@ -372,11 +372,11 @@ export const join: (this: any, ...args: any[]) => any;
 /**
  * Partition, divide an array into two
  */
-export const partition: (arr: any[], a: (value: any) => boolean, b: (value: any) => boolean) => any;
+export const partition: <T>(arr: T[], a: (value: T) => boolean, b: (value: T) => boolean) => T[][];
 /**
  * ZipMap
  */
-export const zipMap: <X>(f: _GenericFunction1, ...iters: Iterable<X>[]) => any[];
+export const zipMap: <T>(f: _GenericFunction1, ...iters: Iterable<T>[]) => any[];
 /**
  * SortBy
  */
@@ -411,7 +411,7 @@ export const pluck: (...args: any[]) => any;
 /**
  * DeepMap
  */
-export const deepMap: (fn: (element: any) => any) => (tree: any[]) => any[];
+export const deepMap: <T>(fn: (element: T) => any) => (tree: T[]) => any[];
 /**
  * Range
  */
@@ -607,15 +607,15 @@ export const pipeAsync: (...fns: _GenericFunction3[]) => _GenericFunction3;
 /**
  * MapAsync
  */
-export const mapAsync: (f: <X>(value: any) => Promise<X>, a: any[]) => Promise<unknown[]>;
+export const mapAsync: <T>(f: <X>(value: T) => Promise<X>, a: T[]) => Promise<unknown[]>;
 /**
  * ReduceAsync
  */
-export const reduceAsync: (f: <X>(value: any) => Promise<X>, init: any, a: any[]) => Promise<any>;
+export const reduceAsync: <T>(f: <X>(value: T) => Promise<X>, init: any, a: T[]) => Promise<any>;
 /**
  * FilterAsync
  */
-export const filterAsync: (f: <X>(value: any) => Promise<X>, a: any) => Promise<any>;
+export const filterAsync: <T>(f: <X>(value: T) => Promise<X>, a: T[]) => Promise<T[]>;
 /**
  * Math functions
  * Provides a set of functions for common math operations
@@ -659,11 +659,14 @@ export function Prepend(behaviour: any): (clazz: any) => any;
 export function Define(behaviour: any): (clazz: any) => void;
 export function Override(behaviour: any): (clazz: any) => any;
 type _GenericFunction4 = (...args: any[]) => any;
-export const after: (...fns: _GenericFunction4[]) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
-export const before: (...fns: _GenericFunction4[]) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
-export const provided: (...fns: _GenericFunction4[]) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
-export const unless: (...fns: _GenericFunction4[]) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
-export const wrapWith: (decorator: _GenericFunction4) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
+interface IDecorator {
+    (target: any, name: string, descriptor: PropertyDescriptor): any;
+}
+export const after: (...fns: _GenericFunction4[]) => IDecorator;
+export const before: (...fns: _GenericFunction4[]) => IDecorator;
+export const provided: (...fns: _GenericFunction4[]) => IDecorator;
+export const unless: (...fns: _GenericFunction4[]) => IDecorator;
+export const wrapWith: (decorator: _GenericFunction4) => IDecorator;
 export const aroundAll: (behaviour: any, ...methodNames: string[]) => (clazz: any) => any;
 export const beforeAll: (behaviour: any, ...methodNames: string[]) => (clazz: any) => any;
 export const afterAll: (behaviour: any, ...methodNames: string[]) => (clazz: any) => any;
@@ -807,7 +810,7 @@ export class IOAsync {
     [Symbol.toStringTag]: string;
     constructor(fn: IOAsyncFunction);
     map(fn: (value: IOAsyncFunction) => IOAsyncFunction): Promise<IO>;
-    flatMap(fn: (value: IOAsyncFunction) => IOAsyncFunction): Promise<any>;
+    flatMap(fn: (value: IOAsyncFunction) => IOAsyncFunction): Promise<IOAsync>;
     merge(): Promise<IOAsync>;
     toString(): string;
     toJSON(): {
@@ -1016,6 +1019,11 @@ interface ICollection {
     take: (numberToTake: number) => ICollection;
     drop: (numberToDrop: number) => ICollection;
 }
+/**
+ * Lazy Collection is a Collection data-type that is essentially just mapping
+ * Symbol.iterator. It can be mixed in to any existing iterable object, such as
+ * an Array.
+ */
 export const Collection: ICollection;
 export const Numbers: {
     [Symbol.iterator](): Generator<number, never, unknown>;
@@ -1027,10 +1035,20 @@ interface IStack extends ICollection {
     pop: () => any;
     isEmpty: () => boolean;
 }
+/**
+ * Lazy Stack is a Stack data-type that is essentially just mapping
+ * Symbol.iterator. It features the most common stack methods, such as
+ * push() and pop()
+ */
 export const Stack: {
     (): IStack;
     from<X>(iterable: Iterable<X>): IStack;
 };
+/**
+ * Lazy Collection is a Collection data-type that is essentially just mapping
+ * Symbol.iterator. It can be mixed in to any existing iterable object, such as
+ * an Array.
+ */
 export function Lazy<X>(target: Iterable<X>): ICollection;
 export { EventEmitter };
 export const reactivize: (obj: any) => any;
@@ -1160,20 +1178,49 @@ export function createAsyncThunk(typePrefix: string, payloadCreator: (...args: a
     };
     typePrefix: string;
 };
+interface IActionCreatorObject {
+    [propKey: PropertyKey]: IActionCreator;
+}
 /**
  * Turns an action creator object into one whose values are wrapped in
  * a dispatch call so as to enable them to be invoked directly
  */
-export function bindActionCreators(actionCreators: any, dispatch: (action: IAction) => any): any;
+export function bindActionCreators(actionCreators: IActionCreatorObject | IActionCreator, dispatch: (action: IAction) => any): IActionCreator | IActionCreatorObject;
+interface IReducerFunction {
+    (state: any, action: IAction): any;
+}
+export interface Reducer {
+    builder(): IReducerBuilder;
+    combineReducers: (...reducers: Reducer[]) => Reducer;
+}
+interface IReducerBuilder {
+    case(type: string, handler: (state: any, action: IAction) => any): IReducerBuilder;
+    init(initialState: any): IReducerBuilder;
+    build(): MultiMethod;
+}
+/**
+ * Reducer offers an easy way to create a reducer function
+ */
+export const Reducer: {
+    builder(): {
+        case(type: any, handler: IReducerFunction): any;
+        init(initialState: any): any;
+        build(): MultiMethod;
+    };
+    combineReducers: typeof combineReducers;
+};
 /**
  * Create a stateful store for managing application state
  */
-export function createStore(reducer: (state: any, action: IAction) => any, initialState?: any, enhancer?: (createStore: any) => (reducer: (state: any, action: IAction) => any, initialState: any) => any): any;
+export function createStore(reducer: IReducerFunction, initialState?: any, enhancer?: (createStore: any) => (reducer: IReducerFunction, initialState: any) => any): any;
+interface IReducerObject {
+    [propKey: PropertyKey]: IReducerFunction;
+}
 /**
  * Turns an object with various reducer functions into a single reducer
  * function.
  */
-export function combineReducers(reducers: any[]): (state: any, action: IAction) => any;
+export function combineReducers(reducers: IReducerObject): IReducerFunction;
 type Selector = (state: any) => any;
 /**
  * createSelector takes some function and memoizes it
@@ -1197,32 +1244,12 @@ export function createSelector(...fns: Selector[]): {
  * be injected later.
  */
 declare function createThunkMiddleware(extraArgument?: any): {
-    (api: IMiddlewareAPI): (next: Middleware) => (action: IAction | any) => any;
+    ({ dispatch, getState }: IMiddlewareAPI): (next: Middleware) => (action: IAction | any) => any;
     withExtraArgument: typeof createThunkMiddleware;
 };
 export const thunk: {
-    (api: IMiddlewareAPI): (next: Middleware) => (action: IAction | any) => any;
+    ({ dispatch, getState }: IMiddlewareAPI): (next: Middleware) => (action: IAction | any) => any;
     withExtraArgument: typeof createThunkMiddleware;
-};
-export interface Reducer {
-    builder(): IReducerBuilder;
-    combineReducers: (...reducers: Reducer[]) => Reducer;
-}
-interface IReducerBuilder {
-    case(type: string, handler: (state: any, action: IAction) => any): IReducerBuilder;
-    init(initialState: any): IReducerBuilder;
-    build(): MultiMethod;
-}
-/**
- * Reducer offers an easy way to create a reducer function
- */
-export const Reducer: {
-    builder(): {
-        case(type: any, handler: (state: any, action: IAction) => any): any;
-        init(initialState: any): any;
-        build(): MultiMethod;
-    };
-    combineReducers: typeof combineReducers;
 };
 export const createConfiguredStore: (reducer: (state: any, action: import("store/createAction").IAction) => any, initialState: any) => any;
 

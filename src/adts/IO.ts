@@ -47,7 +47,7 @@ export class IOAsync {
     return new IO(composeAsync(fn, this.unsafePerformIO) as IOAsyncFunction)
   }
   async flatMap(fn: (value: IOAsyncFunction) => IOAsyncFunction) {
-    return await (this.map(fn) as any).merge()
+    return await (this.map(fn) as any as IOAsync).merge()
   }
   async merge() {
     return new IOAsync(

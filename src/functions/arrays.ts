@@ -34,11 +34,11 @@ export const getOrElseThrow = curry((e: Error, M: any) => M.getOrElseThrow(e))
  * Array functions
  * Provides a set of functions for common array operations
  */
-export const head = (a: string | any[]) => a && a[0]
-export const last = (a: string | any[]) => a && a[a.length - 1]
-export const every = curry((f: (value: any) => boolean, arr: any[]) => arr.every(f))
-export const some = curry((f: (value: any) => boolean, arr: any[]) => arr.some(f))
-export const find = curry((f: (value: any) => boolean, arr: any[]) => arr.find(f))
+export const head = <T>(a: T[]): T => a && a[0]
+export const last = <T>(a: T[]): T => a && a[a.length - 1]
+export const every = curry(<T>(f: (value: T) => boolean, arr: T[]) => arr.every(f))
+export const some = curry(<T>(f: (value: T) => boolean, arr: T[]) => arr.some(f))
+export const find = curry(<T>(f: (value: T) => boolean, arr: T[]) => arr.find(f))
 export const sum = (...args: number[]) => args.reduce((x, y) => x + y, 0)
 export const average = (ns: number[]) => sum(...ns) / ns.length
 export const join = curry((sep: string, a: any[]) => a.join(sep))
@@ -46,20 +46,20 @@ export const join = curry((sep: string, a: any[]) => a.join(sep))
 /**
  * Partition, divide an array into two
  */
-export const partition = (
-  arr: any[],
-  a: (value: any) => boolean,
-  b: (value: any) => boolean
+export const partition = <T>(
+  arr: T[],
+  a: (value: T) => boolean,
+  b: (value: T) => boolean
 ) =>
   arr.reduce(
     (acc, cv) => (a(cv) ? (acc[0].push(cv), acc) : b(cv) ? (acc[1].push(cv), acc) : acc),
-    [[], []]
+    [[] as T[], [] as T[]]
   )
 
 /**
  * ZipMap
  */
-export const zipMap = <X>(f: GenericFunction, ...iters: Iterable<X>[]) => {
+export const zipMap = <T>(f: GenericFunction, ...iters: Iterable<T>[]) => {
   const min = Math.min(...pluck('length')(iters))
   const result = []
 
@@ -73,7 +73,7 @@ export const zipMap = <X>(f: GenericFunction, ...iters: Iterable<X>[]) => {
 /**
  * SortBy
  */
-export const sortBy = curry((f: (a: any, b: any) => number, a: any[]) => [...a].sort(f))
+export const sortBy = curry(<T>(f: (a: T, b: T) => number, a: T[]): T[] => [...a].sort(f))
 
 /**
  * ForEach
@@ -81,23 +81,23 @@ export const sortBy = curry((f: (a: any, b: any) => number, a: any[]) => [...a].
  * @param {array} M - Monad / iterable that implements forEach
  * @returns {undefined}
  */
-export const forEach = curry((f: (value: any) => void, M: any[]) => M.forEach(f))
+export const forEach = curry(<T>(f: (value: T) => void, M: T[]): void => M.forEach(f))
 
 /**
  * Map
  */
-export const map = curry((f: (value: any, index: number) => any, M: any[]) => M.map(f))
+export const map = curry(<T>(f: (value: T, index: number) => any, M: T[]) => M.map(f))
 
 /**
  * Filter
  */
-export const filter = curry((p: (value: any) => boolean, M: any[]) => M.filter(p))
+export const filter = curry(<T>(p: (value: T) => boolean, M: T[]) => M.filter(p))
 
 /**
  * Reduce
  */
 export const reduce = curry(
-  (reducer: (accumulator: any, value: any) => any, seed: any, M: any[]) =>
+  <T>(reducer: (accumulator: any, value: T) => any, seed: any, M: T[]) =>
     M.reduce(reducer, seed)
 )
 
@@ -105,7 +105,7 @@ export const reduce = curry(
  * ReduceRight
  */
 export const reduceRight = curry(
-  (reducer: (accumulator: any, value: any) => any, seed: any, M: any[]) =>
+  <T>(reducer: (accumulator: any, value: T) => any, seed: any, M: T[]) =>
     M.reduceRight(reducer, seed)
 )
 
@@ -117,8 +117,8 @@ export const pluck = compose(map, prop)
 /**
  * DeepMap
  */
-export const deepMap = (fn: (element: any) => any) =>
-  function innerDeepMap(tree: any[]): any[] {
+export const deepMap = <T>(fn: (element: T) => any) =>
+  function innerDeepMap(tree: T[]): any[] {
     return Array.prototype.map.call(tree, element =>
       Array.isArray(element) ? innerDeepMap(element) : fn(element)
     )
@@ -144,7 +144,7 @@ export const range = (start: number, end: number, step = start < end ? 1 : -1) =
 /**
  * deepJoin, deep join two arrays on keyA and keyB
  */
-export const deepJoin = curry((keyA: string, keyB: string, a: any, b: any) => {
+export const deepJoin = curry((keyA: string, keyB: string, a: any[], b: any[]) => {
   const objA = keyBy(keyA, a)
   const objB = keyBy(keyB, b)
 

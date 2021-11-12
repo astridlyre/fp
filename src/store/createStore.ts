@@ -5,6 +5,7 @@ import { diff } from '../functions/objects'
 import { $$observable, Observable, Observer } from '../observable/Observable'
 import { isPlainObject } from './isPlainObject'
 import { IAction } from './createAction'
+import { IReducerFunction } from './reducer'
 
 export const INIT = '@@ACTION/INIT'
 
@@ -17,11 +18,9 @@ interface IListener {
  * Create a stateful store for managing application state
  */
 export function createStore(
-  reducer: (state: any, action: IAction) => any,
+  reducer: IReducerFunction,
   initialState?: any,
-  enhancer?: (
-    createStore: any
-  ) => (reducer: (state: any, action: IAction) => any, initialState: any) => any
+  enhancer?: (createStore: any) => (reducer: IReducerFunction, initialState: any) => any
 ) {
   if (isFunction(initialState) && isFunction(enhancer)) {
     throw new Error('Passing multiple enhancers is not supported')

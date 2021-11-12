@@ -245,7 +245,7 @@ export function merge(a: any, b: any) {
 /**
  * Entries, eagerly get entries of an object or iterable
  */
-export function entries(iterable: any[]) {
+export function entries(iterable: any) {
   if (iterable.entries && isFunction(iterable.entries)) {
     return [...iterable.entries()]
   }
@@ -255,7 +255,7 @@ export function entries(iterable: any[]) {
 /**
  * Values, eagerly get values of an object or iterable
  */
-export function values(iterable: any[]) {
+export function values(iterable: any) {
   if (iterable.values && isFunction(iterable.values)) {
     return [...iterable.values()]
   }
@@ -265,7 +265,7 @@ export function values(iterable: any[]) {
 /**
  * Keys, eagerly get keys of an object or iterable
  */
-export function keys(iterable: any[]) {
+export function keys(iterable: any) {
   if (iterable.keys && isFunction(iterable.keys)) {
     return [...iterable.keys()]
   }
@@ -291,7 +291,7 @@ export const rename = curry((keyMap: any, a: any) => {
   return result
 })
 
-const detectCollision = (...descriptors: object[]) =>
+const detectCollision = (...descriptors: PropertyDescriptor[]) =>
   descriptors
     .flatMap(Object.keys)
     .reduce(sortReducer, [])
@@ -402,7 +402,7 @@ export function deepCopy(obj: any) {
   return aux
 }
 
-(Object as any).deepFreeze = (Object as any).deepFreeze || deepFreeze
+;(Object as any).deepFreeze = (Object as any).deepFreeze || deepFreeze
 
 /**
  * Immutable

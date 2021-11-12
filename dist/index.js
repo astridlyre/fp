@@ -3216,9 +3216,16 @@ function $3faa38f8209de142$export$aea084d96e84da92(actionCreators, dispatch) {
     return boundActionCreators;
 }
 function $3faa38f8209de142$var$bindActionCreator(actionCreator, dispatch) {
-    return function boundCreator(...args) {
+    return Object.assign(function boundCreator(...args) {
         return dispatch(actionCreator.apply(this, args));
-    };
+    }, {
+        match (type) {
+            return actionCreator.match(type);
+        },
+        get type () {
+            return actionCreator.type;
+        }
+    });
 }
 
 
@@ -3425,8 +3432,7 @@ function $57a2bf34e3c8a2fe$var$getDependencies(fns) {
  * Creates a middleware function that accepts an optional 'extra argument' to
  * be injected later.
  */ function $70bde6dd28a4bd67$var$createThunkMiddleware(extraArgument) {
-    function middleware(api) {
-        const { dispatch: dispatch , getState: getState  } = api;
+    function middleware({ dispatch: dispatch , getState: getState  }) {
         return (next)=>(action)=>$77d07aef6f69d2ce$export$f6e2535fb5126e54(action) ? action(dispatch, getState, extraArgument) : next(action)
         ;
     }

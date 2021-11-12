@@ -1,9 +1,13 @@
 /* eslint no-unused-vars: 0 */
 type GenericFunction = (...args: any[]) => any
 
+interface IDecorator {
+  (target: any, name: string, descriptor: PropertyDescriptor): any
+}
+
 // Method Decorators
 // Calls fns after method invocation
-export const after = (...fns: GenericFunction[]) =>
+export const after = (...fns: GenericFunction[]): IDecorator =>
   function after(target: any, name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
@@ -17,7 +21,7 @@ export const after = (...fns: GenericFunction[]) =>
   }
 
 // Calls fns before method invocation
-export const before = (...fns: GenericFunction[]) =>
+export const before = (...fns: GenericFunction[]): IDecorator =>
   function before(target: any, name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
@@ -30,7 +34,7 @@ export const before = (...fns: GenericFunction[]) =>
   }
 
 // Calls method if all fns return truthy
-export const provided = (...fns: GenericFunction[]) =>
+export const provided = (...fns: GenericFunction[]): IDecorator =>
   function provided(target: any, name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
@@ -41,7 +45,7 @@ export const provided = (...fns: GenericFunction[]) =>
   }
 
 // Does not call method if any fn returns truthy
-export const unless = (...fns: GenericFunction[]) =>
+export const unless = (...fns: GenericFunction[]): IDecorator =>
   function unless(target: any, name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
@@ -52,7 +56,7 @@ export const unless = (...fns: GenericFunction[]) =>
   }
 
 // Wrap a method with a decorator (turns ordinary decorator into ES.later)
-export const wrapWith = (decorator: GenericFunction) =>
+export const wrapWith = (decorator: GenericFunction): IDecorator =>
   function wrapWith(target: any, name: string, descriptor: PropertyDescriptor) {
     descriptor.value = decorator(descriptor.value)
   }

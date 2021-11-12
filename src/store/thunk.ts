@@ -7,8 +7,7 @@ import { IAction } from './createAction'
  * be injected later.
  */
 function createThunkMiddleware(extraArgument?: any) {
-  function middleware(api: IMiddlewareAPI) {
-    const { dispatch, getState } = api
+  function middleware({ dispatch, getState }: IMiddlewareAPI) {
     return (next: Middleware) => (action: IAction | any) =>
       isFunction(action) ? action(dispatch, getState, extraArgument) : next(action)
   }

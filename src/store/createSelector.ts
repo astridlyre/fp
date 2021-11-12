@@ -3,7 +3,7 @@ import { isArray, isFunction } from '../functions/predicates'
 import { memoize } from '../functions/utils'
 import { head } from '../functions/arrays'
 
-type Selector = (state: any) => any
+type Selector = (state: { [propKey: PropertyKey]: any }) => any
 
 /**
  * createSelector takes some function and memoizes it
@@ -50,7 +50,7 @@ export function createSelector(...fns: Selector[]) {
 }
 
 function getDependencies(fns: Selector[]) {
-  const dependencies = isArray(head(fns)) ? head(fns) : fns
+  const dependencies = isArray(head(fns)) ? (head(fns) as any) : fns
 
   if (!dependencies.every(isFunction)) {
     throw new Error('createSelector expects all input-selectors to be functions')

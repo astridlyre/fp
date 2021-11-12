@@ -165,10 +165,10 @@ export const log = (fn: GenericFunction, logger = console.log.bind(console)) =>
  * Transduce, combine multiple maps, filters, into a more efficient operation
  */
 export const transduce = curry(
-  (
-    arr: any[],
+  <T>(
+    arr: T[],
     fns: GenericFunction[],
-    reducer: (accumulator: any, value: any) => any,
+    reducer: (accumulator: any, value: T) => any,
     initial: any
   ) => arr.reduce(compose(...fns)(reducer), initial)
 )
@@ -230,7 +230,7 @@ export const groupBy = curry((key: string, arr: any[]) => {
   const result: any = {}
 
   for (const item of arr) {
-    (result[item[key]] || (result[item[key]] = [])).push(item)
+    ;(result[item[key]] || (result[item[key]] = [])).push(item)
   }
 
   return values(result)
