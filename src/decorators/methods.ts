@@ -1,7 +1,7 @@
 // Method Decorators
 // Calls fns after method invocation
 export const after = (...fns: Function[]) =>
-  function after(target: any, name: string, descriptor: any) {
+  function after(target: any, name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
     descriptor.value = function withAfter(this: any, ...args: any[]) {
@@ -15,7 +15,7 @@ export const after = (...fns: Function[]) =>
 
 // Calls fns before method invocation
 export const before = (...fns: Function[]) =>
-  function before(target: any, name: string, descriptor: any) {
+  function before(target: any, name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
     descriptor.value = function withBefore(this: any, ...args: any[]) {
@@ -28,7 +28,7 @@ export const before = (...fns: Function[]) =>
 
 // Calls method if all fns return truthy
 export const provided = (...fns: Function[]) =>
-  function provided(target: any, name: string, descriptor: any) {
+  function provided(target: any, name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
     descriptor.value = function withProvided(this: any, ...args: any[]) {
@@ -39,7 +39,7 @@ export const provided = (...fns: Function[]) =>
 
 // Does not call method if any fn returns truthy
 export const unless = (...fns: Function[]) =>
-  function unless(target: any, name: string, descriptor: any) {
+  function unless(target: any, name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
     descriptor.value = function withUnless(this: any, ...args: any[]) {
@@ -50,7 +50,7 @@ export const unless = (...fns: Function[]) =>
 
 // Wrap a method with a decorator (turns ordinary decorator into ES.later)
 export const wrapWith = (decorator: Function) =>
-  function wrapWith(target: any, name: string, descriptor: any) {
+  function wrapWith(target: any, name: string, descriptor: PropertyDescriptor) {
     descriptor.value = decorator(descriptor.value)
   }
 
@@ -73,9 +73,9 @@ export const beforeAll =
     for (const methodName of methodNames) {
       const method = clazz.prototype[methodName]
       Object.defineProperty(clazz.prototype, methodName, {
-        value(/*...args*/) {
-          behaviour.apply(this, arguments)
-          return method.apply(this, arguments)
+        value(...args: any[]) {
+          behaviour.apply(this, args)
+          return method.apply(this, args)
         },
         writable: true,
       })
@@ -89,9 +89,9 @@ export const afterAll =
     for (const methodName of methodNames) {
       const method = clazz.prototype[methodName]
       Object.defineProperty(clazz.prototype, methodName, {
-        value(/*...args*/) {
-          const returnedValue = method.apply(this, arguments)
-          behaviour.apply(this, arguments)
+        value(...args: any[]) {
+          const returnedValue = method.apply(this, args)
+          behaviour.apply(this, args)
           return returnedValue
         },
         writable: true,

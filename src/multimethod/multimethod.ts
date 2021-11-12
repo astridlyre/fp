@@ -20,7 +20,7 @@ export interface IHandler {
   [isMethodObject]: boolean
 }
 
-export interface MultiMethod {
+export interface MultiMethod extends Function {
   [dispatchKey]: (...args: any) => any
   [handlersKey]: IHandler[]
   map: (...args: any) => any

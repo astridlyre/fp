@@ -1754,9 +1754,9 @@ const $e3473fb7a7ac863f$export$8fd4d608a3485fcf = (behaviour, ...methodNames)=>(
         for (const methodName of methodNames){
             const method = clazz.prototype[methodName];
             Object.defineProperty(clazz.prototype, methodName, {
-                value () {
-                    behaviour.apply(this, arguments);
-                    return method.apply(this, arguments);
+                value (...args) {
+                    behaviour.apply(this, args);
+                    return method.apply(this, args);
                 },
                 writable: true
             });
@@ -1768,9 +1768,9 @@ const $e3473fb7a7ac863f$export$c7fd1518a7cbf3dd = (behaviour, ...methodNames)=>(
         for (const methodName of methodNames){
             const method = clazz.prototype[methodName];
             Object.defineProperty(clazz.prototype, methodName, {
-                value () {
-                    const returnedValue = method.apply(this, arguments);
-                    behaviour.apply(this, arguments);
+                value (...args) {
+                    const returnedValue = method.apply(this, args);
+                    behaviour.apply(this, args);
                     return returnedValue;
                 },
                 writable: true

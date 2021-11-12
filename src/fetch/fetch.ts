@@ -1,4 +1,10 @@
-type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+enum HTTPMethod {
+  GET = 'GET',
+  POST = 'POST',
+  PUT = 'PUT',
+  PATCH = 'PATCH',
+  DELETE = 'DELETE',
+}
 
 interface Response {
   ok: boolean
@@ -54,16 +60,19 @@ export function createClient(
 
   return {
     get(url: string, options: any) {
-      return client(url, 'GET', options)
+      return client(url, HTTPMethod.GET, options)
     },
     post(url: string, body: any, options: any) {
-      return client(url, 'POST', { ...options, body: JSON.stringify(body) })
+      return client(url, HTTPMethod.POST, { ...options, body: JSON.stringify(body) })
     },
     put(url: string, body: any, options: any) {
-      return client(url, 'PUT', { ...options, body: JSON.stringify(body) })
+      return client(url, HTTPMethod.PUT, { ...options, body: JSON.stringify(body) })
+    },
+    patch(url: string, body: any, options: any) {
+      return client(url, HTTPMethod.PATCH, { ...options, body: JSON.stringify(body) })
     },
     delete(url: string, options: any) {
-      return client(url, 'DELETE', options)
+      return client(url, HTTPMethod.DELETE, options)
     },
   }
 }
