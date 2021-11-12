@@ -68,11 +68,11 @@ type GenericFunction = (...args: any[]) => any;
 /**
  * Identity, x => x
  */
-export const identity: (x: any) => any;
+export const identity: <T>(x: T) => T;
 /**
  * Constant, x => y => x
  */
-export const constant: (a: any) => () => any;
+export const constant: <T>(a: T) => () => T;
 /**
  * Arity, turn a function into one with n arguments
  */
@@ -706,8 +706,8 @@ export class Maybe {
 export class Just extends Maybe {
     get isJust(): boolean;
     get isNothing(): boolean;
-    fold(fn?: (x: any) => any): any;
-    filter(fn?: (x: any) => any): Maybe;
+    fold(fn?: <T>(x: T) => T): any;
+    filter(fn?: <T>(x: T) => T): Maybe;
     map(fn: (x: any) => any): Maybe;
     flatMap(fn: (x: any) => Maybe): Maybe;
     ap(Ma: Maybe): Maybe;
@@ -1191,7 +1191,7 @@ interface IReducerFunction {
 }
 export interface Reducer {
     builder(): IReducerBuilder;
-    combineReducers: (...reducers: Reducer[]) => Reducer;
+    combineReducers: (...reducers: IReducerFunction[]) => IReducerFunction;
 }
 interface IReducerBuilder {
     case(type: string, handler: (state: any, action: IAction) => any): IReducerBuilder;
@@ -1221,7 +1221,9 @@ interface IReducerObject {
  * function.
  */
 export function combineReducers(reducers: IReducerObject): IReducerFunction;
-type Selector = (state: any) => any;
+type Selector = (state: {
+    [propKey: PropertyKey]: any;
+}) => any;
 /**
  * createSelector takes some function and memoizes it
  */

@@ -7,12 +7,15 @@ type GenericFunction = (...args: any[]) => any
 /**
  * Identity, x => x
  */
-export const identity = (x: any) => x
+export const identity = <T>(x: T): T => x
 
 /**
  * Constant, x => y => x
  */
-export const constant = (a: any) => () => a
+export const constant =
+  <T>(a: T) =>
+  (): T =>
+    a
 
 /**
  * Arity, turn a function into one with n arguments
@@ -230,7 +233,7 @@ export const groupBy = curry((key: string, arr: any[]) => {
   const result: any = {}
 
   for (const item of arr) {
-    ;(result[item[key]] || (result[item[key]] = [])).push(item)
+    (result[item[key]] || (result[item[key]] = [])).push(item)
   }
 
   return values(result)

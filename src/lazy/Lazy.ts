@@ -64,7 +64,7 @@ export const Collection: ICollection = {
             next: () => {
               let done, value
               do {
-                ;({ done, value } = iterator.next())
+                ({ done, value } = iterator.next())
               } while (!done && !predicate(value))
               return { done, value }
             },
@@ -84,7 +84,7 @@ export const Collection: ICollection = {
             next: () => {
               let done, value
               do {
-                ;({ done, value } = iterator.next())
+                ({ done, value } = iterator.next())
               } while (!done && !searcher(value))
               return { done, value }
             },

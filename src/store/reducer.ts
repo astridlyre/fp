@@ -10,7 +10,7 @@ export interface IReducerFunction {
 
 export interface Reducer {
   builder(): IReducerBuilder
-  combineReducers: (...reducers: Reducer[]) => Reducer
+  combineReducers: (...reducers: IReducerFunction[]) => IReducerFunction
 }
 
 interface IReducerBuilder {
