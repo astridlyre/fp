@@ -11,10 +11,13 @@ export function Prepend(behaviour: any) {
             if (prependValue === undefined || !!prependValue) {
               return overriddenMethodFunction.apply(this, args)
             }
+            return void 0
           },
           writable: true,
         })
-      } else throw new Error(`Attempt to override non-existant method ${prop as string}`)
+      } else {
+        throw new Error(`Attempt to override non-existant method ${prop as string}`)
+      }
     }
     return clazz
   }

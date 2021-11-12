@@ -1,3 +1,5 @@
+/* eslint no-unused-vars: 0 */
+
 import { Success, Failure } from './Result'
 
 export class Try {

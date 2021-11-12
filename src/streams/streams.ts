@@ -1,9 +1,10 @@
+/* eslint no-unused-vars: 0 */
 import { Transform } from 'stream'
 
 export function createFilterStream(fn: (value: any) => boolean) {
   return new Transform({
     objectMode: true,
-    transform(chunk: any, encoding: string, callback: Function) {
+    transform(chunk: any, encoding: string, callback: () => void) {
       if (fn(chunk)) this.push(chunk)
       callback()
     },
@@ -13,7 +14,7 @@ export function createFilterStream(fn: (value: any) => boolean) {
 export function createMapStream(fn: (value: any) => any) {
   return new Transform({
     objectMode: true,
-    transform(chunk: any, encoding: string, callback: Function) {
+    transform(chunk: any, encoding: string, callback: () => void) {
       this.push(fn(chunk))
       callback()
     },
@@ -27,11 +28,11 @@ export function createReduceStream(
   let accumulator = initialValue
   return new Transform({
     objectMode: true,
-    transform(chunk: any, encoding: string, callback: Function) {
+    transform(chunk: any, encoding: string, callback: () => void) {
       accumulator = reducer(accumulator, chunk)
       callback()
     },
-    flush(callback: Function) {
+    flush(callback: () => void) {
       this.push(accumulator)
       callback()
     },
@@ -46,14 +47,14 @@ export interface ParallelStream {
 export class ParallelStream extends Transform {
   userTransform
   running = 0
-  terminate: Function | null = null
+  terminate: (() => void) | null = null
 
   constructor(
     userTransform: (
       chunk: any,
       encoding: string,
-      push: Function,
-      onComplete: Function
+      push: (value: any) => any,
+      onComplete: (err: Error) => any
     ) => void,
     options = {}
   ) {
@@ -61,13 +62,13 @@ export class ParallelStream extends Transform {
     this.userTransform = userTransform
   }
 
-  _transform(chunk: any, encoding: string, callback: Function) {
+  _transform(chunk: any, encoding: string, callback: () => void) {
     this.running++
     this.userTransform(chunk, encoding, this.push.bind(this), this._onComplete.bind(this))
     callback()
   }
 
-  _flush(callback: Function) {
+  _flush(callback: () => void) {
     if (this.running > 0) {
       this.terminate = callback
     } else callback()
@@ -94,16 +95,16 @@ export class LimitedParallelStream extends Transform {
   concurrency
   userTransform
   running = 0
-  continue: Function | null = null
-  terminate: Function | null = null
+  continue: (() => void) | null = null
+  terminate: (() => void) | null = null
 
   constructor(
     concurrency: number,
     userTransform: (
       chunk: any,
       encoding: string,
-      push: Function,
-      onComplete: Function
+      push: (value: any) => any,
+      onComplete: (err: Error) => any
     ) => void,
     options = {}
   ) {
@@ -112,7 +113,7 @@ export class LimitedParallelStream extends Transform {
     this.userTransform = userTransform
   }
 
-  _transform(chunk: any, encoding: string, callback: Function) {
+  _transform(chunk: any, encoding: string, callback: () => void) {
     this.running++
     this.userTransform(chunk, encoding, this.push.bind(this), this._onComplete.bind(this))
     if (this.running < this.concurrency) {
@@ -122,7 +123,7 @@ export class LimitedParallelStream extends Transform {
     }
   }
 
-  _flush(callback: Function) {
+  _flush(callback: () => void) {
     if (this.running > 0) {
       this.terminate = callback
     } else callback()

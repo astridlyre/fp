@@ -1,3 +1,5 @@
+/* eslint no-unused-vars: 0 */
+
 export function throwError(err: Error): Error {
   throw err
 }

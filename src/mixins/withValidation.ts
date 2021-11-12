@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0 */
 import { curry } from '../functions/utils'
 
 interface IValidationError {
@@ -36,10 +37,10 @@ export const withValidation = curry(
     onSucces: (...args: any) => any,
     onFailure: (...args: any) => any
   ) =>
-    function validate(this: any) {
-      if (!validator(selector.apply(this, arguments as any))) {
+    function validate(this: any, ...args: any[]) {
+      if (!validator(selector.apply(this, args))) {
         return onFailure(new ValidationError('Validation failed', validator.errors))
       }
-      return onSucces.apply(this, arguments as any)
+      return onSucces.apply(this, args)
     }
 )

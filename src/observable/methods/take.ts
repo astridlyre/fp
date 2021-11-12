@@ -13,7 +13,7 @@ export const take = placeholder((numberToTake: number, stream: Observable) => {
     const subs = stream.subscribe(
       withNext(observer)((value: any) => {
         if (taken++ >= numberToTake) return observer.complete()
-        observer.next(value)
+        return observer.next(value)
       })
     )
     return () => subs.unsubscribe()

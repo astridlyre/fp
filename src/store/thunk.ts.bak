@@ -12,7 +12,9 @@ function createThunkMiddleware(extraArgument?: any) {
     return (next: Middleware) => (action: IAction | any) =>
       isFunction(action) ? action(dispatch, getState, extraArgument) : next(action)
   }
+
   middleware.withExtraArgument = createThunkMiddleware
+
   return middleware
 }
 

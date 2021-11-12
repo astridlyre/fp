@@ -1,14 +1,17 @@
+/* eslint no-unused-vars: 0, prefer-spread: 0, prefer-rest-params: 0 */
 import { isArray, isFunction } from '../functions/predicates'
 import { memoize } from '../functions/utils'
 import { head } from '../functions/arrays'
 
+type Selector = (state: any) => any
+
 /**
  * createSelector takes some function and memoizes it
  */
-export function createSelector(...fns: Function[]) {
+export function createSelector(...fns: Selector[]) {
   let recomputations = 0
   let lastResult: any
-  let resultFunc = fns.pop()
+  const resultFunc = fns.pop()
 
   if (!isFunction(resultFunc)) {
     throw new Error(
@@ -19,9 +22,9 @@ export function createSelector(...fns: Function[]) {
 
   const dependencies = getDependencies(fns)
 
-  const memoizedResultFunc = memoize(function wrappedResultFunc() {
+  const memoizedResultFunc = memoize(function wrappedResultFunc(/*... args*/) {
     recomputations++
-    return resultFunc!.apply(null, arguments)
+    return resultFunc && resultFunc.apply(null, arguments as any)
   })
 
   const selector = memoize(function selector() {
@@ -46,7 +49,7 @@ export function createSelector(...fns: Function[]) {
   })
 }
 
-function getDependencies(fns: Function[]) {
+function getDependencies(fns: Selector[]) {
   const dependencies = isArray(head(fns)) ? head(fns) : fns
 
   if (!dependencies.every(isFunction)) {

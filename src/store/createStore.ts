@@ -1,5 +1,6 @@
+/* eslint no-param-reassign: 0, no-unused-vars: 0 */
 import { isFunction, isUndefined } from '../functions/predicates'
-import { stringify } from '../functions/utils'
+import { identity, stringify } from '../functions/utils'
 import { diff } from '../functions/objects'
 import { $$observable, Observable, Observer } from '../observable/Observable'
 import { isPlainObject } from './isPlainObject'
@@ -8,8 +9,8 @@ import { IAction } from './createAction'
 export const INIT = '@@ACTION/INIT'
 
 interface IListener {
-  selector: Function
-  listener: Function
+  selector: (state: any) => any
+  listener: (state?: any) => void
 }
 
 /**
@@ -18,7 +19,9 @@ interface IListener {
 export function createStore(
   reducer: (state: any, action: IAction) => any,
   initialState?: any,
-  enhancer?: Function
+  enhancer?: (
+    createStore: any
+  ) => (reducer: (state: any, action: IAction) => any, initialState: any) => any
 ) {
   if (isFunction(initialState) && isFunction(enhancer)) {
     throw new Error('Passing multiple enhancers is not supported')
@@ -34,7 +37,7 @@ export function createStore(
       throw new Error('Expected enhancer to be a function, got: ' + stringify(enhancer))
     }
 
-    return enhancer!(createStore)(reducer, initialState)
+    return enhancer && enhancer(createStore)(reducer, initialState)
   }
 
   if (!isFunction(reducer)) {
@@ -150,7 +153,7 @@ export function createStore(
    * Creates a simple observable from state updates, compatible with the
    * Observable proposal
    */
-  function observe(selector: (state: any) => any = (x: any) => x) {
+  function observe(selector: (state: any) => any = identity) {
     return new Observable((observer: Observer) => {
       return subscribe(selector, () => observer.next(selector(getState())))
     })

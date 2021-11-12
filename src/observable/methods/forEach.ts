@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0 */
 import { curry } from '../../functions/utils'
 import { Observable, Observer } from '../Observable'
 

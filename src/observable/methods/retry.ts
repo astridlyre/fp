@@ -1,3 +1,4 @@
+/* eslint no-param-reassign: 0, no-magic-numbers: 0 */
 import { isNumber } from '../../functions/predicates'
 import { placeholder } from './utils'
 import { Observable, Observer, Subscription } from '../Observable'
@@ -54,7 +55,7 @@ function retryInner(
             config.method === 'expo' ? config.delay * Math.pow(i, 2) : config.delay * i
           )
         }
-        observer.complete()
+        return observer.complete()
       },
       complete: () => observer.complete(),
     })

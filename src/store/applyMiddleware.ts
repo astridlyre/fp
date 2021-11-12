@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0, @typescript-eslint/no-unused-vars: 0 */
 import { compose } from '../functions/utils'
 import { IAction } from './createAction'
 
@@ -6,15 +7,17 @@ export interface IMiddlewareAPI {
   dispatch(action: IAction, ...args: any[]): any
 }
 
+export type Middleware = (api: IMiddlewareAPI) => any
+
 /**
  * Applies various middleware function to the store dispatch
  */
-export function applyMiddleware(...middlewares: Function[]) {
+export function applyMiddleware(...middlewares: Middleware[]) {
   return (createStore: any) =>
     (reducer: (state: any, action: IAction) => any, initialState: any) => {
       const store = createStore(reducer, initialState)
 
-      let dispatch = (..._: any[]) => {
+      let dispatch = (...args: any[]) => {
         throw new Error('Cannot dispatch while constructing middleware')
       }
 

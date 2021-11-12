@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0, prefer-const: 0, no-param-reassign: 0 */
 /**
  * Lazy Collection is a Collection data-type that is essentially just mapping
  * Symbol.iterator. It can be mixed in to any existing iterable object, such as
@@ -58,7 +59,7 @@ export const Collection: ICollection = {
             next: () => {
               let done, value
               do {
-                ;({ done, value } = iterator.next())
+                ({ done, value } = iterator.next())
               } while (!done && !predicate(value))
               return { done, value }
             },
@@ -78,7 +79,7 @@ export const Collection: ICollection = {
             next: () => {
               let done, value
               do {
-                ;({ done, value } = iterator.next())
+                ({ done, value } = iterator.next())
               } while (!done && !searcher(value))
               return { done, value }
             },
@@ -150,7 +151,7 @@ export const Collection: ICollection = {
         while (numberToDrop-- > 0) iterator.next()
         return {
           next: () => {
-            let { done, value } = iterator.next()
+            const { done, value } = iterator.next()
             return { done, value: done ? undefined : value }
           },
         }
@@ -210,7 +211,7 @@ export const Stack = (): IStack =>
 
 Stack.from = function from<X>(iterable: Iterable<X>): IStack {
   const stack = this()
-  for (let element of iterable) {
+  for (const element of iterable) {
     stack.push(element)
   }
   return stack

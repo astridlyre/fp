@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0 */
 import { placeholder } from './utils'
 import { Observable, Observer } from '../Observable'
 
@@ -14,7 +15,7 @@ export const until = placeholder(
         next: value => {
           try {
             if (comparator(value)) {
-              return observer.complete()
+              observer.complete()
             }
           } catch (err: any) {
             observer.error(err)

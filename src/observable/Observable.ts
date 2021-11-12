@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0, no-magic-numbers: 0 */
 import { entries } from '../functions/objects'
 import { isFunction } from '../functions/predicates'
 import 'core-js/features/observable/index.js'
@@ -26,7 +27,7 @@ import { pick } from './methods/pick'
 import { reduce } from './methods/reduce'
 import { retry } from './methods/retry'
 import { skip } from './methods/skip'
-import { share } from './methods/share'
+import { share, DEFAULT_BUFFER_SIZE } from './methods/share'
 import { switchStream } from './methods/switch'
 import { subject } from './methods/subject'
 import { take } from './methods/take'
@@ -41,8 +42,10 @@ export interface Observer {
   complete(): void
 }
 
+type GenericFunction = (...args: any[]) => any
+
 export interface Observable {
-  fromEvent(emitter: any, event: string, handler: Function): Observable
+  fromEvent(emitter: any, event: string, handler: GenericFunction): Observable
   fromGenerator(generator: GeneratorFunction): Observable
   fromPromise<X>(promise: Promise<X>): Observable
   fromStream(stream: any): Observable
@@ -57,8 +60,8 @@ export interface Observable {
   reduce(reducer: (accumulator: any, value: any) => any, initialValue: any): Observable
   mapTo(value: any): Observable
   throttle(limit: number): Observable
-  forEach(f: Function): any
-  effect(f: Function): Observable
+  forEach(f: (value: any) => void): any
+  effect(f: (value: any) => void): Observable
   pick(prop: PropertyKey): Observable
   debounce(limit: number): Observable
   catch(err: Error): Observable
@@ -72,7 +75,7 @@ export interface Observable {
   until(fn: (value: any) => boolean): Observable
   zip(zipper: (...args: any[]) => any, ...streams: Observable[]): Observable
   retry(config: any): Observable
-  finally(f: Function): Observable
+  finally(f: (err?: Error) => void): Observable
   subscribe(observer: Observer): Subscription
 }
 
@@ -85,7 +88,7 @@ export const $$observable = /* #__PURE__ */ (() =>
 
 const additionalProperties = {
   fromEvent: placeholder(
-    (emitter: any, event: string, handler: Function) =>
+    (emitter: any, event: string, handler: GenericFunction) =>
       new Observable((observer: Observer) => {
         const group = new Map([
           [event, (...args: any[]) => observer.next(handler(...args))],
@@ -193,7 +196,7 @@ export const ReactiveExtensions = {
   merge(stream: Observable) {
     return merge(this, stream)
   },
-  share(bufferSize = 100) {
+  share(bufferSize: number = DEFAULT_BUFFER_SIZE) {
     return share(bufferSize, this as any)
   },
   switch() {
@@ -202,7 +205,7 @@ export const ReactiveExtensions = {
   flatMap(fn: (value: any) => Observable) {
     return flatMap(fn, this)
   },
-  distinct(fn: Function = (x: any) => x) {
+  distinct(fn: GenericFunction = (x: any) => x) {
     return distinct(fn, this)
   },
   until(fn: (value: any) => boolean) {

@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0 */
 import { nanoid } from './nanoid'
 import { createAction, IAction } from './createAction'
 
@@ -5,12 +6,18 @@ const STATUS_FULFILLED = 'fulfilled'
 const STATUS_REJECTED = 'rejected'
 const STATUS_PENDING = 'pending'
 
+class AbortError extends Error {
+  constructor(message: string) {
+    super(message)
+  }
+}
+
 /**
  * Creates an async thunk
  */
 export function createAsyncThunk(
   typePrefix: string,
-  payloadCreator: Function,
+  payloadCreator: (...args: any[]) => any,
   options: any
 ) {
   // Create thunk states
@@ -39,11 +46,11 @@ export function createAsyncThunk(
       let abortReason: any
       let started = false
 
-      const abortedPromise = new Promise((_, reject) =>
+      const abortedPromise = new Promise((_, reject) => {
         abortController.signal.addEventListener('abort', () =>
-          reject({ name: 'AbortError', message: abortReason || 'Aborted' })
+          reject(new AbortError(abortReason || 'Aborted'))
         )
-      )
+      })
 
       const promise = (async function createPromise() {
         let finalAction: any

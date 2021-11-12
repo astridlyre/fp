@@ -1,3 +1,4 @@
+/* eslint prefer-rest-params: 0, prefer-spread: 0, no-unused-vars: 0 */
 import { deepEqual } from '../functions/utils'
 import { isFunction, isClass } from '../functions/predicates'
 import { last } from '../functions/arrays'

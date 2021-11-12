@@ -1,7 +1,10 @@
+/* eslint no-param-reassign: 0, no-unused-vars: 0 */
 import { curry, compose, keyBy } from './utils'
 import { prop, aggregate, values } from './objects'
 
-function composeM2(f: Function, g: Function) {
+type GenericFunction = (...args: any[]) => any
+
+function composeM2(f: GenericFunction, g: GenericFunction) {
   return function innerComposeM2(this: any, ...args: any[]) {
     return g.apply(this, args).flatMap(f)
   }
@@ -14,17 +17,17 @@ export function composeM(...Ms: any) {
   return Ms.reduce(composeM2)
 }
 
-export const liftA2 = curry((fn: Function, a1: any, a2: any) => a1.map(fn).ap(a2))
-export const liftA3 = curry((fn: Function, a1: any, a2: any, a3: any) =>
+export const liftA2 = curry((fn: GenericFunction, a1: any, a2: any) => a1.map(fn).ap(a2))
+export const liftA3 = curry((fn: GenericFunction, a1: any, a2: any, a3: any) =>
   a1.map(fn).ap(a2).ap(a3)
 )
-export const liftA4 = curry((fn: Function, a1: any, a2: any, a3: any, a4: any) =>
+export const liftA4 = curry((fn: GenericFunction, a1: any, a2: any, a3: any, a4: any) =>
   a1.map(fn).ap(a2).ap(a3).ap(a4)
 )
-export const apply = curry((fn: Function, F: any) => map.call(F, fn))
+export const apply = curry((fn: GenericFunction, F: any) => map.call(F, fn))
 export const flat = (M: any) => M.flat()
-export const flatMap = curry((f: Function, M: any) => M.flatMap(f))
-export const fold = curry((f: Function, M: any) => M.fold(f))
+export const flatMap = curry((f: GenericFunction, M: any) => M.flatMap(f))
+export const fold = curry((f: GenericFunction, M: any) => M.fold(f))
 export const getOrElseThrow = curry((e: Error, M: any) => M.getOrElseThrow(e))
 
 /**
@@ -56,7 +59,7 @@ export const partition = (
 /**
  * ZipMap
  */
-export const zipMap = <X>(f: Function, ...iters: Iterable<X>[]) => {
+export const zipMap = <X>(f: GenericFunction, ...iters: Iterable<X>[]) => {
   const min = Math.min(...pluck('length')(iters))
   const result = []
 
@@ -114,7 +117,7 @@ export const pluck = compose(map, prop)
 /**
  * DeepMap
  */
-export const deepMap = (fn: Function) =>
+export const deepMap = (fn: (element: any) => any) =>
   function innerDeepMap(tree: any[]): any[] {
     return Array.prototype.map.call(tree, element =>
       Array.isArray(element) ? innerDeepMap(element) : fn(element)

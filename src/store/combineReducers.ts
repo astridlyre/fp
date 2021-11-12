@@ -1,3 +1,4 @@
+/* eslint no-param-reassign: 0 */
 import { isFunction, isUndefined } from '../functions/predicates'
 import { keys } from '../functions/objects'
 import { INIT } from './createStore'

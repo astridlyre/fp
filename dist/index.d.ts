@@ -64,6 +64,7 @@ export function isEmpty(x: any): boolean;
  * IsClass
  */
 export function isClass(obj: any): any;
+type GenericFunction = (...args: any[]) => any;
 /**
  * Identity, x => x
  */
@@ -71,31 +72,31 @@ export const identity: (x: any) => any;
 /**
  * Constant, x => y => x
  */
-export const constant: (a: any) => (b: any) => any;
+export const constant: (a: any) => () => any;
 /**
  * Arity, turn a function into one with n arguments
  */
-export const arity: (fn: Function, n: number) => (this: any, ...args: any[]) => any;
+export const arity: (fn: GenericFunction, n: number) => (this: any, ...args: any[]) => any;
 /**
  * Unary, turn a function into one with 1 argument
  */
-export const unary: (fn: Function) => (this: any, ...args: any[]) => any;
+export const unary: (fn: GenericFunction) => (this: any, ...args: any[]) => any;
 /**
  * Binary, turn a function into one with 2 arguments
  */
-export const binary: (fn: Function) => (this: any, ...args: any[]) => any;
+export const binary: (fn: GenericFunction) => (this: any, ...args: any[]) => any;
 /**
  * Ternary, turn a function into one with 3 arguments
  */
-export const ternary: (fn: Function) => (this: any, ...args: any[]) => any;
+export const ternary: (fn: GenericFunction) => (this: any, ...args: any[]) => any;
 /**
  * Call First, partially apply a function's leftmost argument
  */
-export const callFirst: (fn: Function, larg: any) => (this: any, ...args: any) => any;
+export const callFirst: (fn: GenericFunction, larg: any) => (this: any, ...args: any) => any;
 /**
  * Call Last, partially apply a function's rightmost argument
  */
-export const callLast: (fn: Function, rarg: any) => (this: any, ...args: any) => any;
+export const callLast: (fn: GenericFunction, rarg: any) => (this: any, ...args: any) => any;
 /**
  * Demethodize, convert a method to a standalone function
  */
@@ -109,13 +110,13 @@ export const len: (a: any) => any;
  * Any number of functions fns to compose
  *  A function composed of fns
  */
-export function compose(...fns: Function[]): Function;
+export function compose(...fns: GenericFunction[]): GenericFunction;
 /**
  * Pipe, combine any number of functions together, left to right
  * fns to pipe
  * A function pipe of fns
  */
-export function pipe(...fns: Function[]): Function;
+export function pipe(...fns: GenericFunction[]): GenericFunction;
 /**
  * Curry, automatically curry a function, only works with non-variadic functions
  *
@@ -123,7 +124,7 @@ export function pipe(...fns: Function[]): Function;
  * Returns partially applied function, or result of calling
  * function fn if arguments are greater than or equal to total arity of function fn.
  */
-export function curry(fn: Function): (this: any, ...args: any[]) => any;
+export function curry(fn: GenericFunction): (this: any, ...args: any[]) => any;
 /**
  * Tap, run a side effect fn and then return x
  */
@@ -139,11 +140,11 @@ export const negate: (this: any, ...args: any[]) => any;
 /**
  * Flip2, flip the position of a function's arguments
  */
-export const flip2: (f: Function) => (this: any, ...args: any[]) => any;
+export const flip2: (f: GenericFunction) => (this: any, ...args: any[]) => any;
 /**
  * Flip3, flip the first argument to the last argument
  */
-export const flip3: (f: Function) => (this: any, ...args: any[]) => any;
+export const flip3: (f: GenericFunction) => (this: any, ...args: any[]) => any;
 /**
  * Tee, logs argument and returns it
  * @param {any}
@@ -153,7 +154,7 @@ export const tee: any;
 /**
  * Log, spy on the execution of a function fn with logger
  */
-export const log: (fn: Function, logger?: (...data: any[]) => void) => (this: any, ...args: any[]) => any;
+export const log: (fn: GenericFunction, logger?: (...data: any[]) => void) => (this: any, ...args: any[]) => any;
 /**
  * Transduce, combine multiple maps, filters, into a more efficient operation
  */
@@ -161,11 +162,11 @@ export const transduce: (this: any, ...args: any[]) => any;
 /**
  * MapTR, create a map transducer
  */
-export const mapTR: (fn: Function) => (reducer: Function) => (acc: any, val: any) => any;
+export const mapTR: (fn: GenericFunction) => (reducer: (accumulator: any, value: any) => any) => (acc: any, val: any) => any;
 /**
  * filterTR, create a filter transducer
  */
-export const filterTR: (fn: Function) => (reducer: Function) => (acc: any, val: any) => any;
+export const filterTR: (fn: GenericFunction) => (reducer: (accumulator: any, value: any) => any) => (acc: any, val: any) => any;
 /**
  * Send, returns a function that applies instance method name with args
  */
@@ -177,7 +178,7 @@ export const bound: (name: string, ...args: any[]) => (instance: any) => any;
 /**
  * Invoke, returns a function that takes a context to call function fn with args in
  */
-export const invoke: (fn: Function, ...args: any[]) => (instance: any) => any;
+export const invoke: (fn: GenericFunction, ...args: any[]) => (instance: any) => any;
 /**
  * Unique, get only unique items
  */
@@ -212,22 +213,22 @@ export const tryCatch: (this: any, ...args: any[]) => any;
 /**
  * Once will return the cached result of the call
  */
-export function once(fn: Function): (this: any, ...args: any[]) => any;
+export function once(fn: GenericFunction): (this: any, ...args: any[]) => any;
 /**
  * Memoize a function
  */
-export function memoize(fn: Function): {
+export function memoize(fn: GenericFunction): {
     (this: any, ...args: any[]): any;
     clearCache(): any;
 };
 /**
  * Debounce a function
  */
-export const debounce: (delay: number) => (this: any, fn: Function) => void;
+export const debounce: (delay: number) => (this: any, fn: GenericFunction) => void;
 /**
  * Accumulate returns a function that will be called with all accumulated events after delay
  */
-export const accumulate: (delay: number) => (this: any, fn: Function) => (event: any) => void;
+export const accumulate: (delay: number) => (this: any, fn: GenericFunction) => (event: any) => void;
 /**
  * DeepEqual
  * @param {any} a
@@ -322,7 +323,7 @@ export function deepCopy(obj: any): any;
  * @param {object} Object to seal and deep freeze
  * @returns {object} Object that is sealed and deep frozen
  */
-export const immutable: Function;
+export const immutable: (...args: any[]) => any;
 /**
  * Buffer
  * @param {number} count - Size of events to buffer
@@ -343,6 +344,7 @@ declare const concat: (...initialArgs: any[]) => {};
  * @returns {observable} Latest combined output of stream a and b
  */
 declare const combine: (...initialArgs: any[]) => {};
+type _GenericFunction1 = (...args: any[]) => any;
 /**
  * ComposeM
  */
@@ -374,7 +376,7 @@ export const partition: (arr: any[], a: (value: any) => boolean, b: (value: any)
 /**
  * ZipMap
  */
-export const zipMap: <X>(f: Function, ...iters: Iterable<X>[]) => any[];
+export const zipMap: <X>(f: _GenericFunction1, ...iters: Iterable<X>[]) => any[];
 /**
  * SortBy
  */
@@ -405,11 +407,11 @@ export const reduceRight: (this: any, ...args: any[]) => any;
 /**
  * Pluck
  */
-export const pluck: Function;
+export const pluck: (...args: any[]) => any;
 /**
  * DeepMap
  */
-export const deepMap: (fn: Function) => (tree: any[]) => any[];
+export const deepMap: (fn: (element: any) => any) => (tree: any[]) => any[];
 /**
  * Range
  */
@@ -517,7 +519,7 @@ declare const skip: (...initialArgs: any[]) => {};
 /**
  * Share, buffers 100 events by default
  */
-declare const share: (bufferSize: number, stream: Observable) => {};
+declare const share: (bufferSize: number | undefined, stream: Observable) => {};
 /**
  * Subject
  */
@@ -555,8 +557,9 @@ interface Observer {
     error(err: Error): void;
     complete(): void;
 }
+type _GenericFunction2 = (...args: any[]) => any;
 export interface Observable {
-    fromEvent(emitter: any, event: string, handler: Function): Observable;
+    fromEvent(emitter: any, event: string, handler: _GenericFunction2): Observable;
     fromGenerator(generator: GeneratorFunction): Observable;
     fromPromise<X>(promise: Promise<X>): Observable;
     fromStream(stream: any): Observable;
@@ -571,8 +574,8 @@ export interface Observable {
     _reduce1(reducer: (accumulator: any, value: any) => any, initialValue: any): Observable;
     mapTo(value: any): Observable;
     throttle(limit: number): Observable;
-    _forEach1(f: Function): any;
-    effect(f: Function): Observable;
+    _forEach1(f: (value: any) => void): any;
+    effect(f: (value: any) => void): Observable;
     _pick1(prop: PropertyKey): Observable;
     _debounce1(limit: number): Observable;
     catch(err: Error): Observable;
@@ -586,20 +589,21 @@ export interface Observable {
     until(fn: (value: any) => boolean): Observable;
     _zip1(zipper: (...args: any[]) => any, ...streams: Observable[]): Observable;
     retry(config: any): Observable;
-    finally(f: Function): Observable;
+    finally(f: (err?: Error) => void): Observable;
     subscribe(observer: Observer): Subscription;
 }
 interface Subscription {
     unsubscribe(): void;
 }
+type _GenericFunction3 = (...args: any[]) => any;
 /**
  * ComposeAsync
  */
-export const composeAsync: (...fns: Function[]) => Function;
+export const composeAsync: (...fns: _GenericFunction3[]) => _GenericFunction3;
 /**
  * PipeAsync
  */
-export const pipeAsync: (...fns: Function[]) => Function;
+export const pipeAsync: (...fns: _GenericFunction3[]) => _GenericFunction3;
 /**
  * MapAsync
  */
@@ -654,11 +658,12 @@ export function Append(behaviour: any): (clazz: any) => any;
 export function Prepend(behaviour: any): (clazz: any) => any;
 export function Define(behaviour: any): (clazz: any) => void;
 export function Override(behaviour: any): (clazz: any) => any;
-export const after: (...fns: Function[]) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
-export const before: (...fns: Function[]) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
-export const provided: (...fns: Function[]) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
-export const unless: (...fns: Function[]) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
-export const wrapWith: (decorator: Function) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
+type _GenericFunction4 = (...args: any[]) => any;
+export const after: (...fns: _GenericFunction4[]) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
+export const before: (...fns: _GenericFunction4[]) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
+export const provided: (...fns: _GenericFunction4[]) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
+export const unless: (...fns: _GenericFunction4[]) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
+export const wrapWith: (decorator: _GenericFunction4) => (target: any, name: string, descriptor: PropertyDescriptor) => void;
 export const aroundAll: (behaviour: any, ...methodNames: string[]) => (clazz: any) => any;
 export const beforeAll: (behaviour: any, ...methodNames: string[]) => (clazz: any) => any;
 export const afterAll: (behaviour: any, ...methodNames: string[]) => (clazz: any) => any;
@@ -679,8 +684,7 @@ export const FactoryFactory: (c: any) => (...args: any[]) => any;
 export interface Maybe {
     isJust: boolean;
     isNothing: boolean;
-    merge(): Maybe;
-    call(content: Maybe, ...args: any): Function;
+    merge(): any;
     map(mapper: (value: any) => any): Maybe;
 }
 export class Maybe {
@@ -781,34 +785,36 @@ export class TryAsync {
     constructor();
     static of(fn: <X>() => Promise<X>, msg: string): Promise<Failure | Success>;
 }
+type IOFunction = () => any;
 export class IO {
-    unsafePerformIO: Function;
+    unsafePerformIO: IOFunction;
     [Symbol.toStringTag]: string;
-    constructor(fn: Function);
-    map(fn: (value: Function) => Function): IO;
-    flatMap(fn: (value: Function) => Function): IO;
+    constructor(fn: IOFunction);
+    map(fn: (value: IOFunction) => IOFunction): IO;
+    flatMap(fn: (value: IOFunction) => IOFunction): IO;
     ap(f: any): IO;
     merge(): IO;
     toString(): string;
     toJSON(): {
         type: string;
-        value: Function;
+        value: IOFunction;
     };
     static of(x: any): IO;
 }
+type IOAsyncFunction = <X>() => Promise<X>;
 export class IOAsync {
-    unsafePerformIO: Function;
+    unsafePerformIO: IOAsyncFunction;
     [Symbol.toStringTag]: string;
-    constructor(fn: Function);
-    map(fn: (value: Function) => Function): Promise<IO>;
-    flatMap(fn: (value: Function) => Function): Promise<any>;
+    constructor(fn: IOAsyncFunction);
+    map(fn: (value: IOAsyncFunction) => IOAsyncFunction): Promise<IO>;
+    flatMap(fn: (value: IOAsyncFunction) => IOAsyncFunction): Promise<any>;
     merge(): Promise<IOAsync>;
     toString(): string;
     toJSON(): {
         type: string;
-        value: Function;
+        value: IOAsyncFunction;
     };
-    static of<X>(fn: Promise<X>): IOAsync;
+    static of(fn: IOAsyncFunction): IOAsync;
 }
 export class Pair {
     #private;
@@ -887,6 +893,10 @@ export function createClient(apiEndpoint: string, options?: {
         abort: () => void;
     };
     put(url: string, body: any, options: any): {
+        req: Promise<unknown>;
+        abort: () => void;
+    };
+    patch(url: string, body: any, options: any): {
         req: Promise<unknown>;
         abort: () => void;
     };
@@ -1032,7 +1042,7 @@ interface IHandler {
     handler: (...args: any) => any;
     [isMethodObject]: boolean;
 }
-interface MultiMethod {
+interface MultiMethod extends Function {
     [dispatchKey]: (...args: any) => any;
     [handlersKey]: IHandler[];
     map: (...args: any) => any;
@@ -1060,12 +1070,12 @@ export interface ParallelStream {
     push(value: any): any;
 }
 export class ParallelStream extends Transform {
-    userTransform: (chunk: any, encoding: string, push: Function, onComplete: Function) => void;
+    userTransform: (chunk: any, encoding: string, push: (value: any) => any, onComplete: (err: Error) => any) => void;
     running: number;
-    terminate: Function | null;
-    constructor(userTransform: (chunk: any, encoding: string, push: Function, onComplete: Function) => void, options?: {});
-    _transform(chunk: any, encoding: string, callback: Function): void;
-    _flush(callback: Function): void;
+    terminate: (() => void) | null;
+    constructor(userTransform: (chunk: any, encoding: string, push: (value: any) => any, onComplete: (err: Error) => any) => void, options?: {});
+    _transform(chunk: any, encoding: string, callback: () => void): void;
+    _flush(callback: () => void): void;
     _onComplete(err: Error): void;
 }
 export interface LimitedParallelStream {
@@ -1074,13 +1084,13 @@ export interface LimitedParallelStream {
 }
 export class LimitedParallelStream extends Transform {
     concurrency: number;
-    userTransform: (chunk: any, encoding: string, push: Function, onComplete: Function) => void;
+    userTransform: (chunk: any, encoding: string, push: (value: any) => any, onComplete: (err: Error) => any) => void;
     running: number;
-    continue: Function | null;
-    terminate: Function | null;
-    constructor(concurrency: number, userTransform: (chunk: any, encoding: string, push: Function, onComplete: Function) => void, options?: {});
-    _transform(chunk: any, encoding: string, callback: Function): void;
-    _flush(callback: Function): void;
+    continue: (() => void) | null;
+    terminate: (() => void) | null;
+    constructor(concurrency: number, userTransform: (chunk: any, encoding: string, push: (value: any) => any, onComplete: (err: Error) => any) => void, options?: {});
+    _transform(chunk: any, encoding: string, callback: () => void): void;
+    _flush(callback: () => void): void;
     _onComplete(err: Error): void;
 }
 export function createFork(stream: any): (...streams: any[]) => void;
@@ -1113,15 +1123,17 @@ interface IMiddlewareAPI {
     getState(): any;
     dispatch(action: IAction, ...args: any[]): any;
 }
+type Middleware = (api: IMiddlewareAPI) => any;
+type IListener = (action: IAction, middlewareAPI: IMiddlewareAPI) => any;
 export const actionListener: {
-    middleware(middlewareAPI: IMiddlewareAPI): (next: Function) => (action: IAction) => any;
-    addListener: (actionCreator: IActionCreator, listener: Function) => void;
-    removeListener: (actionCreator: IActionCreator, listener: Function) => void;
+    middleware(middlewareAPI: IMiddlewareAPI): (next: (action: IAction) => any) => (action: IAction) => any;
+    addListener: (actionCreator: IActionCreator, listener: IListener) => void;
+    removeListener: (actionCreator: IActionCreator, listener: IListener) => void;
 };
 /**
  * Creates an async thunk
  */
-export function createAsyncThunk(typePrefix: string, payloadCreator: Function, options: any): ((arg: any) => (dispatch: (action: IAction) => any, getState: () => any, extra: any) => Promise<any> & {
+export function createAsyncThunk(typePrefix: string, payloadCreator: (...args: any[]) => any, options: any): ((arg: any) => (dispatch: (action: IAction) => any, getState: () => any, extra: any) => Promise<any> & {
     abort(reason: any): void;
     arg: any;
     requestId: string;
@@ -1150,29 +1162,26 @@ export function createAsyncThunk(typePrefix: string, payloadCreator: Function, o
 /**
  * Turns an action creator object into one whose values are wrapped in
  * a dispatch call so as to enable them to be invoked directly
- *
- * @param {object} Action Creators
- * @param {function} Dispatch function
- * @returns {object} Bound action creator object
  */
 export function bindActionCreators(actionCreators: any, dispatch: (action: IAction) => any): any;
 /**
  * Create a stateful store for managing application state
  */
-export function createStore(reducer: (state: any, action: IAction) => any, initialState?: any, enhancer?: Function): any;
+export function createStore(reducer: (state: any, action: IAction) => any, initialState?: any, enhancer?: (createStore: any) => (reducer: (state: any, action: IAction) => any, initialState: any) => any): any;
 /**
  * Turns an object with various reducer functions into a single reducer
  * function.
  */
 export function combineReducers(reducers: any[]): (state: any, action: IAction) => any;
+type Selector = (state: any) => any;
 /**
  * createSelector takes some function and memoizes it
  */
-export function createSelector(...fns: Function[]): {
+export function createSelector(...fns: Selector[]): {
     (this: any, ...args: any[]): any;
     clearCache(): any;
 } & {
-    resultFunc: Function | undefined;
+    resultFunc: Selector | undefined;
     memoizedResultFunc: {
         (this: any, ...args: any[]): any;
         clearCache(): any;
@@ -1187,11 +1196,11 @@ export function createSelector(...fns: Function[]): {
  * be injected later.
  */
 declare function createThunkMiddleware(extraArgument?: any): {
-    (api: IMiddlewareAPI): (next: Function) => (action: any) => any;
+    (api: IMiddlewareAPI): (next: Middleware) => (action: IAction | any) => any;
     withExtraArgument: typeof createThunkMiddleware;
 };
 export const thunk: {
-    (api: IMiddlewareAPI): (next: Function) => (action: any) => any;
+    (api: IMiddlewareAPI): (next: Middleware) => (action: IAction | any) => any;
     withExtraArgument: typeof createThunkMiddleware;
 };
 export interface Reducer {

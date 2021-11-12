@@ -1,3 +1,6 @@
+/* eslint no-unused-vars: 0 */
+import { nanoid } from '../store/nanoid'
+
 enum HTTPMethod {
   GET = 'GET',
   POST = 'POST',
@@ -17,13 +20,14 @@ interface Response {
 export function createClient(
   apiEndpoint: string,
   options = {
-    storageKey: `${Math.round(Math.random() * 100000)}_client_key`,
+    storageKey: `${nanoid()}_client_key`,
     toJSON: true,
   }
 ) {
   async function isError(res: Response | any) {
-    if (!res.ok)
+    if (!res.ok) {
       throw new Error((await res.text()) || `HTTP response was not ok: ${res.status}`)
+    }
     return res
   }
 

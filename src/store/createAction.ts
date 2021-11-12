@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0 */
 import { isPlainObject } from './isPlainObject'
 import { isString } from '../functions/predicates'
 
@@ -20,7 +21,7 @@ export interface IActionCreator extends Function {
 export function createAction(type: string, prepareAction: (...args: any[]) => any) {
   function actionCreator(...args: any[]) {
     if (prepareAction) {
-      let prepared = prepareAction(...args)
+      const prepared = prepareAction(...args)
       if (!prepared) throw new Error('prepareAction did not return an object')
 
       return {

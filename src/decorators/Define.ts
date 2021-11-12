@@ -8,10 +8,11 @@ export function Define(behaviour: any) {
           value: behaviour[prop],
           writable: true,
         })
-      } else
+      } else {
         throw new Error(
           `Illegal attempt to override ${prop as string}, which already exists.`
         )
+      }
     }
   }
 }

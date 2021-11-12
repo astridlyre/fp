@@ -6,7 +6,7 @@ function implementsPushProtocol(obj: any) {
   return (
     obj &&
     Symbol.iterator in Object(obj) &&
-    typeof obj['push'] === 'function' &&
+    typeof obj.push === 'function' &&
     typeof obj[Symbol.iterator] === 'function'
   )
 }

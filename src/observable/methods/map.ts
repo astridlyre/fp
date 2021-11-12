@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0 */
 import { withNext, placeholder } from './utils'
 import { Observable, Observer } from '../Observable'
 

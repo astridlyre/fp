@@ -1,4 +1,7 @@
-const composeAsync2 = (f: Function, g: Function) =>
+/* eslint no-unused-vars: 0 */
+type GenericFunction = (...args: any[]) => any
+
+const composeAsync2 = (f: GenericFunction, g: GenericFunction) =>
   async function innerComposeAsync(this: any, ...args: any[]) {
     return await f.call(this, await g.apply(this, args))
   }
@@ -6,12 +9,12 @@ const composeAsync2 = (f: Function, g: Function) =>
 /**
  * ComposeAsync
  */
-export const composeAsync = (...fns: Function[]) => fns.reduce(composeAsync2)
+export const composeAsync = (...fns: GenericFunction[]) => fns.reduce(composeAsync2)
 
 /**
  * PipeAsync
  */
-export const pipeAsync = (...fns: Function[]) => fns.reduceRight(composeAsync2)
+export const pipeAsync = (...fns: GenericFunction[]) => fns.reduceRight(composeAsync2)
 
 /**
  * MapAsync

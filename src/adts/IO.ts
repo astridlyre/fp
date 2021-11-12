@@ -1,17 +1,20 @@
+/* eslint no-unused-vars: 0 */
 import { compose } from '../functions/utils'
 import { composeAsync } from '../functions/async'
 
+type IOFunction = () => any
+
 export class IO {
-  unsafePerformIO: Function;
+  unsafePerformIO: IOFunction;
   [Symbol.toStringTag] = 'IO'
 
-  constructor(fn: Function) {
+  constructor(fn: IOFunction) {
     this.unsafePerformIO = fn
   }
-  map(fn: (value: Function) => Function) {
-    return new IO(compose(fn, this.unsafePerformIO))
+  map(fn: (value: IOFunction) => IOFunction) {
+    return new IO(compose(fn, this.unsafePerformIO) as IOFunction)
   }
-  flatMap(fn: (value: Function) => Function) {
+  flatMap(fn: (value: IOFunction) => IOFunction) {
     return this.map(fn).merge()
   }
   ap(f: any) {
@@ -31,21 +34,25 @@ export class IO {
   }
 }
 
+type IOAsyncFunction = <X>() => Promise<X>
+
 export class IOAsync {
-  unsafePerformIO: Function;
+  unsafePerformIO: IOAsyncFunction;
   [Symbol.toStringTag] = 'IOAsync'
 
-  constructor(fn: Function) {
+  constructor(fn: IOAsyncFunction) {
     this.unsafePerformIO = fn
   }
-  async map(fn: (value: Function) => Function) {
-    return new IO(composeAsync(fn, this.unsafePerformIO))
+  async map(fn: (value: IOAsyncFunction) => IOAsyncFunction) {
+    return new IO(composeAsync(fn, this.unsafePerformIO) as IOAsyncFunction)
   }
-  async flatMap(fn: (value: Function) => Function) {
+  async flatMap(fn: (value: IOAsyncFunction) => IOAsyncFunction) {
     return await (this.map(fn) as any).merge()
   }
   async merge() {
-    return new IOAsync(async () => await this.unsafePerformIO().unsafePerformIO())
+    return new IOAsync(
+      async () => await (this.unsafePerformIO() as any).unsafePerformIO()
+    )
   }
   toString() {
     return `IOAsync#(${this.unsafePerformIO.name})`
@@ -53,7 +60,7 @@ export class IOAsync {
   toJSON() {
     return { type: 'IOAsync', value: this.unsafePerformIO }
   }
-  static of<X>(fn: Promise<X>) {
-    return new IOAsync(async () => await fn)
+  static of(fn: IOAsyncFunction) {
+    return new IOAsync(fn)
   }
 }

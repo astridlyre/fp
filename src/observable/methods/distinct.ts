@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0 */
 import { deepEqual } from '../../functions/utils'
 import { Observable, Observer } from '../Observable'
 import { withNext, placeholder } from './utils'

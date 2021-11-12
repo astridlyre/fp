@@ -1,3 +1,4 @@
+/* eslint no-param-reassign: 0 */
 import { curry, unique, compose } from './utils'
 import { isFunction, isObject, isMap, isArray, isSet } from './predicates'
 /**
@@ -401,7 +402,7 @@ export function deepCopy(obj: any) {
   return aux
 }
 
-;(Object as any).deepFreeze = (Object as any).deepFreeze || deepFreeze
+(Object as any).deepFreeze = (Object as any).deepFreeze || deepFreeze
 
 /**
  * Immutable

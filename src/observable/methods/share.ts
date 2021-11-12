@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0 */
 import { placeholder } from './utils'
 import { Observable, Observer } from '../Observable'
 
@@ -10,10 +11,12 @@ interface IStore {
   removeObserver(o: Observer): void
 }
 
+export const DEFAULT_BUFFER_SIZE = 100
+
 /**
  * Share, buffers 100 events by default
  */
-export const share = (bufferSize: number, stream: Observable) => {
+export const share = (bufferSize: number = DEFAULT_BUFFER_SIZE, stream: Observable) => {
   const store: IStore = {
     values: [],
     errors: [],
@@ -45,6 +48,7 @@ export const share = (bufferSize: number, stream: Observable) => {
 
   function broadcast() {
     const { values, errors, observers, wantsComplete } = store
+
     if (errors.length) {
       observers.forEach(observer => {
         errors.forEach(value => {
@@ -60,9 +64,10 @@ export const share = (bufferSize: number, stream: Observable) => {
       })
       values.length = 0
     }
+
     if (wantsComplete) {
       observers.forEach(observer => observer.complete())
-      return subs.unsubscribe()
+      subs.unsubscribe()
     }
   }
 
@@ -70,6 +75,7 @@ export const share = (bufferSize: number, stream: Observable) => {
     () =>
       new Observable((observer: Observer) => {
         store.addObserver(observer)
+
         return () => {
           store.removeObserver(observer)
           observer.complete()

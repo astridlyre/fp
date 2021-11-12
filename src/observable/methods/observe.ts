@@ -1,3 +1,4 @@
+/* eslint prefer-rest-params: 0, prefer-spread: 0 */
 import {
   isObject,
   isFunction,
@@ -25,7 +26,7 @@ export function makeObservable(object: any) {
       return result
     },
     get(target, prop, receiver) {
-      if (prop === 'observe')
+      if (prop === 'observe') {
         /**
          * Returns an observe function that takes an optional array of props
          * to observe
@@ -36,6 +37,7 @@ export function makeObservable(object: any) {
             subs.push(sub)
             return () => subs.splice(subs.indexOf(sub), 1)
           })
+      }
 
       if (isAsyncFunction(target[prop])) {
         return async function wrappedMethod() {
@@ -58,7 +60,7 @@ export function makeObservable(object: any) {
           let { done, value } = generator.next()
 
           while (!done) {
-            ;({ done, value } = generator.next())
+            ({ done, value } = generator.next())
             dispatchChanged(target, prop)
             yield { done, value }
           }
@@ -71,7 +73,7 @@ export function makeObservable(object: any) {
           let { done, value } = await generator.next()
 
           while (!done) {
-            ;({ done, value } = await generator.next())
+            ({ done, value } = await generator.next())
             dispatchChanged(target, prop)
             yield { done, value }
           }

@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0 */
 import { placeholder } from './utils'
 import { Observable, Observer, Subscription } from '../Observable'
 
@@ -33,9 +34,9 @@ function retry(
           if (capture === stream) {
             return retry(handler, stream, sub, observer)
           }
-          observer.next(capture)
+          return observer.next(capture)
         } catch (err: any) {
-          observer.error(err)
+          return observer.error(err)
         }
       },
       complete: () => observer.complete(),

@@ -25,7 +25,7 @@ function subNextStream(
       error: observer.error.bind(observer),
       complete() {
         if (i === streams.length - 1) return observer.complete()
-        subNextStream(streams, i + 1, subs, observer)
+        return subNextStream(streams, i + 1, subs, observer)
       },
     })
   )

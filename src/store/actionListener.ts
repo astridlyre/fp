@@ -1,19 +1,22 @@
+/* eslint no-unused-vars: 0 */
 import { isFunction } from '../functions/predicates'
 import { IAction, IActionCreator } from './createAction'
 import { IMiddlewareAPI } from './applyMiddleware'
+
+type IListener = (action: IAction, middlewareAPI: IMiddlewareAPI) => any
 
 /**
  * Creates a middleware function that accepts an optional 'extra argument' to
  * be injected later.
  */
 function createActionListenerMiddleware() {
-  const listeners = new Map()
+  const listeners: Map<IActionCreator | string | IAction, IListener[]> = new Map()
 
   /**
    * Add a listener
    * @param Action creator function or action.type
    */
-  function addListener(actionCreator: IActionCreator, listener: Function) {
+  function addListener(actionCreator: IActionCreator, listener: IListener) {
     const currentListeners = listeners.get(actionCreator) || []
     listeners.set(actionCreator, currentListeners.concat(listener))
   }
@@ -22,19 +25,19 @@ function createActionListenerMiddleware() {
    * Remove a listener
    * @param Action creator function or action.type
    */
-  function removeListener(actionCreator: IActionCreator, listener: Function) {
+  function removeListener(actionCreator: IActionCreator, listener: IListener) {
     const currentListeners = listeners.get(actionCreator) || []
     listeners.set(
       actionCreator,
-      currentListeners.filter((currentListener: Function) => currentListener !== listener)
+      currentListeners.filter((currentListener: IListener) => currentListener !== listener)
     )
   }
 
   return {
     middleware(middlewareAPI: IMiddlewareAPI) {
-      return (next: Function) => (action: IAction) => {
+      return (next: (action: IAction) => any) => (action: IAction) => {
         if (isFunction(action)) {
-          const currentListeners: Function[] = listeners.get(action) || []
+          const currentListeners: IListener[] = listeners.get(action) || []
 
           for (const listener of currentListeners) {
             try {
@@ -45,7 +48,7 @@ function createActionListenerMiddleware() {
           }
         } else {
           const { type } = action
-          const currentListeners: Function[] = listeners.get(type) || []
+          const currentListeners: IListener[] = listeners.get(type) || []
 
           for (const listener of currentListeners) {
             try {

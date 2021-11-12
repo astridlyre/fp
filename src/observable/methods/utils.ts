@@ -1,6 +1,7 @@
+/* eslint no-unused-vars: 0 */
 import { Observable, Observer } from '../Observable'
 
-export const withNext = (observer: Observer) => (next: Function) =>
+export const withNext = (observer: Observer) => (next: (value: any) => any) =>
   ({
     next,
     error: observer.error.bind(observer),

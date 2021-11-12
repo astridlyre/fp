@@ -1,6 +1,9 @@
+/* eslint no-unused-vars: 0 */
+type GenericFunction = (...args: any[]) => any
+
 // Method Decorators
 // Calls fns after method invocation
-export const after = (...fns: Function[]) =>
+export const after = (...fns: GenericFunction[]) =>
   function after(target: any, name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
@@ -14,7 +17,7 @@ export const after = (...fns: Function[]) =>
   }
 
 // Calls fns before method invocation
-export const before = (...fns: Function[]) =>
+export const before = (...fns: GenericFunction[]) =>
   function before(target: any, name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
@@ -27,29 +30,29 @@ export const before = (...fns: Function[]) =>
   }
 
 // Calls method if all fns return truthy
-export const provided = (...fns: Function[]) =>
+export const provided = (...fns: GenericFunction[]) =>
   function provided(target: any, name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
     descriptor.value = function withProvided(this: any, ...args: any[]) {
-      for (const fn of fns) if (!fn.apply(this, arguments)) return
-      return method.apply(this, arguments)
+      for (const fn of fns) if (!fn.apply(this, args)) return void 0
+      return method.apply(this, args)
     }
   }
 
 // Does not call method if any fn returns truthy
-export const unless = (...fns: Function[]) =>
+export const unless = (...fns: GenericFunction[]) =>
   function unless(target: any, name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
     descriptor.value = function withUnless(this: any, ...args: any[]) {
-      for (const fn of fns) if (fn.apply(this, args)) return
+      for (const fn of fns) if (fn.apply(this, args)) return void 0
       return method.apply(this, args)
     }
   }
 
 // Wrap a method with a decorator (turns ordinary decorator into ES.later)
-export const wrapWith = (decorator: Function) =>
+export const wrapWith = (decorator: GenericFunction) =>
   function wrapWith(target: any, name: string, descriptor: PropertyDescriptor) {
     descriptor.value = decorator(descriptor.value)
   }

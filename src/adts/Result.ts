@@ -1,3 +1,5 @@
+/* eslint no-unused-vars: 0 */
+
 import { isFunction } from '../functions/predicates'
 import { errorWith } from './utils'
 

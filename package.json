@@ -1,6 +1,6 @@
 {
   "name": "@ebflat9/fp",
-  "version": "1.2.35",
+  "version": "1.2.36",
   "description": "my fp utils",
   "source": "src/index.js",
   "main": "dist/index.js",
@@ -14,10 +14,13 @@
     "functional programming"
   ],
   "scripts": {
-    "test": "parcel build src/index.ts && mocha --parallel",
+    "test": "mocha --parallel",
+    "test:build": "parcel build src/index.ts && mocha --parallel",
     "build": "parcel build src/index.ts",
     "check": "tsc --noEmit",
-    "watch": "parcel watch"
+    "check:format": "prettier -c src/**",
+    "watch": "parcel watch",
+    "lint": "eslint src/**"
   },
   "repository": {
     "type": "git",

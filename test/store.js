@@ -176,13 +176,14 @@ describe('createAction', function () {
 describe('asyncThunk', function () {
   describe('Creating a thunk', function () {
     it('should create a thunk', function (done) {
-      const thunk = createAsyncThunk('ADD', arg => {
-        return new Promise(resolve => setTimeout(() => resolve(arg), 1))
-      })
+      const thunk = createAsyncThunk(
+        'ADD',
+        arg => new Promise(resolve => setTimeout(() => resolve(arg), 1))
+      )
+      const initialState = { values: [] }
 
-      const initalState = { values: [] }
       const reducer = Reducer.builder()
-        .case(thunk.fulfilled.type, (state = initalState, action) => ({
+        .case(thunk.fulfilled.type, (state = initialState, action) => ({
           ...state,
           values: state.values.concat(action.payload),
         }))

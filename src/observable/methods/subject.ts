@@ -1,3 +1,4 @@
+/* eslint no-param-reassign: 0 */
 import { isFunction } from '../../functions/predicates'
 import { Observable, Observer } from '../Observable'
 

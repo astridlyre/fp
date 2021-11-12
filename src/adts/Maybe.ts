@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0 */
 import { identity } from '../functions/utils'
 import { isFunction } from '../functions/predicates'
 import { errorWith, throwError } from './utils'
@@ -6,8 +7,7 @@ import { errorWith, throwError } from './utils'
 export interface Maybe {
   isJust: boolean
   isNothing: boolean
-  merge(): Maybe
-  call(content: Maybe, ...args: any): Function
+  merge(): any
   map(mapper: (value: any) => any): Maybe
 }
 
