@@ -1,4 +1,6 @@
-export function Append(behaviour: any) {
+import { IBehaviour } from './Types'
+
+export function Append(behaviour: IBehaviour) {
   const instanceKeys = Reflect.ownKeys(behaviour)
 
   return function append(clazz: any) {

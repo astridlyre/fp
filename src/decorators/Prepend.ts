@@ -1,4 +1,6 @@
-export function Prepend(behaviour: any) {
+import { IBehaviour } from './Types'
+
+export function Prepend(behaviour: IBehaviour) {
   const instanceKeys = Reflect.ownKeys(behaviour)
 
   return function prepend(clazz: any) {

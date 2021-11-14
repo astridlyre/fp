@@ -654,22 +654,27 @@ export const padStart: (this: any, ...args: any[]) => any;
  * PadEnd
  */
 export const padEnd: (this: any, ...args: any[]) => any;
-export function Append(behaviour: any): (clazz: any) => any;
-export function Prepend(behaviour: any): (clazz: any) => any;
-export function Define(behaviour: any): (clazz: any) => void;
-export function Override(behaviour: any): (clazz: any) => any;
-type _GenericFunction4 = (...args: any[]) => any;
+interface IGenericFunction {
+    (...args: any[]): any;
+}
+interface IBehaviour {
+    [propKey: PropertyKey]: IGenericFunction;
+}
+export function Append(behaviour: IBehaviour): (clazz: any) => any;
+export function Prepend(behaviour: IBehaviour): (clazz: any) => any;
+export function Define(behaviour: IBehaviour): (clazz: any) => void;
+export function Override(behaviour: IBehaviour): (clazz: any) => any;
 interface IDecorator {
     (target: any, name: string, descriptor: PropertyDescriptor): any;
 }
-export const after: (...fns: _GenericFunction4[]) => IDecorator;
-export const before: (...fns: _GenericFunction4[]) => IDecorator;
-export const provided: (...fns: _GenericFunction4[]) => IDecorator;
-export const unless: (...fns: _GenericFunction4[]) => IDecorator;
-export const wrapWith: (decorator: _GenericFunction4) => IDecorator;
-export const aroundAll: (behaviour: any, ...methodNames: string[]) => (clazz: any) => any;
-export const beforeAll: (behaviour: any, ...methodNames: string[]) => (clazz: any) => any;
-export const afterAll: (behaviour: any, ...methodNames: string[]) => (clazz: any) => any;
+export const after: (...fns: IGenericFunction[]) => IDecorator;
+export const before: (...fns: IGenericFunction[]) => IDecorator;
+export const provided: (...fns: IGenericFunction[]) => IDecorator;
+export const unless: (...fns: IGenericFunction[]) => IDecorator;
+export const wrapWith: (decorator: IGenericFunction) => IDecorator;
+export const aroundAll: (behaviour: IGenericFunction, ...methodNames: string[]) => (clazz: any) => any;
+export const beforeAll: (behaviour: IGenericFunction, ...methodNames: string[]) => (clazz: any) => any;
+export const afterAll: (behaviour: IGenericFunction, ...methodNames: string[]) => (clazz: any) => any;
 /**
  * FunctionalMixin takes a behaviour object and a target, which is the object to mix behaviour into
  */

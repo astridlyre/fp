@@ -1,4 +1,6 @@
-export function Override(behaviour: any) {
+import { IBehaviour } from './Types'
+
+export function Override(behaviour: IBehaviour) {
   const instanceKeys = Reflect.ownKeys(behaviour)
 
   return function override(clazz: any) {

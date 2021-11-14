@@ -1,4 +1,6 @@
-export function Define(behaviour: any) {
+import { IBehaviour } from './Types'
+
+export function Define(behaviour: IBehaviour) {
   const instanceKeys = Reflect.ownKeys(behaviour)
 
   return function define(clazz: any) {
