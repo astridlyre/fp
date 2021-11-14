@@ -1,33 +1,39 @@
 /* eslint no-param-reassign: 0 */
 import { curry, unique, compose } from './utils'
 import { isFunction, isObject, isMap, isArray, isSet } from './predicates'
+
+interface GenericObject {
+  [propKey: PropertyKey]: any
+}
 /**
  * Prop, access a property in an object
  */
 export const prop = curry(
-  (name: PropertyKey, a: any) =>
+  (name: PropertyKey, a: GenericObject) =>
     a && (name in a ? (isFunction(a[name]) ? a[name].call(a) : a[name]) : void 0)
 )
 
 /**
  * SetPropM, sets a property in an object **MUTATES**
  */
-export const setPropM = curry((name: PropertyKey, value: any, a: any): object =>
-  isObject(a) ? ((a[name] = value), a) : a
+export const setPropM = curry(
+  (name: PropertyKey, value: any, a: GenericObject): GenericObject =>
+    isObject(a) ? ((a[name] = value), a) : a
 )
 
 /**
  * SetProp, returns a copy of an object with new property name set to value
  */
-export const setProp = curry((name: PropertyKey, value: any, a: object): object =>
-  a && name in a ? { ...a, [name]: value } : { ...a }
+export const setProp = curry(
+  (name: PropertyKey, value: any, a: GenericObject): GenericObject =>
+    a && name in a ? { ...a, [name]: value } : { ...a }
 )
 
 /**
  * Set, set key in object a to value
  */
 export const set = curry(
-  (key: PropertyKey, value: any, a: any): object | Map<any, any> => (
+  (key: any, value: any, a: GenericObject): GenericObject | Map<any, any> => (
     isMap(a) ? a.set(key, value) : (a[key] = value), a
   )
 )
@@ -35,16 +41,17 @@ export const set = curry(
 /**
  * Props, gets an array of property names from an object, shallow
  */
-export const props = curry((names: PropertyKey[], a: object) =>
+export const props = curry((names: PropertyKey[], a: GenericObject) =>
   names.map(n => prop(n, a))
 )
 
 /**
  * Pick, returns an object with only the selected property names, shallow
  */
-export const pick = curry((names: PropertyKey[], a: any) =>
+export const pick = curry((names: PropertyKey[], a: GenericObject) =>
   names.reduce(
-    (result: any, key) => (key in a ? ((result[key] = a[key]), result) : result),
+    (result: GenericObject, key) =>
+      key in a ? ((result[key] = a[key]), result) : result,
     {}
   )
 )
@@ -52,7 +59,7 @@ export const pick = curry((names: PropertyKey[], a: any) =>
 /**
  * DeepProp, get a property from any object, deep
  */
-export const deepProp = curry((path: string | PropertyKey[], a: object) => {
+export const deepProp = curry((path: string | PropertyKey[], a: GenericObject) => {
   if (!Array.isArray(path)) path = path.split('.')
   const [p, ...rest] = path
   return !rest.length ? prop(p, a) : deepProp(rest, prop(p, a))
@@ -62,10 +69,14 @@ export const deepProp = curry((path: string | PropertyKey[], a: object) => {
  * DeepSetProp, set a property in an object, returns a copy, deep
  */
 export const deepSetProp = curry(
-  (path: string | PropertyKey[], value: any, a: object) => {
+  (path: string | PropertyKey[], value: any, a: GenericObject) => {
     if (!Array.isArray(path)) path = path.split('.')
 
-    function innerDeepSetProp(path: PropertyKey[], value: any, obj: any): object {
+    function innerDeepSetProp(
+      path: PropertyKey[],
+      value: any,
+      obj: GenericObject
+    ): object {
       if (path.length === 1) {
         obj[path[0]] = value
         return obj
@@ -92,19 +103,23 @@ export const deepSetProp = curry(
 /**
  * DeepPick, returns an object with only deep properties paths
  */
-export const deepPick = curry((paths: PropertyKey[], a: object) =>
+export const deepPick = curry((paths: PropertyKey[], a: GenericObject) =>
   paths.reduce((result, path) => deepSetProp(path, deepProp(path)(a), result), {})
 )
 
 /**
  * DiffObject, returns the changed values from newObj that are not in oldObj
  */
-function diffObjects(oldObj: object, newObj: object) {
+function diffObjects(oldObj: GenericObject, newObj: GenericObject) {
   if (oldObj === newObj) return {}
   if (!oldObj) return newObj
   if (!newObj) return oldObj
 
-  function innerDiffObjects(oldObj: any, newObj: any, result: any) {
+  function innerDiffObjects(
+    oldObj: GenericObject,
+    newObj: GenericObject,
+    result: GenericObject
+  ) {
     if (oldObj === newObj) return result
 
     for (const key of Reflect.ownKeys(newObj)) {
@@ -154,7 +169,7 @@ export function diff(a: any, b: any) {
 /**
  * Aggregate, deep merge a and b
  */
-export function aggregate(a: any, b: any): any {
+export function aggregate<T extends GenericObject>(a: T, b: T): T {
   if (!a && b) return b
 
   if (isArray(b)) {
@@ -176,8 +191,8 @@ export function aggregate(a: any, b: any): any {
  * AggregateOn, combine many objects into one with aggregated keys
  * TODO: Try to improve the algorithm
  */
-export function aggregateOn(keyMap: any, ...objects: any[]) {
-  let result: any = {}
+export function aggregateOn(keyMap: any, ...objects: GenericObject[]) {
+  let result: GenericObject = {}
 
   for (const current of objects) {
     result = aggregate(result, current)
@@ -198,7 +213,7 @@ export function aggregateOn(keyMap: any, ...objects: any[]) {
 /**
  * Merge, combine all keys
  */
-export function merge(a: any, b: any) {
+export function merge(a: GenericObject, b: GenericObject) {
   if (!a && b) return deepCopy(b)
   if (!b && a) return deepCopy(a)
 
@@ -211,7 +226,7 @@ export function merge(a: any, b: any) {
   }
 
   if (isObject(a) && isObject(b)) {
-    const result: any = {}
+    const result: GenericObject = {}
     const keys = unique([...Reflect.ownKeys(a), ...Reflect.ownKeys(b)])
 
     for (const key of keys) {
@@ -275,7 +290,7 @@ export function keys(iterable: any) {
 /**
  * Rename object's keys using a keymap
  */
-export const rename = curry((keyMap: any, a: any) => {
+export const rename = curry((keyMap: any, a: GenericObject) => {
   const result = deepCopy(a)
 
   for (const [oldKey, newKey] of entries(keyMap)) {
@@ -353,7 +368,7 @@ if (typeof (Object as any).mixin !== 'function') {
 /**
  * DeepFreeze
  */
-export function deepFreeze(obj: any) {
+export function deepFreeze(obj: GenericObject) {
   if (obj && typeof obj === 'object' && !Object.isFrozen(obj)) {
     Object.getOwnPropertyNames(obj).forEach(name => deepFreeze(obj[name]))
     Object.freeze(obj)
@@ -402,7 +417,7 @@ export function deepCopy(obj: any) {
   return aux
 }
 
-(Object as any).deepFreeze = (Object as any).deepFreeze || deepFreeze
+;(Object as any).deepFreeze = (Object as any).deepFreeze || deepFreeze
 
 /**
  * Immutable

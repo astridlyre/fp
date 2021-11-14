@@ -235,6 +235,9 @@ export const accumulate: (delay: number) => (this: any, fn: GenericFunction) => 
  * @param {any} b
  */
 export function deepEqual(a: any, b: any): boolean;
+interface GenericObject {
+    [propKey: PropertyKey]: any;
+}
 /**
  * Prop, access a property in an object
  */
@@ -280,16 +283,16 @@ export function diff(a: any, b: any): any;
 /**
  * Aggregate, deep merge a and b
  */
-export function aggregate(a: any, b: any): any;
+export function aggregate<T extends GenericObject>(a: T, b: T): T;
 /**
  * AggregateOn, combine many objects into one with aggregated keys
  * TODO: Try to improve the algorithm
  */
-export function aggregateOn(keyMap: any, ...objects: any[]): any;
+export function aggregateOn(keyMap: any, ...objects: GenericObject[]): GenericObject;
 /**
  * Merge, combine all keys
  */
-export function merge(a: any, b: any): any;
+export function merge(a: GenericObject, b: GenericObject): any;
 /**
  * Entries, eagerly get entries of an object or iterable
  */
@@ -309,7 +312,7 @@ export const rename: (this: any, ...args: any[]) => any;
 /**
  * DeepFreeze
  */
-export function deepFreeze(obj: any): any;
+export function deepFreeze(obj: GenericObject): GenericObject;
 /**
  * DeepCopyArray
  */
@@ -345,6 +348,9 @@ declare const concat: (...initialArgs: any[]) => {};
  */
 declare const combine: (...initialArgs: any[]) => {};
 type _GenericFunction1 = (...args: any[]) => any;
+interface Flatable {
+    flat(): any;
+}
 /**
  * ComposeM
  */
@@ -353,7 +359,7 @@ export const liftA2: (this: any, ...args: any[]) => any;
 export const liftA3: (this: any, ...args: any[]) => any;
 export const liftA4: (this: any, ...args: any[]) => any;
 export const apply: (this: any, ...args: any[]) => any;
-export const flat: (M: any) => any;
+export const flat: <F extends Flatable>(M: F) => any;
 export const flatMap: (this: any, ...args: any[]) => any;
 export const fold: (this: any, ...args: any[]) => any;
 export const getOrElseThrow: (this: any, ...args: any[]) => any;
@@ -361,7 +367,9 @@ export const getOrElseThrow: (this: any, ...args: any[]) => any;
  * Array functions
  * Provides a set of functions for common array operations
  */
-export const head: <T>(a: T[]) => T;
+export const head: <T extends {
+    [index: number]: any;
+}>(a: T) => T;
 export const last: <T>(a: T[]) => T;
 export const every: (this: any, ...args: any[]) => any;
 export const some: (this: any, ...args: any[]) => any;
@@ -993,7 +1001,7 @@ export function zip<X>(...iterables: Iterable<X>[]): Iterable<X>;
  * @returns {function} Generator iterator function that yields the result
  * of applying zipper function to elements of iterables
  */
-export function zipWith<X>(zipper: (...elements: any) => any, ...iterables: Iterable<X>[]): Iterable<X>;
+export function zipWith<X>(zipper: (...elements: X[]) => any, ...iterables: Iterable<X>[]): Iterable<any>;
 /**
  * ReduceWith
  * @param {function} fn - Reducer function

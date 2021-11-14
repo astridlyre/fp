@@ -118,7 +118,7 @@ export function curry(fn: GenericFunction) {
 /**
  * Tap, run a side effect fn and then return x
  */
-export const tap = curry((fn: GenericFunction, x: any) => (fn(x), x))
+export const tap = curry(<T>(fn: GenericFunction, x: T): T => (fn(x), x))
 
 /**
  * Not, negate the result of a function
@@ -233,7 +233,7 @@ export const groupBy = curry((key: string, arr: any[]) => {
   const result: any = {}
 
   for (const item of arr) {
-    (result[item[key]] || (result[item[key]] = [])).push(item)
+    ;(result[item[key]] || (result[item[key]] = [])).push(item)
   }
 
   return values(result)

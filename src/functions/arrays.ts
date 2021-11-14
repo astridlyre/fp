@@ -10,6 +10,26 @@ function composeM2(f: GenericFunction, g: GenericFunction) {
   }
 }
 
+interface Mappable {
+  map(f: (value: any, index?: number, arr?: any[]) => any): any
+}
+
+interface Applyable {
+  ap(f: (value: any) => any): any
+}
+
+interface FlatMappable {
+  flatMap(f: (value: any, index?: number, arr?: any[]) => any): any
+}
+
+interface Flatable {
+  flat(): any
+}
+
+interface Foldable {
+  fold(f: (value: any, index?: number, arr?: any[]) => any): any
+}
+
 /**
  * ComposeM
  */
@@ -17,25 +37,44 @@ export function composeM(...Ms: any) {
   return Ms.reduce(composeM2)
 }
 
-export const liftA2 = curry((fn: GenericFunction, a1: any, a2: any) => a1.map(fn).ap(a2))
-export const liftA3 = curry((fn: GenericFunction, a1: any, a2: any, a3: any) =>
-  a1.map(fn).ap(a2).ap(a3)
+export const liftA2 = curry(<T extends Mappable>(fn: GenericFunction, a1: T, a2: any) =>
+  a1.map(fn).ap(a2)
 )
-export const liftA4 = curry((fn: GenericFunction, a1: any, a2: any, a3: any, a4: any) =>
-  a1.map(fn).ap(a2).ap(a3).ap(a4)
+
+export const liftA3 = curry(
+  <T extends Mappable, P extends Applyable>(fn: GenericFunction, a1: T, a2: P, a3: P) =>
+    a1.map(fn).ap(a2).ap(a3)
 )
+
+export const liftA4 = curry(
+  <T extends Mappable, P extends Applyable>(
+    fn: GenericFunction,
+    a1: T,
+    a2: P,
+    a3: P,
+    a4: P
+  ) => a1.map(fn).ap(a2).ap(a3).ap(a4)
+)
+
 export const apply = curry((fn: GenericFunction, F: any) => map.call(F, fn))
-export const flat = (M: any) => M.flat()
-export const flatMap = curry((f: GenericFunction, M: any) => M.flatMap(f))
-export const fold = curry((f: GenericFunction, M: any) => M.fold(f))
+
+export const flat = <F extends Flatable>(M: F) => M.flat()
+
+export const flatMap = curry(<F extends FlatMappable>(f: GenericFunction, M: F) =>
+  M.flatMap(f)
+)
+
+export const fold = curry(<F extends Foldable>(f: GenericFunction, M: F) => M.fold(f))
+
 export const getOrElseThrow = curry((e: Error, M: any) => M.getOrElseThrow(e))
 
 /**
  * Array functions
  * Provides a set of functions for common array operations
  */
-export const head = <T>(a: T[]): T => a && a[0]
+export const head = <T extends { [index: number]: any }>(a: T): T => a && a[0]
 export const last = <T>(a: T[]): T => a && a[a.length - 1]
+
 export const every = curry(<T>(f: (value: T) => boolean, arr: T[]) => arr.every(f))
 export const some = curry(<T>(f: (value: T) => boolean, arr: T[]) => arr.some(f))
 export const find = curry(<T>(f: (value: T) => boolean, arr: T[]) => arr.find(f))

@@ -8,9 +8,9 @@ import { curry } from '../functions/utils'
  * @returns {function} Generator iterator function
  */
 export const mapWith = curry(function* mapWith<X>(
-  fn: (element: any) => any,
+  fn: (element: X) => any,
   iterable: Iterable<X>
-): Iterable<X> {
+): Iterable<any> {
   for (const element of iterable) {
     yield fn(element)
   }
@@ -24,9 +24,9 @@ export const mapWith = curry(function* mapWith<X>(
  * elements and then yields the result of their individual iteration
  */
 export const mapAllWith = curry(function* mapAllWith<X>(
-  fn: (element: any) => Iterable<X>,
+  fn: (element: X) => Iterable<any>,
   iterable: Iterable<X>
-): Iterable<X> {
+): Iterable<any> {
   for (const element of iterable) {
     yield* fn(element)
   }
@@ -40,7 +40,7 @@ export const mapAllWith = curry(function* mapAllWith<X>(
  * function fn
  */
 export const filterWith = curry(function* filterWith<X>(
-  fn: (element: any) => boolean,
+  fn: (element: X) => boolean,
   iterable: Iterable<X>
 ): Iterable<X> {
   for (const element of iterable) {
@@ -68,7 +68,7 @@ export const compact = curry(function* compact<X>(iterable: Iterable<X>): Iterab
  * the result of fn(element) is true
  */
 export const untilWith = curry(function* untilWith<X>(
-  fn: (element: any) => boolean,
+  fn: (element: X) => boolean,
   iterable: Iterable<X>
 ): Iterable<X> {
   for (const element of iterable) {
@@ -166,9 +166,9 @@ export function* zip<X>(...iterables: Iterable<X>[]): Iterable<X> {
  * of applying zipper function to elements of iterables
  */
 export function* zipWith<X>(
-  zipper: (...elements: any) => any,
+  zipper: (...elements: X[]) => any,
   ...iterables: Iterable<X>[]
-): Iterable<X> {
+): Iterable<any> {
   const iterators = iterables.map(i => i[Symbol.iterator]())
 
   while (true) {
@@ -189,7 +189,7 @@ export function* zipWith<X>(
  * @returns {any} Result of reducing iterable with reducer
  */
 export const reduceWith = curry(function reduceWith<X>(
-  fn: (accumulator: any, element: any) => any,
+  fn: (accumulator: any, element: X) => any,
   seed: any,
   iterable: Iterable<X>
 ): any {
