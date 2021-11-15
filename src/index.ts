@@ -2,6 +2,7 @@ import * as rx from './observable/Observable'
 
 export {
   accumulate,
+  and,
   arity,
   binary,
   bound,
@@ -28,6 +29,7 @@ export {
   negate,
   not,
   once,
+  or,
   parse,
   pipe,
   send,

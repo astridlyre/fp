@@ -21,7 +21,7 @@ export class Pair {
   map(fn: (value: any) => any) {
     return new Pair(fn(this.#left), fn(this.#right))
   }
-  flatMap(fn: (left: any, right: any) => [left: any, right: any]) {
+  flatMap(fn: (left: any, right: any) => [any, any]) {
     return new Pair(...fn(this.#left, this.#right))
   }
   toString() {
@@ -68,9 +68,7 @@ export class Triple {
   map(fn: (value: any) => any) {
     return new Triple(fn(this.#left), fn(this.#middle), fn(this.#right))
   }
-  flatMap(
-    fn: (left: any, middle: any, right: any) => [left: any, middle: any, right: any]
-  ) {
+  flatMap(fn: (left: any, middle: any, right: any) => [any, any, any]) {
     return new Triple(...fn(this.#left, this.#middle, this.#right))
   }
   toString() {

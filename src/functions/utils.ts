@@ -126,6 +126,20 @@ export const tap = curry(<T>(fn: GenericFunction, x: T): T => (fn(x), x))
 export const not = curry((f: GenericFunction, a: any) => !f(a))
 
 /**
+ * And, satisfy both functions
+ */
+export const and = curry(
+  (f: GenericFunction, g: GenericFunction, x: any): boolean => f(x) && g(x)
+)
+
+/**
+ * Or, satisfy one or the other functions
+ */
+export const or = curry(
+  (f: GenericFunction, g: GenericFunction, x: any): boolean => f(x) || g(x)
+)
+
+/**
  * Negate, reverse the sign of a numerical result of a function
  */
 export const negate = curry((f: GenericFunction, a: any) => -f(a))

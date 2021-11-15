@@ -134,6 +134,14 @@ export const tap: (this: any, ...args: any[]) => any;
  */
 export const not: (this: any, ...args: any[]) => any;
 /**
+ * And, satisfy both functions
+ */
+export const and: (this: any, ...args: any[]) => any;
+/**
+ * Or, satisfy one or the other functions
+ */
+export const or: (this: any, ...args: any[]) => any;
+/**
  * Negate, reverse the sign of a numerical result of a function
  */
 export const negate: (this: any, ...args: any[]) => any;
@@ -843,7 +851,7 @@ export class Pair {
         right: any;
     };
     map(fn: (value: any) => any): Pair;
-    flatMap(fn: (left: any, right: any) => [left: any, right: any]): Pair;
+    flatMap(fn: (left: any, right: any) => [any, any]): Pair;
     toString(): string;
     toJSON(): {
         type: string;
@@ -869,7 +877,7 @@ export class Triple {
         right: any;
     };
     map(fn: (value: any) => any): Triple;
-    flatMap(fn: (left: any, middle: any, right: any) => [left: any, middle: any, right: any]): Triple;
+    flatMap(fn: (left: any, middle: any, right: any) => [any, any, any]): Triple;
     toString(): string;
     toJSON(): {
         type: string;
