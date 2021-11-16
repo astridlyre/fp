@@ -417,7 +417,7 @@ export function deepCopy(obj: any) {
   return aux
 }
 
-;(Object as any).deepFreeze = (Object as any).deepFreeze || deepFreeze
+(Object as any).deepFreeze = (Object as any).deepFreeze || deepFreeze
 
 /**
  * Immutable

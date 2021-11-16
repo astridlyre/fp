@@ -36,18 +36,6 @@
             "error",
             "getBeforeSet"
         ],
-        "no-magic-numbers": [
-            "warn",
-            {
-                "ignoreArrayIndexes": true,
-                "enforceConst": true,
-                "ignore": [
-                    1,
-                    -1,
-                    0
-                ]
-            }
-        ],
         "no-unused-vars": "warn",
         "no-param-reassign": "error",
         "prefer-promise-reject-errors": "error",

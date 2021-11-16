@@ -1,14 +1,17 @@
+/* eslint func-names: 0 */
 import { method, multi } from '../dist/index.js'
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
 
-describe('Multi', function () {
-  describe('method', function () {
+describe('MultiMethod', function () {
+  describe('Registering handlers', function () {
     it('should register multiple handlers', function () {
       const dispatch = multi(method(['red', 'green'], 'blue'), method(['blue'], 'red'))
       assert.deepEqual(dispatch('red', 'green'), 'blue')
     })
+  })
 
+  describe('Custom dispatch', function () {
     it('should allow custom dispatch', function () {
       const store = {
         todos: [],
@@ -31,7 +34,9 @@ describe('Multi', function () {
       dispatch({ type: 'REMOVE_TODO', id: 1 }, store)
       assert.deepEqual(store.todos, [])
     })
+  })
 
+  describe('Extending a multimethod', function () {
     it('should allow extending multimethod', function () {
       const a = multi(method('hi', () => 'there'))
       assert.deepEqual(a('hi'), 'there')
@@ -42,13 +47,17 @@ describe('Multi', function () {
       assert.deepEqual(b('a'), 'b')
       assert.throws(() => a('a'), 'b')
     })
+  })
 
+  describe('Map', function () {
     it('should allow map', function () {
       const a = multi(method('a', () => 'b'))
       const upper = a.map(s => s.toUpperCase())
       assert.deepEqual(upper('a'), 'B')
     })
+  })
 
+  describe('Default Handler', function () {
     it('should set a default handler', function () {
       const a = multi(
         method('a', () => 'b'),
@@ -57,7 +66,9 @@ describe('Multi', function () {
       assert.deepEqual(a(), 'c')
       assert.deepEqual(a('a'), 'b')
     })
+  })
 
+  describe('Handling non-function keys', function () {
     it('should handle keys that are functions', function () {
       const router = multi(
         method(req => ['GET'].includes(req.method) && req.url === '/', 'Hello world!'),
@@ -69,6 +80,9 @@ describe('Multi', function () {
       )
       assert.deepEqual(router({ method: 'GET', url: '/' }), 'Hello world!')
     })
+  })
+
+  describe('Handling class keys', function () {
     it('should handle classes', function () {
       class A {
         sayHi() {
@@ -88,7 +102,9 @@ describe('Multi', function () {
       assert.deepEqual(handler(new B()), 'b')
       assert.deepEqual(handler(new A()), 'a!')
     })
+  })
 
+  describe('No handlers', function () {
     it('should throw an error if no handlers', function () {
       const mm = multi(method('a', 'b'))
       assert.throws(() => mm('b'), 'No handlers for args (["b"])')

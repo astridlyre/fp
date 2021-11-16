@@ -1,5 +1,5 @@
-import { EventEmitter } from '../dist/index.js'
-import { Observable } from '../dist/index.js'
+/* eslint func-names: 0 */
+import { EventEmitter, Observable } from '../dist/index.js'
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
 import { Readable } from 'stream'
@@ -128,37 +128,6 @@ describe('Observable', function () {
           },
         })
     })
-
-    // Commenting this out until I can find a better way to test this reliably
-    /* it('should debounce a stream async', function (done) {
-      const stream = new Observable(observer => {
-        let num = 20
-        let n = 1
-        let currentTimeout
-        function recur() {
-          observer.next(n++)
-          currentTimeout = setTimeout(recur, (num += 5))
-        }
-        recur()
-        setTimeout(() => clearTimeout(currentTimeout), 150)
-        return () => clearTimeout(currentTimeout)
-      })
-      const values = []
-      const sub = stream.debounce(20).subscribe({
-        next: value => {
-          values.push(value)
-        },
-      })
-      setTimeout(() => {
-        sub.unsubscribe()
-        try {
-          assert.deepEqual(values, [1, 2, 3])
-          done()
-        } catch (err) {
-          done(err)
-        }
-      }, 90)
-    }) */
   })
 
   describe('map', function () {

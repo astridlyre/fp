@@ -1,8 +1,9 @@
+/* eslint func-names: 0 */
 import * as combinators from '../dist/index.js'
 import { describe, it } from 'mocha'
-import { AssertionError, strict as assert } from 'assert'
+import { strict as assert } from 'assert'
 
-describe('Combinators', function () {
+describe('Functions', function () {
   describe('identity', function () {
     it('should return value given', function () {
       const value = combinators.identity('hello')
@@ -85,54 +86,6 @@ describe('Combinators', function () {
     it('should allow using a method as a regular function', function () {
       const toUpperCase = combinators.demethodize(String.prototype.toUpperCase)
       assert.equal(toUpperCase('hello'), 'HELLO')
-    })
-  })
-
-  describe('isX functions', function () {
-    it('should test if x is a number', function () {
-      assert.equal(combinators.isNumber(10), true)
-      assert.equal(combinators.isNumber('hi'), false)
-    })
-    it('should test if x is boolean', function () {
-      assert.equal(combinators.isBoolean(0), false)
-      assert.equal(combinators.isBoolean(true), true)
-      assert.equal(combinators.isBoolean(null), false)
-    })
-    it('should test if x is null', function () {
-      assert.equal(combinators.isNull(0), false)
-      assert.equal(combinators.isNull(null), true)
-      assert.equal(combinators.isNull('null'), false)
-    })
-    it('should test is x is a string', function () {
-      assert.equal(combinators.isString('null'), true)
-      assert.equal(combinators.isString(String), false)
-    })
-    it('should test if x is an object', function () {
-      assert.equal(combinators.isObject(String), false)
-      assert.equal(combinators.isObject(null), false)
-      assert.equal(combinators.isObject({}), true)
-    })
-    it('should test if x is an array', function () {
-      assert.equal(combinators.isArray([]), true)
-      assert.equal(combinators.isArray(Array), false)
-      assert.equal(combinators.isArray('[]'), false)
-    })
-    it('should test if x is instance of y', function () {
-      class y {}
-      assert.equal(combinators.isInstanceOf(y)(new y()), true)
-      assert.equal(combinators.isInstanceOf(y)(y), false)
-    })
-    it('should test if x is a function', function () {
-      assert.equal(combinators.isFunction(String), true)
-      assert.equal(combinators.isFunction('hi'), false)
-    })
-    it('should test if x is a set', function () {
-      assert.equal(combinators.isSet([]), false)
-      assert.equal(combinators.isSet(new Set()), true)
-    })
-    it('should test if x is a map', function () {
-      assert.equal(combinators.isMap(new Map()), true)
-      assert.equal(combinators.isMap({}), false)
     })
   })
 
@@ -664,11 +617,12 @@ describe('Combinators', function () {
     })
   })
 
-  describe('immutate', function () {
+  describe('immutable', function () {
     it('should not allow changing properties', function () {
       const obj = combinators.immutable({ greeting: 'hi' })
       assert.throws(() => (obj.greeting = 'hello'))
     })
+
     it('should not allow extending object', function () {
       const obj = combinators.immutable({ greeting: 'hi' })
       assert.throws(() => (obj.method = () => {}))
@@ -1156,53 +1110,6 @@ describe('Combinators', function () {
         combinators.deepEqual(new Map([['hey', 'hi']]), new Map([['hey', 'hi']])),
         true
       )
-    })
-  })
-
-  describe('isEmpty', function () {
-    it('should check empty string', function () {
-      const strA = ''
-      const strB = 'hi'
-      assert.equal(combinators.isEmpty(strA), true)
-      assert.equal(combinators.isEmpty(strB), false)
-    })
-    it('should check empty array', function () {
-      const arrA = []
-      const arrB = [1]
-      assert.equal(combinators.isEmpty(arrA), true)
-      assert.equal(combinators.isEmpty(arrB), false)
-    })
-    it('should check empty object', function () {
-      const objA = {}
-      const objB = { hi: 'there' }
-      assert.equal(combinators.isEmpty(objA), true)
-      assert.equal(combinators.isEmpty(objB), false)
-    })
-    it('should check empty set', function () {
-      const setA = new Set()
-      const setB = new Set(['hi'])
-      assert.equal(combinators.isEmpty(setA), true)
-      assert.equal(combinators.isEmpty(setB), false)
-    })
-    it('should check empty map', function () {
-      const mapA = new Map()
-      const mapB = new Map([['hi', 'there']])
-      assert.equal(combinators.isEmpty(mapA), true)
-      assert.equal(combinators.isEmpty(mapB), false)
-    })
-    it('should check null and undefined', function () {
-      assert.equal(combinators.isEmpty(null), true)
-      assert.equal(combinators.isEmpty(undefined), true)
-    })
-    it('should check NaN', function () {
-      assert.equal(combinators.isEmpty(NaN), true)
-      assert.equal(combinators.isEmpty(0), false)
-    })
-    it('should check class', function () {
-      assert.equal(combinators.isEmpty(new (class Dog {})()), false)
-    })
-    it('should combine with not', function () {
-      assert.equal(combinators.compose(combinators.isEmpty, combinators.not)(''), false)
     })
   })
 

@@ -247,7 +247,7 @@ export const groupBy = curry((key: string, arr: any[]) => {
   const result: any = {}
 
   for (const item of arr) {
-    ;(result[item[key]] || (result[item[key]] = [])).push(item)
+    (result[item[key]] || (result[item[key]] = [])).push(item)
   }
 
   return values(result)
