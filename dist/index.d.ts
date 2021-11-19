@@ -581,7 +581,7 @@ export interface Observable {
     fromStream(stream: any): Observable;
     listen(eventName: string, element: any): Observable;
     subject(): Observable;
-    makeObservable(obj: any): Observable;
+    wrap(obj: any): Observable;
     _filter1(fn: (value: any) => boolean): Observable;
     _map1(fn: (value: any) => any): Observable;
     buffer(size: number): Observable;

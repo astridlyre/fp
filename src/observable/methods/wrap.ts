@@ -12,7 +12,7 @@ import { Observable, Observer } from '../Observable'
  * Wrap an existing object in an Observable to update any subscribers when
  * object properties change or methods are called.
  */
-export function makeObservable(object: any) {
+export function wrap(object: any) {
   const subs: { props: PropertyKey[]; observer: Observer }[] = []
   let cache: any = Object.create(null)
 
@@ -60,7 +60,7 @@ export function makeObservable(object: any) {
           let { done, value } = generator.next()
 
           while (!done) {
-            ({ done, value } = generator.next())
+            ;({ done, value } = generator.next())
             dispatchChanged(target, prop)
             yield { done, value }
           }
@@ -73,7 +73,7 @@ export function makeObservable(object: any) {
           let { done, value } = await generator.next()
 
           while (!done) {
-            ({ done, value } = await generator.next())
+            ;({ done, value } = await generator.next())
             dispatchChanged(target, prop)
             yield { done, value }
           }
@@ -107,7 +107,7 @@ export function makeObservable(object: any) {
         }
 
         if (!observed) {
-          observed = Observable.makeObservable(target[prop])
+          observed = Observable.wrap(target[prop])
           observed.observe().subscribe(() => dispatchChanged(target, prop))
         }
 

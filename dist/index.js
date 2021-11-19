@@ -935,7 +935,7 @@ const $74dfda0eeadc7572$export$e0eaf3a86c03b2ad = $68379df254bd8d65$export$c7187
 
 
 
-function $f082861340bbb0dd$export$885e6ca7a4dc4b3e(object) {
+function $24e29b24ec18ec3c$export$4997ffc0176396a6(object) {
     const subs = [];
     let cache = Object.create(null);
     function dispatchChanged(target, prop) {
@@ -1022,7 +1022,7 @@ function $f082861340bbb0dd$export$885e6ca7a4dc4b3e(object) {
                     original = target[prop];
                 }
                 if (!observed) {
-                    observed = $73296c0bdeea98f6$export$77cea355fa80b5f4.makeObservable(target[prop]);
+                    observed = $73296c0bdeea98f6$export$77cea355fa80b5f4.wrap(target[prop]);
                     observed.observe().subscribe(()=>dispatchChanged(target, prop)
                     );
                 }
@@ -1479,7 +1479,7 @@ const $73296c0bdeea98f6$var$additionalProperties = {
     listen: $babdc44c7ce00a1f$export$63174c828edd6ff8,
     merge: $9b5d65fce739a5b9$export$4950aa0f605343fb,
     subject: $480770cf9bfd508e$export$c49781290a0a7ce3,
-    makeObservable: $f082861340bbb0dd$export$885e6ca7a4dc4b3e
+    wrap: $24e29b24ec18ec3c$export$4997ffc0176396a6
 };
 for (const [prop, value1] of Object.entries($73296c0bdeea98f6$var$additionalProperties))if (!$73296c0bdeea98f6$export$77cea355fa80b5f4[prop]) Object.defineProperty($73296c0bdeea98f6$export$77cea355fa80b5f4, prop, {
     value: value1,

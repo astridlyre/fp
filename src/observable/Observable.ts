@@ -20,7 +20,7 @@ import { interval } from './methods/interval'
 import { listen } from './methods/listen'
 import { map } from './methods/map'
 import { mapTo } from './methods/mapTo'
-import { makeObservable } from './methods/observe'
+import { wrap } from './methods/wrap'
 import { merge } from './methods/merge'
 import { flatMap } from './methods/flatMap'
 import { pick } from './methods/pick'
@@ -51,7 +51,7 @@ export interface Observable {
   fromStream(stream: any): Observable
   listen(eventName: string, element: any): Observable
   subject(): Observable
-  makeObservable(obj: any): Observable
+  wrap(obj: any): Observable
   filter(fn: (value: any) => boolean): Observable
   map(fn: (value: any) => any): Observable
   buffer(size: number): Observable
@@ -133,7 +133,7 @@ const additionalProperties = {
   listen,
   merge,
   subject,
-  makeObservable,
+  wrap,
 }
 
 for (const [prop, value] of Object.entries(additionalProperties)) {

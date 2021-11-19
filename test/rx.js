@@ -1164,10 +1164,9 @@ describe('Observable', function () {
     })
   })
 
-  describe('makeObservable', function () {
-    it('should make regular object observable', function (done) {
-      const obj = { name: 'tim' }
-      const observed = Observable.makeObservable(obj)
+  describe('wrap', function () {
+    it('should wrap regular object observable', function (done) {
+      const observed = Observable.wrap({ name: 'tim' })
 
       observed.observe().subscribe(value => {
         assert.deepEqual(value, { name: 'john' })
@@ -1178,8 +1177,7 @@ describe('Observable', function () {
     })
 
     it('should dispatch when making new property', function (done) {
-      const obj = { name: 'tim' }
-      const observed = Observable.makeObservable(obj)
+      const observed = Observable.wrap({ name: 'tim' })
 
       observed.observe().subscribe(value => {
         assert.deepEqual(value, { name: 'tim', age: 5 })
@@ -1190,8 +1188,7 @@ describe('Observable', function () {
     })
 
     it('should dispatch when property deleted', function (done) {
-      const obj = { name: 'tim', age: 5 }
-      const observed = Observable.makeObservable(obj)
+      const observed = Observable.wrap({ name: 'tim', age: 5 })
 
       observed.observe().subscribe(value => {
         assert.deepEqual(value, { name: 'tim' })
@@ -1202,8 +1199,7 @@ describe('Observable', function () {
     })
 
     it('should observe an array', function (done) {
-      const arr = [1, 2, 3]
-      const observed = Observable.makeObservable(arr)
+      const observed = Observable.wrap([1, 2, 3])
 
       observed.observe().subscribe(value => {
         assert.deepEqual(value, [1, 2, 3, 4])
@@ -1213,13 +1209,12 @@ describe('Observable', function () {
     })
 
     it('should observe method calls', function (done) {
-      const obj = {
+      const observed = Observable.wrap({
         name: 'tim',
         setName(name) {
           this.name = name
         },
-      }
-      const observed = Observable.makeObservable(obj)
+      })
 
       observed.observe().subscribe(value => {
         assert.equal(value.name, 'john')
@@ -1231,13 +1226,12 @@ describe('Observable', function () {
 
     it('should not dispatch twice if called with same args', function (done) {
       let called = 0
-      const obj = {
+      const observed = Observable.wrap({
         name: 'tim',
         setName(name) {
           this.name = name
         },
-      }
-      const observed = Observable.makeObservable(obj)
+      })
 
       observed.observe().subscribe(value => {
         called++
@@ -1252,13 +1246,12 @@ describe('Observable', function () {
 
     it('should dispatch if called with different args', function (done) {
       let called = 0
-      const obj = {
+      const observed = Observable.wrap({
         name: 'tim',
         setName(name) {
           this.name = name
         },
-      }
-      const observed = Observable.makeObservable(obj)
+      })
 
       observed.observe(['setName', 'name']).subscribe(value => {
         called++
@@ -1285,7 +1278,7 @@ describe('Observable', function () {
         },
         age: 16,
       }
-      const observed = Observable.makeObservable(obj)
+      const observed = Observable.wrap(obj)
 
       observed.observe(['name', 'setName']).subscribe(value => {
         done(new Error('Should not have been called'))
@@ -1299,7 +1292,7 @@ describe('Observable', function () {
     it('should not dispatch if a prop is accessed only', function (done) {
       let called = 0
       const obj = { name: 'tim' }
-      const observed = Observable.makeObservable(obj)
+      const observed = Observable.wrap(obj)
       observed.observe().subscribe(value => {
         called++
         done(new Error('Expected not to be called'))
@@ -1319,7 +1312,7 @@ describe('Observable', function () {
           yield (this.name = Math.random() * 1000)
         },
       }
-      const observed = Observable.makeObservable(obj)
+      const observed = Observable.wrap(obj)
       observed.observe().subscribe(value => {
         assert.notDeepEqual(value.name, 'tim')
         assert.equal(called, 1)
@@ -1339,7 +1332,7 @@ describe('Observable', function () {
           )
         },
       }
-      const observed = Observable.makeObservable(obj)
+      const observed = Observable.wrap(obj)
       observed.observe().subscribe(value => {
         assert.deepEqual(value.name, 'john')
         assert.equal(called, 1)
@@ -1360,7 +1353,7 @@ describe('Observable', function () {
           while (true) yield (this.name = newName)
         },
       }
-      const observed = Observable.makeObservable(obj)
+      const observed = Observable.wrap(obj)
       observed.observe().subscribe(value => {
         assert.notEqual(value.name, 'tim')
         assert.equal(called, 1)
@@ -1376,7 +1369,7 @@ describe('Observable', function () {
           return this.todos.filter(todo => !todo.finished).length
         },
       }
-      const observed = Observable.makeObservable(obj)
+      const observed = Observable.wrap(obj)
 
       observed.observe().subscribe(value => {
         assert.deepEqual(value.todos, [{ name: 'Clean cat', finished: false }])
@@ -1394,7 +1387,7 @@ describe('Observable', function () {
           this.people.set(name, details)
         },
       }
-      const observed = Observable.makeObservable(obj)
+      const observed = Observable.wrap(obj)
 
       observed.observe().subscribe(value => {
         assert.deepEqual(value.people, new Map([['kevin', { age: 15 }]]))
@@ -1408,7 +1401,7 @@ describe('Observable', function () {
       const obj = {
         people: [{ name: 'tim', likes: ['cats'] }],
       }
-      const observed = Observable.makeObservable(obj)
+      const observed = Observable.wrap(obj)
 
       observed.observe().subscribe(value => {
         assert.deepEqual(value, { people: [{ name: 'tim', likes: ['cats', 'dogs'] }] })
@@ -1423,7 +1416,7 @@ describe('Observable', function () {
       const obj = {
         list: ['a'],
       }
-      const observed = Observable.makeObservable(obj)
+      const observed = Observable.wrap(obj)
       observed.observe().subscribe(value => {
         called++
         if (called === 1) {
