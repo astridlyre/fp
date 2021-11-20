@@ -1436,5 +1436,10 @@ describe('Observable', function () {
       observed.list = ['cat']
       observed.list.push('dog')
     })
+
+    it('should allow symbol.iterator', function () {
+      const observed = Observable.wrap([1, 2, 3])
+      assert.deepEqual([...observed], [1, 2, 3])
+    })
   })
 })

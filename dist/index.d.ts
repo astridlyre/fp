@@ -64,6 +64,8 @@ export function isEmpty(x: any): boolean;
  * IsClass
  */
 export function isClass(obj: any): any;
+declare const ReducedSymbol: unique symbol;
+export const isReduced: (thing: any) => boolean;
 type GenericFunction = (...args: any[]) => any;
 /**
  * Identity, x => x
@@ -165,8 +167,19 @@ export const tee: any;
 export const log: (fn: GenericFunction, logger?: (...data: any[]) => void) => (this: any, ...args: any[]) => any;
 /**
  * Transduce, combine multiple maps, filters, into a more efficient operation
+ * @param {array} transducer functions
+ * @param {function} Reducer function
+ * @param {any} Initial value
+ * @param {array} Array to transduce
  */
 export const transduce: (this: any, ...args: any[]) => any;
+/**
+ * Reduced wrapper
+ */
+export function reduced(value: any): {
+    value: any;
+    [ReducedSymbol]: boolean;
+};
 /**
  * MapTR, create a map transducer
  */
@@ -175,6 +188,11 @@ export const mapTR: (fn: GenericFunction) => (reducer: (accumulator: any, value:
  * filterTR, create a filter transducer
  */
 export const filterTR: (fn: GenericFunction) => (reducer: (accumulator: any, value: any) => any) => (acc: any, val: any) => any;
+/**
+ * WhileTR, create a while transducer
+ */
+export const whileTR: (fn: GenericFunction) => (reducer: (accumulator: any, value: any) => any) => (acc: any, val: any) => any;
+export const takeN: (n: number) => () => boolean;
 /**
  * Send, returns a function that applies instance method name with args
  */
@@ -379,6 +397,7 @@ export const head: <T extends {
     [index: number]: any;
 }>(a: T) => T;
 export const last: <T>(a: T[]) => T;
+export const cat: (a: any[], b: any) => any[];
 export const every: (this: any, ...args: any[]) => any;
 export const some: (this: any, ...args: any[]) => any;
 export const find: (this: any, ...args: any[]) => any;

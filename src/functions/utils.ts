@@ -1,5 +1,14 @@
 /* eslint complexity: 0, no-unused-vars: 0, eqeqeq: 0, no-magic-numbers: 0 */
-import { isArray, isFunction, isString, isMap, isObject, isSet } from './predicates'
+import {
+  isArray,
+  isFunction,
+  isString,
+  isMap,
+  isObject,
+  isSet,
+  isReduced,
+  ReducedSymbol,
+} from './predicates'
 import { values } from './objects'
 
 type GenericFunction = (...args: any[]) => any
@@ -180,15 +189,29 @@ export const log = (fn: GenericFunction, logger = console.log.bind(console)) =>
 
 /**
  * Transduce, combine multiple maps, filters, into a more efficient operation
+ * @param {array} transducer functions
+ * @param {function} Reducer function
+ * @param {any} Initial value
+ * @param {array} Array to transduce
  */
 export const transduce = curry(
   <T>(
-    arr: T[],
     fns: GenericFunction[],
     reducer: (accumulator: any, value: T) => any,
-    initial: any
-  ) => arr.reduce(compose(...fns)(reducer), initial)
+    initial: any,
+    arr: T[]
+  ) => {
+    const result: any = arr.reduce(compose(...fns)(reducer), initial)
+    return isReduced(result) ? result.value : result
+  }
 )
+
+/**
+ * Reduced wrapper
+ */
+export function reduced(value: any) {
+  return { value, [ReducedSymbol]: true }
+}
 
 /**
  * MapTR, create a map transducer
@@ -197,7 +220,7 @@ export const mapTR =
   (fn: GenericFunction) =>
   (reducer: (accumulator: any, value: any) => any) =>
   (acc: any, val: any) =>
-    reducer(acc, fn(val))
+    isReduced(acc) ? acc : reducer(acc, fn(val))
 
 /**
  * filterTR, create a filter transducer
@@ -206,7 +229,22 @@ export const filterTR =
   (fn: GenericFunction) =>
   (reducer: (accumulator: any, value: any) => any) =>
   (acc: any, val: any) =>
-    fn(val) ? reducer(acc, val) : acc
+    isReduced(acc) ? acc : fn(val) ? reducer(acc, val) : acc
+
+/**
+ * WhileTR, create a while transducer
+ */
+export const whileTR =
+  (fn: GenericFunction) =>
+  (reducer: (accumulator: any, value: any) => any) =>
+  (acc: any, val: any) =>
+    isReduced(acc) ? acc : fn(val) ? reducer(acc, val) : reduced(acc)
+
+export const takeN = (n: number) =>
+  (function take() {
+    let taken = n
+    return () => taken-- > 0
+  })()
 
 /**
  * Send, returns a function that applies instance method name with args
@@ -247,7 +285,7 @@ export const groupBy = curry((key: string, arr: any[]) => {
   const result: any = {}
 
   for (const item of arr) {
-    (result[item[key]] || (result[item[key]] = [])).push(item)
+    ;(result[item[key]] || (result[item[key]] = [])).push(item)
   }
 
   return values(result)

@@ -115,3 +115,6 @@ export function isClass(obj: any) {
 
   return isCtorClass || isPrototypeCtorClass
 }
+
+export const ReducedSymbol = Symbol('reduced')
+export const isReduced = (thing: any) => !!thing?.[ReducedSymbol]

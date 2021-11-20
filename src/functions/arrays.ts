@@ -74,7 +74,7 @@ export const getOrElseThrow = curry((e: Error, M: any) => M.getOrElseThrow(e))
  */
 export const head = <T extends { [index: number]: any }>(a: T): T => a && a[0]
 export const last = <T>(a: T[]): T => a && a[a.length - 1]
-
+export const cat = (a: any[], b: any): any[] => a.concat(b)
 export const every = curry(<T>(f: (value: T) => boolean, arr: T[]) => arr.every(f))
 export const some = curry(<T>(f: (value: T) => boolean, arr: T[]) => arr.some(f))
 export const find = curry(<T>(f: (value: T) => boolean, arr: T[]) => arr.find(f))
