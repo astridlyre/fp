@@ -1,4 +1,4 @@
-/* eslint no-param-reassign: 0 */
+/* eslint no-param-reassign: 0, no-unused-vars: 0 */
 import { curry, unique, compose } from './utils'
 import { isFunction, isObject, isMap, isArray, isSet } from './predicates'
 
@@ -36,6 +36,14 @@ export const set = curry(
   (key: any, value: any, a: GenericObject): GenericObject | Map<any, any> => (
     isMap(a) ? a.set(key, value) : (a[key] = value), a
   )
+)
+
+/**
+ * Update, updates a key of an object with an updator function
+ */
+export const update = curry(
+  (key: PropertyKey | any, updater: (currentValue: any) => any, a: any) =>
+    isMap(a) ? a.set(key, updater(a.get(key))) : ((a[key] = updater(a[key])), a)
 )
 
 /**
@@ -97,6 +105,43 @@ export const deepSetProp = curry(
     const aux = deepCopy(a)
 
     return innerDeepSetProp(path, value, aux), aux
+  }
+)
+
+/**
+ * DeepUpdate, updates a property in an object with an updater function
+ */
+export const deepUpdate = curry(
+  (
+    path: string | PropertyKey[],
+    updater: (currentValue: any) => any,
+    a: GenericObject
+  ) => {
+    if (!Array.isArray(path)) path = path.split('.')
+
+    function innerDeepSetProp(
+      path: PropertyKey[],
+      updater: (currentValue: any) => any,
+      obj: GenericObject
+    ): object {
+      if (path.length === 1) {
+        obj[path[0]] = updater(obj[path[0]])
+        return obj
+      }
+
+      if (path[0] in obj && isObject(obj[path[0]])) {
+        const newObj = obj[path[0]]
+        return innerDeepSetProp(path.slice(1), updater, newObj)
+      }
+
+      const newObj = {}
+
+      obj[path[0]] = newObj
+
+      return innerDeepSetProp(path.slice(1), updater, newObj)
+    }
+
+    return innerDeepSetProp(path, updater, a), a
   }
 )
 
@@ -417,7 +462,7 @@ export function deepCopy(obj: any) {
   return aux
 }
 
-(Object as any).deepFreeze = (Object as any).deepFreeze || deepFreeze
+;(Object as any).deepFreeze = (Object as any).deepFreeze || deepFreeze
 
 /**
  * Immutable

@@ -1157,4 +1157,65 @@ describe('Functions', function () {
       assert.equal(called, 3)
     })
   })
+
+  describe('update', function () {
+    it('should update in an object', function () {
+      const obj = {
+        name: 'tim',
+      }
+      combinators.update('name', n => n.toUpperCase(), obj)
+      assert.equal(obj.name, 'TIM')
+    })
+
+    it('should update in an object, without key existing', function () {
+      const obj = {}
+      combinators.update('name', () => 'tim', obj)
+      assert.deepEqual(obj, { name: 'tim' })
+    })
+
+    it('should update in a map', function () {
+      const m = new Map()
+      m.set('name', 'tim')
+      combinators.update('name', n => n.toUpperCase(), m)
+      assert.equal(m.get('name'), 'TIM')
+    })
+
+    it('should update in a map, without key existing', function () {
+      const m = new Map()
+      combinators.update('name', () => 'TIM', m)
+      assert.equal(m.get('name'), 'TIM')
+    })
+  })
+
+  describe('deepUpdate', function () {
+    it('should update an object deeply', function () {
+      const obj = {
+        address: {
+          line1: '1234 Fake St',
+        },
+      }
+      const updated = combinators.deepUpdate('address.line1', a => a.toUpperCase(), obj)
+      assert.deepEqual(obj, { address: { line1: '1234 FAKE ST' } })
+      assert.equal(obj, updated)
+    })
+
+    it('should update a deeply nested object without changing anything else', function () {
+      const obj = {
+        a: {
+          b: {
+            c: {
+              d: {
+                name: 'hello',
+              },
+            },
+            k: 'world',
+          },
+        },
+      }
+      const updated = combinators.deepUpdate('a.b.c.d.name', n => n.toUpperCase(), obj)
+      assert.equal(obj.a.b.c.d.name, 'HELLO')
+      assert.equal(obj.a.b.k, 'world')
+      assert.equal(obj, updated)
+    })
+  })
 })

@@ -281,6 +281,10 @@ export const setProp: (this: any, ...args: any[]) => any;
  */
 export const set: (this: any, ...args: any[]) => any;
 /**
+ * Update, updates a key of an object with an updator function
+ */
+export const update: (this: any, ...args: any[]) => any;
+/**
  * Props, gets an array of property names from an object, shallow
  */
 export const props: (this: any, ...args: any[]) => any;
@@ -296,6 +300,10 @@ export const deepProp: (this: any, ...args: any[]) => any;
  * DeepSetProp, set a property in an object, returns a copy, deep
  */
 export const deepSetProp: (this: any, ...args: any[]) => any;
+/**
+ * DeepUpdate, updates a property in an object with an updater function
+ */
+export const deepUpdate: (this: any, ...args: any[]) => any;
 /**
  * DeepPick, returns an object with only deep properties paths
  */

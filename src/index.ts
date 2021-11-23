@@ -104,59 +104,61 @@ export {
 
 export {
   composeAsync,
-  pipeAsync,
-  mapAsync,
   filterAsync,
+  mapAsync,
+  pipeAsync,
   reduceAsync,
 } from './functions/async'
 
 export {
-  eq,
   add,
   addRight,
-  subtract,
-  subtractRight,
-  multiply,
   divide,
   divideRight,
-  roundTo,
+  eq,
+  multiply,
   pow,
+  roundTo,
+  subtract,
+  subtractRight,
 } from './functions/math'
 
 export {
-  prop,
-  setPropM,
-  setProp,
-  set,
-  props,
-  pick,
-  deepProp,
-  deepSetProp,
-  deepPick,
-  diff,
   aggregate,
   aggregateOn,
-  merge,
-  entries,
-  values,
-  keys,
-  rename,
-  deepFreeze,
-  deepCopyArray,
   deepCopy,
+  deepCopyArray,
+  deepFreeze,
+  deepPick,
+  deepProp,
+  deepSetProp,
+  deepUpdate,
+  diff,
+  entries,
   immutable,
+  keys,
+  merge,
+  pick,
+  prop,
+  props,
+  rename,
+  set,
+  setProp,
+  setPropM,
+  update,
+  values,
 } from './functions/objects'
 
 export {
+  append,
   match,
+  padEnd,
+  padStart,
+  prepend,
   replace,
   split,
   toLowerCase,
   toUpperCase,
-  prepend,
-  append,
-  padStart,
-  padEnd,
 } from './functions/strings'
 
 export { Append } from './decorators/Append'
@@ -165,13 +167,13 @@ export { Define } from './decorators/Define'
 export { Override } from './decorators/Override'
 export {
   after,
+  afterAll,
+  aroundAll,
   before,
+  beforeAll,
   provided,
   unless,
   wrapWith,
-  beforeAll,
-  afterAll,
-  aroundAll,
 } from './decorators/methods'
 
 export { FunctionalMixin } from './mixins/functionalMixin'
