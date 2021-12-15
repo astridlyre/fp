@@ -19,6 +19,8 @@ export {
   flip3,
   fromJSON,
   groupBy,
+  groupByF,
+  groupByFMap,
   identity,
   invoke,
   keyBy,

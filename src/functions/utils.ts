@@ -12,6 +12,9 @@ import {
 import { values } from './objects'
 
 type GenericFunction = (...args: any[]) => any
+interface GenericObject {
+  [propKey: PropertyKey]: any
+}
 
 /**
  * Identity, x => x
@@ -282,7 +285,7 @@ export function unique(...items: any[]) {
  * GroupBy, group a collection of objects into a multi-dimensional array by key
  */
 export const groupBy = curry((key: string, arr: any[]) => {
-  const result: any = {}
+  const result: GenericObject = {}
 
   for (const item of arr) {
     ;(result[item[key]] || (result[item[key]] = [])).push(item)
@@ -290,6 +293,36 @@ export const groupBy = curry((key: string, arr: any[]) => {
 
   return values(result)
 })
+
+export const groupByF = curry(
+  (fn: (item: any, index: number, arr: any[]) => string, arr: any[]) => {
+    const result: GenericObject = {}
+
+    for (let i = 0; i < arr.length; i++) {
+      const key = fn(arr[i], i, arr)
+      const values = result[key] ?? []
+      values.push(arr[i])
+      result[key] = values
+    }
+
+    return result
+  }
+)
+
+export const groupByFMap = curry(
+  (fn: (item: any, index: number, arr: any[]) => string, arr: any[]) => {
+    const result: any = new Map()
+
+    for (let i = 0; i < arr.length; i++) {
+      const key = fn(arr[i], i, arr)
+      const values = result.get(key) ?? []
+      values.push(arr[i])
+      result.set(key, values)
+    }
+
+    return result
+  }
+)
 
 /**
  * KeyBy, convert array into object, assumes each key is unique otherwise the

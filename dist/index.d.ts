@@ -1,5 +1,5 @@
-import { EventEmitter } from "events";
-import { Transform } from "stream";
+import { EventEmitter as  } from "events";
+import { Transform as  } from "stream";
 /**
  * IsNumber, checks if x is a Number
  */
@@ -213,6 +213,8 @@ export function unique(...items: any[]): any[];
  * GroupBy, group a collection of objects into a multi-dimensional array by key
  */
 export const groupBy: (this: any, ...args: any[]) => any;
+export const groupByF: (this: any, ...args: any[]) => any;
+export const groupByFMap: (this: any, ...args: any[]) => any;
 /**
  * KeyBy, convert array into object, assumes each key is unique otherwise the
  * last object wins

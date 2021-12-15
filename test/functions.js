@@ -959,6 +959,33 @@ describe('Functions', function () {
     })
   })
 
+  describe('groupByF', function () {
+    it('should group by using a function', function () {
+      const arr = [1, 2, 3, 4, 5]
+      const result = combinators.groupByF(val => (val % 2 === 0 ? 'even' : 'odd'), arr)
+      assert.deepEqual(result, {
+        odd: [1, 3, 5],
+        even: [2, 4],
+      })
+    })
+  })
+
+  describe('groupByFMap', function () {
+    it('should group by using a function and a map', function () {
+      const arr = [1, 2, 3, 4, 5]
+      const odd = { odd: true }
+      const even = { even: true }
+      const result = combinators.groupByFMap(val => (val % 2 === 0 ? even : odd), arr)
+      assert.deepEqual(
+        result,
+        new Map([
+          [odd, [1, 3, 5]],
+          [even, [2, 4]],
+        ])
+      )
+    })
+  })
+
   describe('aggregateOn', function () {
     it('should group a key of an object into an array', function () {
       const a = {
