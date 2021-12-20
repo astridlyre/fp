@@ -1245,4 +1245,33 @@ describe('Functions', function () {
       assert.equal(obj, updated)
     })
   })
+
+  describe('binarySearch', function () {
+    it('should find an object in an array', function () {
+      const arr = [
+        { name: 'Tom', id: 1 },
+        { name: 'Bill', id: 2 },
+        { name: 'Kim', id: 3 },
+        { name: 'David', id: 4 },
+        { name: 'Lorange', id: 5 },
+      ]
+      const searcher = combinators.createSearcher(p => p.id, 2)
+      const actual = combinators.binarySearch(arr, searcher)
+      const expected = { name: 'Bill', id: 2 }
+
+      assert.deepEqual(actual, expected)
+    })
+
+    it('should return null if item not found', function () {
+      const arr = [
+        { name: 'Tim', id: 1 },
+        { name: 'Kim', id: 2 },
+      ]
+      const searcher = combinators.createSearcher(p => p.id, 3)
+      const actual = combinators.binarySearch(arr, searcher)
+      const expected = null
+
+      assert.equal(actual, expected)
+    })
+  })
 })

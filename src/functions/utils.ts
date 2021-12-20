@@ -424,6 +424,37 @@ export const accumulate = (delay: number) => {
   }
 }
 
+type searcherResult = -1 | 0 | 1
+
+export const createSearcher = curry(
+  <T>(fn: (value: T) => searcherResult, targetValue: number) => {
+    return (value: T): searcherResult => {
+      const result = fn(value)
+      return result === targetValue ? 0 : result > targetValue ? 1 : -1
+    }
+  }
+)
+
+export const binarySearch = <T>(arr: T[], fn: (item: T) => searcherResult): T | null => {
+  let first = 0,
+    mid,
+    last = arr.length - 1
+
+  while (first <= last) {
+    mid = Math.floor((first + last) / 2)
+    const result = fn(arr[mid])
+
+    if (result === 0) {
+      return arr[mid]
+    } else {
+      if (result > 0) last = mid - 1
+      else first = mid + 1
+    }
+  }
+
+  return null
+}
+
 /**
  * DeepEqual
  * @param {any} a

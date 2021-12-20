@@ -257,6 +257,9 @@ export const debounce: (delay: number) => (this: any, fn: GenericFunction) => vo
  * Accumulate returns a function that will be called with all accumulated events after delay
  */
 export const accumulate: (delay: number) => (this: any, fn: GenericFunction) => (event: any) => void;
+type searcherResult = -1 | 0 | 1;
+export const createSearcher: (this: any, ...args: any[]) => any;
+export const binarySearch: <T>(arr: T[], fn: (item: T) => searcherResult) => T | null;
 /**
  * DeepEqual
  * @param {any} a
