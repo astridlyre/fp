@@ -321,7 +321,9 @@ function $a0a27525818bb962$export$9cb4719e2e525b7a(a, b) {
         if (ArrayBuffer.isView(a) && ArrayBuffer.isView(b)) {
             length = a.length;
             if (length != b.length) return false;
-            for(i = length; (i--) !== 0;)if (a[i] !== b[i]) return false;
+            for(i = length; (i--) !== 0;){
+                if (a[i] !== b[i]) return false;
+            }
             return true;
         }
         if (a.constructor === RegExp) return a.source === b.source && a.flags === b.flags;

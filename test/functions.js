@@ -1,4 +1,4 @@
-/* eslint func-names: 0 */
+/* eslint func-names: 0, no-magic-numbers: 0 */
 import * as combinators from '../dist/index.js'
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
@@ -42,7 +42,10 @@ describe('Functions', function () {
   describe('arity', function () {
     it('should convert a function to one of arity n', function () {
       const fn = (a, b, c) => `${a} ${b} ${c}`
-      assert.equal(combinators.arity(fn, 2)('hello', 'world'), 'hello world undefined')
+      assert.equal(
+        combinators.arity(fn, 2)('hello', 'world'),
+        'hello world undefined',
+      )
     })
 
     it('unary', function () {
@@ -55,7 +58,7 @@ describe('Functions', function () {
       const fn = (a, b, c) => `${a} ${b} ${c}`
       assert.equal(
         combinators.binary(fn)('hello', 'world', 'test'),
-        'hello world undefined'
+        'hello world undefined',
       )
     })
 
@@ -63,7 +66,7 @@ describe('Functions', function () {
       const fn = (a, b, c, d) => `${a} ${b} ${c} ${d}`
       assert.equal(
         combinators.ternary(fn)('this', 'is', 'a', 'test'),
-        'this is a undefined'
+        'this is a undefined',
       )
     })
   })
@@ -96,7 +99,7 @@ describe('Functions', function () {
     it('should return the arity of a function', function () {
       assert.equal(
         combinators.len((x, y) => x + y),
-        2
+        2,
       )
     })
     it('should return the length of an array', function () {
@@ -111,9 +114,9 @@ describe('Functions', function () {
             [1, 2],
             [3, 4],
             [5, 6],
-          ])
+          ]),
         ),
-        3
+        3,
       )
     })
     it('should return the number of enumerable keys of an object', function () {
@@ -128,8 +131,8 @@ describe('Functions', function () {
   describe('compose', function () {
     it('should compose two functions', function () {
       const shout = combinators.compose(
-        x => x + '!',
-        x => x.toUpperCase()
+        (x) => x + '!',
+        (x) => x.toUpperCase(),
       )
       assert.equal(shout('hello world'), 'HELLO WORLD!')
     })
@@ -138,10 +141,10 @@ describe('Functions', function () {
   describe('compose', function () {
     it('should compose multiple functions', function () {
       const shoutBackwards = combinators.compose(
-        x => x.join(''),
-        x => [...x].reverse(),
-        x => x + '!',
-        x => x.toUpperCase()
+        (x) => x.join(''),
+        (x) => [...x].reverse(),
+        (x) => x + '!',
+        (x) => x.toUpperCase(),
       )
       assert.equal(shoutBackwards('hello world'), '!DLROW OLLEH')
     })
@@ -150,8 +153,8 @@ describe('Functions', function () {
   describe('pipe', function () {
     it('should pipe multiple functions', function () {
       const add3AndSquare = combinators.pipe(
-        x => x + 3,
-        x => x * x
+        (x) => x + 3,
+        (x) => x * x,
       )
       assert.equal(add3AndSquare(3), 36)
     })
@@ -168,7 +171,7 @@ describe('Functions', function () {
   describe('tap', function () {
     it('should run side effect function', function () {
       let y = 1
-      const fn = x => (y += x)
+      const fn = (x) => (y += x)
       combinators.tap(fn)(5)
       assert.equal(y, 6)
     })
@@ -176,14 +179,14 @@ describe('Functions', function () {
 
   describe('not', function () {
     it('should return opposite of boolean function', function () {
-      const x = y => true
+      const x = () => true
       assert.equal(combinators.not(x)(1), false)
     })
   })
 
   describe('negate', function () {
     it('should negate sign of function result', function () {
-      const x = y => y + 1
+      const x = (y) => y + 1
       assert.equal(combinators.negate(x)(5), -6)
     })
   })
@@ -191,10 +194,13 @@ describe('Functions', function () {
   describe('log', function () {
     it('should log debugging information', function () {
       let result = ''
-      const y = str => (result += str)
-      const x = y => y + 1
+      const y = (str) => (result += str)
+      const x = (y) => y + 1
       combinators.log(x, y)(5)
-      assert.equal(result, 'Entering function x(5)' + '\nExiting function x -> 6')
+      assert.equal(
+        result,
+        'Entering function x(5)' + '\nExiting function x -> 6',
+      )
     })
   })
 
@@ -202,7 +208,7 @@ describe('Functions', function () {
     it('should pluck a prop', function () {
       assert.equal(
         combinators.prop('greeting')({ greeting: 'hello world' }),
-        'hello world'
+        'hello world',
       )
     })
   })
@@ -245,7 +251,9 @@ describe('Functions', function () {
         lastName: 'Burgers',
         email: 'bob@burgers.co.uk',
       }
-      assert.deepEqual(combinators.pick(['email'])(obj), { email: 'bob@burgers.co.uk' })
+      assert.deepEqual(combinators.pick(['email'])(obj), {
+        email: 'bob@burgers.co.uk',
+      })
     })
   })
 
@@ -254,13 +262,13 @@ describe('Functions', function () {
       assert.equal(
         combinators.send(
           'greet',
-          'astrid'
+          'astrid',
         )({
           greet(name) {
             return 'hi ' + name
           },
         }),
-        'hi astrid'
+        'hi astrid',
       )
     })
   })
@@ -277,7 +285,10 @@ describe('Functions', function () {
         },
       }
       assert.equal(combinators.bound('greet')(obj)(), 'hello')
-      assert.equal(combinators.bound('greetByName', 'astrid')(obj)(), 'hello astrid')
+      assert.equal(
+        combinators.bound('greetByName', 'astrid')(obj)(),
+        'hello astrid',
+      )
     })
   })
 
@@ -396,31 +407,37 @@ describe('Functions', function () {
 
   describe('forEach', function () {
     it('should call M#forEach', function () {
-      combinators.forEach(num => assert.equal(num, 1))([1, 1, 1, 1])
+      combinators.forEach((num) => assert.equal(num, 1))([1, 1, 1, 1])
     })
   })
 
   describe('map', function () {
     it('should call M#map', function () {
-      const square = combinators.map(num => num * num)([1, 2, 3])
+      const square = combinators.map((num) => num * num)([1, 2, 3])
       assert.deepEqual(square, [1, 4, 9])
     })
   })
 
   describe('filter', function () {
     it('should call M#filter', function () {
-      const evens = combinators.filter(n => n % 2 === 0)([1, 2, 3, 4, 5])
+      const evens = combinators.filter((n) => n % 2 === 0)([1, 2, 3, 4, 5])
       assert.deepEqual(evens, [2, 4])
     })
   })
 
   describe('reduce', function () {
     it('should call M#reduce', function () {
-      const result = combinators.reduce((acc, cv) => acc + cv, 0)([1, 2, 3, 4, 5])
+      const result = combinators.reduce(
+        (acc, cv) => acc + cv,
+        0,
+      )([1, 2, 3, 4, 5])
       assert.equal(result, 15)
     })
     it('should call M#reduceRight', function () {
-      const result = combinators.reduceRight((acc, cv) => acc + cv, 0)([1, 2, 3, 4, 5])
+      const result = combinators.reduceRight(
+        (acc, cv) => acc + cv,
+        0,
+      )([1, 2, 3, 4, 5])
       assert.equal(result, 15)
     })
   })
@@ -435,21 +452,30 @@ describe('Functions', function () {
   describe('deepMap', function () {
     it('should deeply map nested arrays', function () {
       const arr = [[1], [[3], [4, [5]]]]
-      assert.deepEqual(combinators.deepMap(x => x * x)(arr), [[1], [[9], [16, [25]]]])
+      assert.deepEqual(combinators.deepMap((x) => x * x)(arr), [
+        [1],
+        [[9], [16, [25]]],
+      ])
     })
   })
 
   describe('composeM', function () {
     it('should compose two monads', function () {
-      const fn = x => [x]
+      const fn = (x) => [x]
       assert.deepEqual(combinators.composeM(fn, fn)('hi'), ['hi'])
     })
   })
 
   describe('composeAsync', function () {
     it('should compose two async functions', function (done) {
-      const a = x => new Promise(resolve => setTimeout(() => resolve(x), 0))
-      const b = x => new Promise(resolve => setTimeout(() => resolve(x), 1))
+      const a = (x) =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve(x), 0)
+        })
+      const b = (x) =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve(x), 1)
+        })
       const c = combinators.composeAsync(a, b)
       ;(async () => {
         try {
@@ -508,14 +534,14 @@ describe('Functions', function () {
       assert.equal(combinators.last([1, 2, 3]), 3)
     })
     it('should call A#every', function () {
-      assert.equal(combinators.every(x => x > 1)([2, 3, 4]), true)
+      assert.equal(combinators.every((x) => x > 1)([2, 3, 4]), true)
     })
     it('should call A#some', function () {
-      assert.equal(combinators.some(x => x > 2)([1, 2, 3]), true)
+      assert.equal(combinators.some((x) => x > 2)([1, 2, 3]), true)
     })
     it('should call A#find', function () {
       const arr = [{ name: 'bob' }, { name: 'tim' }]
-      assert.equal(combinators.find(x => x.name === 'tim')(arr), arr[1])
+      assert.equal(combinators.find((x) => x.name === 'tim')(arr), arr[1])
     })
     it('should sum all arguments', function () {
       assert.equal(combinators.sum(1, 2, 3, 4, 5), 15)
@@ -524,8 +550,8 @@ describe('Functions', function () {
       assert.equal(combinators.average([1, 2, 3]), 2)
     })
     it('should partition an array based on two functions', function () {
-      const odd = x => x % 2 !== 0
-      const even = x => !odd(x)
+      const odd = (x) => x % 2 !== 0
+      const even = (x) => !odd(x)
       assert.deepEqual(combinators.partition([1, 2, 3, 4], even, odd), [
         [2, 4],
         [1, 3],
@@ -536,12 +562,16 @@ describe('Functions', function () {
   describe('zipMap', function () {
     it('should zip up iterables and map', function () {
       assert.deepEqual(
-        combinators.zipMap((...args) => args.map(x => x * x), [1, 2, 3], [4, 5, 6]),
+        combinators.zipMap(
+          (...args) => args.map((x) => x * x),
+          [1, 2, 3],
+          [4, 5, 6],
+        ),
         [
           [1, 16],
           [4, 25],
           [9, 36],
-        ]
+        ],
       )
     })
   })
@@ -565,7 +595,10 @@ describe('Functions', function () {
 
   describe('replace', function () {
     it('should replace a match with replacer', function () {
-      assert.equal(combinators.replace('hi', 'hello')('hi world'), 'hello world')
+      assert.equal(
+        combinators.replace('hi', 'hello')('hi world'),
+        'hello world',
+      )
     })
   })
 
@@ -582,14 +615,16 @@ describe('Functions', function () {
         () => {
           throw new Error('testing')
         },
-        err => (result = err.message)
+        (err) => (result = err.message),
       )
       assert.equal(result, 'testing')
 
       // try one without throwing error
       combinators.tryCatch(
         () => (result = 'hello'),
-        () => {}
+        () => {
+          //...
+        },
       )
       assert.equal(result, 'hello')
     })
@@ -609,7 +644,7 @@ describe('Functions', function () {
   describe('once', function () {
     it('should call function only once', function () {
       let result = 1
-      const x = combinators.once(n => (result += n))
+      const x = combinators.once((n) => (result += n))
       x(5)
       x(4)
       assert.equal(result, 6)
@@ -625,7 +660,12 @@ describe('Functions', function () {
 
     it('should not allow extending object', function () {
       const obj = combinators.immutable({ greeting: 'hi' })
-      assert.throws(() => (obj.method = () => {}))
+      assert.throws(
+        () =>
+          (obj.method = () => {
+            // ...
+          }),
+      )
     })
   })
 
@@ -759,7 +799,7 @@ describe('Functions', function () {
         new Map([
           ['hi', 'there'],
           [{}, null],
-        ])
+        ]),
       )
       const o = {
         a: {
@@ -862,13 +902,13 @@ describe('Functions', function () {
             title: 'bookTitle',
             publication_date: 'publicationDate',
           },
-          o
+          o,
         ),
         {
           bookTitle: 'my book',
           publicationDate: 1987,
           available: true,
-        }
+        },
       )
     })
     it('should rename map keys', function () {
@@ -880,12 +920,12 @@ describe('Functions', function () {
           {
             hi: 'HI',
           },
-          m
+          m,
         ),
         new Map([
           ['HI', 'there'],
           [8, 10],
-        ])
+        ]),
       )
     })
   })
@@ -962,7 +1002,10 @@ describe('Functions', function () {
   describe('groupByF', function () {
     it('should group by using a function', function () {
       const arr = [1, 2, 3, 4, 5]
-      const result = combinators.groupByF(val => (val % 2 === 0 ? 'even' : 'odd'), arr)
+      const result = combinators.groupByF(
+        (val) => (val % 2 === 0 ? 'even' : 'odd'),
+        arr,
+      )
       assert.deepEqual(result, {
         odd: [1, 3, 5],
         even: [2, 4],
@@ -975,13 +1018,16 @@ describe('Functions', function () {
       const arr = [1, 2, 3, 4, 5]
       const odd = { odd: true }
       const even = { even: true }
-      const result = combinators.groupByFMap(val => (val % 2 === 0 ? even : odd), arr)
+      const result = combinators.groupByFMap(
+        (val) => (val % 2 === 0 ? even : odd),
+        arr,
+      )
       assert.deepEqual(
         result,
         new Map([
           [odd, [1, 3, 5]],
           [even, [2, 4]],
-        ])
+        ]),
       )
     })
   })
@@ -1005,13 +1051,13 @@ describe('Functions', function () {
             publication_date: 'publicationDates',
           },
           a,
-          b
+          b,
         ),
         {
           title: 'my book',
           authors: ['tim', 'dave'],
           publicationDates: [2008, 1987],
-        }
+        },
       )
       assert.deepEqual(combinators.aggregateOn({ author: 'authors' }, a), {
         title: 'my book',
@@ -1132,10 +1178,16 @@ describe('Functions', function () {
       assert.equal(combinators.deepEqual(d, c), false)
       assert.equal(combinators.deepEqual(null, null), true)
       assert.equal(combinators.deepEqual('hello', 'hello'), true)
-      assert.equal(combinators.deepEqual(new Set(['hi']), new Set(['hi'])), true)
       assert.equal(
-        combinators.deepEqual(new Map([['hey', 'hi']]), new Map([['hey', 'hi']])),
-        true
+        combinators.deepEqual(new Set(['hi']), new Set(['hi'])),
+        true,
+      )
+      assert.equal(
+        combinators.deepEqual(
+          new Map([['hey', 'hi']]),
+          new Map([['hey', 'hi']]),
+        ),
+        true,
       )
     })
   })
@@ -1143,7 +1195,7 @@ describe('Functions', function () {
   describe('memoize', function () {
     it('should memoize a function', function () {
       let called = 0
-      const f = x => (called++, x * x)
+      const f = (x) => (called++, x * x)
       const m = combinators.memoize(f)
       m(5)
       m(5)
@@ -1158,7 +1210,7 @@ describe('Functions', function () {
 
     it('should memoize a function with object arg', function () {
       let called = 0
-      const f = x => (called++, x.name.toUpperCase())
+      const f = (x) => (called++, x.name.toUpperCase())
       const m = combinators.memoize(f)
       m({ name: 'tim' })
       m({ name: 'tim' })
@@ -1171,7 +1223,7 @@ describe('Functions', function () {
 
     it('should enable clearing of cache', function () {
       let called = 0
-      const f = x => (called++, x * x)
+      const f = (x) => (called++, x * x)
       const m = combinators.memoize(f)
       m(5)
       m(5)
@@ -1190,7 +1242,7 @@ describe('Functions', function () {
       const obj = {
         name: 'tim',
       }
-      combinators.update('name', n => n.toUpperCase(), obj)
+      combinators.update('name', (n) => n.toUpperCase(), obj)
       assert.equal(obj.name, 'TIM')
     })
 
@@ -1203,7 +1255,7 @@ describe('Functions', function () {
     it('should update in a map', function () {
       const m = new Map()
       m.set('name', 'tim')
-      combinators.update('name', n => n.toUpperCase(), m)
+      combinators.update('name', (n) => n.toUpperCase(), m)
       assert.equal(m.get('name'), 'TIM')
     })
 
@@ -1221,7 +1273,11 @@ describe('Functions', function () {
           line1: '1234 Fake St',
         },
       }
-      const updated = combinators.deepUpdate('address.line1', a => a.toUpperCase(), obj)
+      const updated = combinators.deepUpdate(
+        'address.line1',
+        (a) => a.toUpperCase(),
+        obj,
+      )
       assert.deepEqual(obj, { address: { line1: '1234 FAKE ST' } })
       assert.equal(obj, updated)
     })
@@ -1239,7 +1295,11 @@ describe('Functions', function () {
           },
         },
       }
-      const updated = combinators.deepUpdate('a.b.c.d.name', n => n.toUpperCase(), obj)
+      const updated = combinators.deepUpdate(
+        'a.b.c.d.name',
+        (n) => n.toUpperCase(),
+        obj,
+      )
       assert.equal(obj.a.b.c.d.name, 'HELLO')
       assert.equal(obj.a.b.k, 'world')
       assert.equal(obj, updated)
@@ -1255,7 +1315,7 @@ describe('Functions', function () {
         { name: 'David', id: 4 },
         { name: 'Lorange', id: 5 },
       ]
-      const searcher = combinators.createSearcher(p => p.id, 2)
+      const searcher = combinators.createSearcher((p) => p.id, 2)
       const actual = combinators.binarySearch(arr, searcher)
       const expected = { name: 'Bill', id: 2 }
 
@@ -1267,7 +1327,7 @@ describe('Functions', function () {
         { name: 'Tim', id: 1 },
         { name: 'Kim', id: 2 },
       ]
-      const searcher = combinators.createSearcher(p => p.id, 3)
+      const searcher = combinators.createSearcher((p) => p.id, 3)
       const actual = combinators.binarySearch(arr, searcher)
       const expected = null
 

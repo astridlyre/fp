@@ -141,14 +141,14 @@ export const not = curry((f: GenericFunction, a: any) => !f(a))
  * And, satisfy both functions
  */
 export const and = curry(
-  (f: GenericFunction, g: GenericFunction, x: any): boolean => f(x) && g(x)
+  (f: GenericFunction, g: GenericFunction, x: any): boolean => f(x) && g(x),
 )
 
 /**
  * Or, satisfy one or the other functions
  */
 export const or = curry(
-  (f: GenericFunction, g: GenericFunction, x: any): boolean => f(x) || g(x)
+  (f: GenericFunction, g: GenericFunction, x: any): boolean => f(x) || g(x),
 )
 
 /**
@@ -184,7 +184,11 @@ export const tee = tap(console.log.bind(console))
  */
 export const log = (fn: GenericFunction, logger = console.log.bind(console)) =>
   function log(this: any, ...args: any[]) {
-    logger(`Entering function ${fn.name}(${args.map(a => JSON.stringify(a)).join(',')})`)
+    logger(
+      `Entering function ${fn.name}(${args
+        .map((a) => JSON.stringify(a))
+        .join(',')})`,
+    )
     const result = fn.apply(this, args)
     logger(`\nExiting function ${fn.name} -> ${JSON.stringify(result)}`)
     return result
@@ -202,11 +206,11 @@ export const transduce = curry(
     fns: GenericFunction[],
     reducer: (accumulator: any, value: T) => any,
     initial: any,
-    arr: T[]
+    arr: T[],
   ) => {
     const result: any = arr.reduce(compose(...fns)(reducer), initial)
     return isReduced(result) ? result.value : result
-  }
+  },
 )
 
 /**
@@ -264,7 +268,10 @@ export const bound = (name: string, ...args: any[]) =>
   args === []
     ? (instance: any) => instance[name].bind(instance)
     : (instance: any) =>
-        Function.prototype.bind.apply(instance[name], [instance].concat(args) as any)
+        Function.prototype.bind.apply(
+          instance[name],
+          [instance].concat(args) as any,
+        )
 
 /**
  * Invoke, returns a function that takes a context to call function fn with args in
@@ -306,7 +313,7 @@ export const groupByF = curry(
     }
 
     return result
-  }
+  },
 )
 
 export const groupByFMap = curry(
@@ -321,7 +328,7 @@ export const groupByFMap = curry(
     }
 
     return result
-  }
+  },
 )
 
 /**
@@ -329,7 +336,10 @@ export const groupByFMap = curry(
  * last object wins
  */
 export const keyBy = curry((key: string, arr: any[]) =>
-  arr.reduce((result: any, item: any) => ((result[item[key]] = item), result), {})
+  arr.reduce(
+    (result: any, item: any) => ((result[item[key]] = item), result),
+    {},
+  ),
 )
 
 /**
@@ -363,7 +373,9 @@ export function once(fn: GenericFunction) {
   let result: any
 
   return function once(this: any, ...args: any[]) {
-    return !done ? ((done = true), (result = fn.apply(this, args)), result) : result
+    return !done
+      ? ((done = true), (result = fn.apply(this, args)), result)
+      : result
   }
 }
 
@@ -377,7 +389,8 @@ export function memoize(fn: GenericFunction) {
     typeof x === 'number' || typeof x === 'string' || typeof x === 'boolean'
 
   function memoize(this: any, ...args: any[]) {
-    const key = args.length === 1 && isPrimitive(args[0]) ? args[0] : JSON.stringify(args)
+    const key =
+      args.length === 1 && isPrimitive(args[0]) ? args[0] : JSON.stringify(args)
 
     return key in cache ? cache[key] : (cache[key] = fn.apply(this, args))
   }
@@ -432,10 +445,13 @@ export const createSearcher = curry(
       const result = fn(value)
       return result === targetValue ? 0 : result > targetValue ? 1 : -1
     }
-  }
+  },
 )
 
-export const binarySearch = <T>(arr: T[], fn: (item: T) => searcherResult): T | null => {
+export const binarySearch = <T>(
+  arr: T[],
+  fn: (item: T) => searcherResult,
+): T | null => {
   let first = 0,
     mid,
     last = arr.length - 1
@@ -490,13 +506,23 @@ export function deepEqual(a: any, b: any) {
     if (ArrayBuffer.isView(a) && ArrayBuffer.isView(b)) {
       length = (a as any).length
       if (length != (b as any).length) return false
-      for (i = length; i-- !== 0; ) if ((a as any)[i] !== (b as any)[i]) return false
+      for (i = length; i-- !== 0; ) {
+        if ((a as any)[i] !== (b as any)[i]) return false
+      }
       return true
     }
 
-    if (a.constructor === RegExp) return a.source === b.source && a.flags === b.flags
-    if (a.valueOf !== Object.prototype.valueOf) return a.valueOf() === b.valueOf()
-    if (a.toString !== Object.prototype.toString) return a.toString() === b.toString()
+    if (a.constructor === RegExp) {
+      return a.source === b.source && a.flags === b.flags
+    }
+
+    if (a.valueOf !== Object.prototype.valueOf) {
+      return a.valueOf() === b.valueOf()
+    }
+
+    if (a.toString !== Object.prototype.toString) {
+      return a.toString() === b.toString()
+    }
 
     const keys = Object.keys(a)
     length = keys.length
