@@ -1,6 +1,6 @@
 {
   "name": "@ebflat9/fp",
-  "version": "1.2.54",
+  "version": "1.2.55",
   "description": "my fp utils",
   "source": "src/index.ts",
   "main": "dist/index.js",

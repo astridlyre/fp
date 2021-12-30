@@ -936,6 +936,10 @@ export class Enum {
     [Symbol.iterator](): () => IterableIterator<unknown>;
     static of(...types: string[]): Enum;
 }
+/**
+ * Non-cryptographically secure nanoid function
+ */
+export function nanoid(size?: number): string;
 export function createClient(apiEndpoint: string, options?: {
     storageKey: string;
     toJSON: boolean;
