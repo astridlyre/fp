@@ -22,7 +22,10 @@ export function FunctionalMixin(behaviour: any, sharedBehaviour = {}) {
   for (const property of sharedKeys) {
     Object.defineProperty(mixin, property, {
       value: (sharedBehaviour as any)[property],
-      enumerable: Object.prototype.propertyIsEnumerable.call(sharedBehaviour, property),
+      enumerable: Object.prototype.propertyIsEnumerable.call(
+        sharedBehaviour,
+        property,
+      ),
     })
   }
   Object.defineProperty(mixin, Symbol.hasInstance, {

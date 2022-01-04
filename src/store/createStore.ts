@@ -20,7 +20,9 @@ interface IListener {
 export function createStore(
   reducer: IReducerFunction,
   initialState?: any,
-  enhancer?: (createStore: any) => (reducer: IReducerFunction, initialState: any) => any
+  enhancer?: (
+    createStore: any,
+  ) => (reducer: IReducerFunction, initialState: any) => any,
 ) {
   if (isFunction(initialState) && isFunction(enhancer)) {
     throw new Error('Passing multiple enhancers is not supported')
@@ -33,14 +35,18 @@ export function createStore(
 
   if (!isUndefined(enhancer)) {
     if (!isFunction(enhancer)) {
-      throw new Error('Expected enhancer to be a function, got: ' + stringify(enhancer))
+      throw new Error(
+        'Expected enhancer to be a function, got: ' + stringify(enhancer),
+      )
     }
 
     return enhancer && enhancer(createStore)(reducer, initialState)
   }
 
   if (!isFunction(reducer)) {
-    throw new Error('Expected reducer to be a function, got: ' + stringify(reducer))
+    throw new Error(
+      'Expected reducer to be a function, got: ' + stringify(reducer),
+    )
   }
 
   let previousState = initialState
@@ -73,13 +79,20 @@ export function createStore(
   /**
    * Subscribe a listener to store updates
    */
-  function subscribe(selector: (state: any) => any, listener: (state: any) => void) {
+  function subscribe(
+    selector: (state: any) => any,
+    listener: (state: any) => void,
+  ) {
     if (!isFunction(selector)) {
-      throw new Error('Expected selector to be a function, got: ' + stringify(selector))
+      throw new Error(
+        'Expected selector to be a function, got: ' + stringify(selector),
+      )
     }
 
     if (!isFunction(listener)) {
-      throw new Error('Expected listener to be a function, got: ' + stringify(listener))
+      throw new Error(
+        'Expected listener to be a function, got: ' + stringify(listener),
+      )
     }
 
     if (isDispatching) {
@@ -101,7 +114,7 @@ export function createStore(
       isSubscribed = false
 
       ensureCanMutateNextListeners()
-      const index = nextListeners.findIndex(obj => obj.listener === listener)
+      const index = nextListeners.findIndex((obj) => obj.listener === listener)
       nextListeners.splice(index, 1)
       currentListeners = null
     }

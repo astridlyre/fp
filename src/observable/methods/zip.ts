@@ -21,9 +21,9 @@ export const zip = placeholder((...streams: Observable[]) => {
 
   function pushValue(event: { n: number; value: any }, observer: Observer) {
     buffers[event.n].unshift(event.value)
-    if (buffers.every(buffer => buffer.length > 0)) {
+    if (buffers.every((buffer: any) => buffer.length > 0)) {
       try {
-        observer.next(zipper(...buffers.map(buffer => buffer.pop())))
+        observer.next(zipper(...buffers.map((buffer) => buffer.pop())))
       } catch (err: any) {
         observer.error(err)
       }
@@ -33,11 +33,11 @@ export const zip = placeholder((...streams: Observable[]) => {
   return new Observable((observer: Observer) => {
     const subscriptions = streams.map((stream, i) =>
       stream.subscribe({
-        next: value => pushValue({ n: i, value }, observer),
+        next: (value) => pushValue({ n: i, value }, observer),
         error: observer.error.bind(observer),
         complete: () => ++done === streams.length && observer.complete(),
-      })
+      }),
     )
-    return () => subscriptions.forEach(subs => subs.unsubscribe())
+    return () => subscriptions.forEach((subs) => subs.unsubscribe())
   })
 })

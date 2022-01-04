@@ -1,3 +1,5 @@
+/* eslint-disable no-extra-semi */
+/* eslint-disable @typescript-eslint/no-extra-semi */
 /* eslint complexity: 0, no-unused-vars: 0, eqeqeq: 0, no-magic-numbers: 0 */
 import {
   isArray,

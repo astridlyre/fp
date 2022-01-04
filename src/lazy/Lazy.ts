@@ -1,3 +1,5 @@
+/* eslint-disable no-extra-semi */
+/* eslint-disable @typescript-eslint/no-extra-semi */
 /* eslint no-unused-vars: 0, prefer-const: 0, no-param-reassign: 0 */
 /**
  * Lazy Collection is a Collection data-type that is essentially just mapping
@@ -35,14 +37,14 @@ export const Collection: ICollection = {
           }
         },
       },
-      Collection
+      Collection,
     )
   },
 
   reduce(
     this: ICollection,
     reducer: (accumulator: any, element: any) => any,
-    seed: any
+    seed: any,
   ): any {
     const iterator = (this as any)[Symbol.iterator]()
 
@@ -64,14 +66,14 @@ export const Collection: ICollection = {
             next: () => {
               let done, value
               do {
-                ({ done, value } = iterator.next())
+                ;({ done, value } = iterator.next())
               } while (!done && !predicate(value))
               return { done, value }
             },
           }
         },
       },
-      Collection
+      Collection,
     )
   },
 
@@ -84,14 +86,14 @@ export const Collection: ICollection = {
             next: () => {
               let done, value
               do {
-                ({ done, value } = iterator.next())
+                ;({ done, value } = iterator.next())
               } while (!done && !searcher(value))
               return { done, value }
             },
           }
         },
       },
-      Collection
+      Collection,
     )
   },
 
@@ -109,7 +111,7 @@ export const Collection: ICollection = {
           }
         },
       },
-      Collection
+      Collection,
     )
   },
 
@@ -126,7 +128,7 @@ export const Collection: ICollection = {
           return iterator
         },
       },
-      Collection
+      Collection,
     )
   },
 
@@ -145,7 +147,7 @@ export const Collection: ICollection = {
           }
         },
       },
-      Collection
+      Collection,
     )
   },
 
@@ -172,7 +174,7 @@ export const Numbers = Object.assign(
       while (true) yield n++
     },
   },
-  Collection
+  Collection,
 )
 
 interface IStack extends ICollection {
@@ -216,7 +218,7 @@ export const Stack = (): IStack =>
         }
       },
     },
-    Collection
+    Collection,
   )
 
 Stack.from = function from<X>(iterable: Iterable<X>): IStack {

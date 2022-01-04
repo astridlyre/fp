@@ -1,5 +1,5 @@
+/* eslint-disable no-redeclare */
 /* eslint no-unused-vars: 0 */
-
 import { isFunction } from '../functions/predicates'
 import { errorWith } from './utils'
 
@@ -26,7 +26,9 @@ export class Result {
     return Result.of(a).map((x: string | []) => (x.length === 0 ? null : x))
   }
   static fromPromise<X>(p: Promise<X>) {
-    return p.then(result => new Success(result)).catch(err => new Failure(err.message))
+    return p
+      .then((result) => new Success(result))
+      .catch((err) => new Failure(err.message))
   }
   [Symbol.toPrimitive](hint: string) {
     switch (hint) {
@@ -99,7 +101,7 @@ export class Success extends Result {
       ? Result.of(
           isFunction(Rs.merge())
             ? Rs.merge().call(Rs, this.value)
-            : this.value(Rs.merge())
+            : this.value(Rs.merge()),
         )
       : Result.of(Rs.merge().call(Rs, this.value))
   }

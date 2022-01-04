@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /* eslint prefer-rest-params: 0, prefer-spread: 0, no-unused-vars: 0 */
 import { deepEqual } from '../functions/utils'
 import { isFunction, isClass } from '../functions/predicates'
@@ -47,7 +48,11 @@ export function method(handler: (...args: any) => any): IHandler
 export function method(key: any, handler: (...args: any) => any): IHandler
 export function method(key: any, handler?: (...args: any) => any): IHandler {
   if (handler === undefined) {
-    return { key: DEFAULT_METHOD, handler: key, [isMethodObject]: true } as IHandler
+    return {
+      key: DEFAULT_METHOD,
+      handler: key,
+      [isMethodObject]: true,
+    } as IHandler
   }
   return { key, handler, [isMethodObject]: true } as IHandler
 }
@@ -62,7 +67,9 @@ export function multi(...initialMethods: IHandler[]): MultiMethod {
   // multiMethod function takes variable arguments and returns the result of
   // calling any handler that can handle the arguments
   function multiMethod() {
-    let method: (...args: any[]) => any = initialHandler(multiMethod[handlersKey])
+    let method: (...args: any[]) => any = initialHandler(
+      multiMethod[handlersKey],
+    )
 
     for (let i = 0; i < multiMethod[handlersKey].length; i++) {
       const { key, handler } = multiMethod[handlersKey][i]
@@ -78,10 +85,14 @@ export function multi(...initialMethods: IHandler[]): MultiMethod {
     }
 
     if (method) {
-      return typeof method === 'function' ? method.apply(null, arguments as any) : method
+      return typeof method === 'function'
+        ? method.apply(null, arguments as any)
+        : method
     }
 
-    throw new NoHandlerError(`No handlers for args (${JSON.stringify(arguments)})`)
+    throw new NoHandlerError(
+      `No handlers for args (${JSON.stringify(arguments)})`,
+    )
   }
 
   const dispatchers = []
@@ -104,7 +115,9 @@ export function multi(...initialMethods: IHandler[]): MultiMethod {
   const dispatch: dispatchFunction = last(dispatchers) ?? defaultDispatch
 
   multiMethod[dispatchKey] = dispatch
-  multiMethod[handlersKey] = defaultMethod ? methods.concat(defaultMethod) : methods
+  multiMethod[handlersKey] = defaultMethod
+    ? methods.concat(defaultMethod)
+    : methods
 
   multiMethod.map = function map(fn: (...args: any) => any) {
     return multi(
@@ -116,8 +129,8 @@ export function multi(...initialMethods: IHandler[]): MultiMethod {
             handler: function mappedHandler() {
               return fn(handler.apply(null, arguments as any))
             },
-          } as IHandler)
-      )
+          } as IHandler),
+      ),
     )
   }
 
@@ -127,6 +140,6 @@ export function multi(...initialMethods: IHandler[]): MultiMethod {
 multi.extend = function extend(multiMethod: MultiMethod, ...methods: any[]) {
   return multi(
     multiMethod[dispatchKey] as any,
-    ...methods.concat(multiMethod[handlersKey])
+    ...methods.concat(multiMethod[handlersKey]),
   )
 }

@@ -17,7 +17,7 @@ export const buffer = placeholder((count: number, stream: Observable) => {
           observer.next(internalStorage.slice())
           internalStorage.length = 0
         }
-      })
+      }),
     )
     return () => subs.unsubscribe()
   })

@@ -10,7 +10,8 @@ type IListener = (action: IAction, middlewareAPI: IMiddlewareAPI) => any
  * be injected later.
  */
 function createActionListenerMiddleware() {
-  const listeners: Map<IActionCreator | string | IAction, IListener[]> = new Map()
+  const listeners: Map<IActionCreator | string | IAction, IListener[]> =
+    new Map()
 
   /**
    * Add a listener
@@ -29,7 +30,9 @@ function createActionListenerMiddleware() {
     const currentListeners = listeners.get(actionCreator) || []
     listeners.set(
       actionCreator,
-      currentListeners.filter((currentListener: IListener) => currentListener !== listener)
+      currentListeners.filter(
+        (currentListener: IListener) => currentListener !== listener,
+      ),
     )
   }
 

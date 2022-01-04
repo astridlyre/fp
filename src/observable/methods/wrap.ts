@@ -1,3 +1,5 @@
+/* eslint-disable no-extra-semi */
+/* eslint-disable @typescript-eslint/no-extra-semi */
 /* eslint prefer-rest-params: 0, prefer-spread: 0 */
 import {
   isObject,

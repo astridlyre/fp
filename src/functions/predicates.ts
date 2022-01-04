@@ -88,7 +88,9 @@ export function isEmpty(x: any) {
     x === '' ||
     x == null ||
     (isArray(x) && x.length === 0) ||
-    (!isClass(x) && (isSet(x) || isMap(x) || isObject(x)) && values(x).length === 0) ||
+    (!isClass(x) &&
+      (isSet(x) || isMap(x) || isObject(x)) &&
+      values(x).length === 0) ||
     Number.isNaN(x)
   ) {
     return true

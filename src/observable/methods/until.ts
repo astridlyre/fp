@@ -12,7 +12,7 @@ export const until = placeholder(
   (comparator: (value: any) => boolean, stream: Observable) =>
     new Observable((observer: Observer) => {
       const subs = stream.subscribe({
-        next: value => {
+        next: (value) => {
           try {
             if (comparator(value)) {
               observer.complete()
@@ -24,5 +24,5 @@ export const until = placeholder(
         },
       } as Observer)
       return () => subs.unsubscribe()
-    })
+    }),
 )

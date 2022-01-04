@@ -14,7 +14,7 @@ export const debounce = placeholder((limit: number, stream: Observable) => {
   let wantsComplete = false
   return new Observable((observer: Observer) => {
     const subs = stream.subscribe({
-      next: value => {
+      next: (value) => {
         stack.push(value)
         clearTimeout(lastInterval)
         lastInterval = setTimeout(() => {

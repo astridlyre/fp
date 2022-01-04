@@ -16,7 +16,7 @@ export function createSelector(...fns: Selector[]) {
   if (!isFunction(resultFunc)) {
     throw new Error(
       `createSelector expects an output function after the ` +
-        `inputs, but received: ${resultFunc}`
+        `inputs, but received: ${resultFunc}`,
     )
   }
 
@@ -53,7 +53,9 @@ function getDependencies(fns: Selector[]) {
   const dependencies = isArray(head(fns)) ? (head(fns) as any) : fns
 
   if (!dependencies.every(isFunction)) {
-    throw new Error('createSelector expects all input-selectors to be functions')
+    throw new Error(
+      'createSelector expects all input-selectors to be functions',
+    )
   }
 
   return dependencies

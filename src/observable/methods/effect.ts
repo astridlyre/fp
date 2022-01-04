@@ -19,8 +19,8 @@ export const effect = placeholder(
           } catch (err: any) {
             observer.error(err)
           }
-        })
+        }),
       )
       return () => subs.unsubscribe()
-    })
+    }),
 )

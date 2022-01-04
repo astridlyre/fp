@@ -26,5 +26,5 @@ export const switchStream = placeholder(
         done = true
         subs.unsubscribe()
       }
-    })
+    }),
 )

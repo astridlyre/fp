@@ -13,7 +13,7 @@ export const reduce = placeholder(
   (
     reducer: (accumulator: any, value: any) => any,
     initialValue: any,
-    stream: Observable
+    stream: Observable,
   ) => {
     let accumulator = initialValue ?? {}
     return new Observable((observer: Observer) => {
@@ -35,5 +35,5 @@ export const reduce = placeholder(
       })
       return () => subs.unsubscribe()
     })
-  }
+  },
 )

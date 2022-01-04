@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /* eslint no-unused-vars: 0 */
 import { identity } from '../functions/utils'
 import { isFunction } from '../functions/predicates'
@@ -77,7 +78,7 @@ export class Just extends Maybe {
       ? Maybe.of(
           isFunction(Ma.merge())
             ? Ma.merge().call(Ma, this.value)
-            : this.value(Ma.merge())
+            : this.value(Ma.merge()),
         )
       : Maybe.of(Ma.merge().call(Ma, this.value))
   }

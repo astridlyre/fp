@@ -1,3 +1,5 @@
+/* eslint-disable no-extra-semi */
+/* eslint-disable @typescript-eslint/no-extra-semi */
 /* eslint no-param-reassign: 0, no-unused-vars: 0 */
 import { curry, unique, compose } from './utils'
 import { isFunction, isObject, isMap, isArray, isSet } from './predicates'
@@ -10,7 +12,8 @@ interface GenericObject {
  */
 export const prop = curry(
   (name: PropertyKey, a: GenericObject) =>
-    a && (name in a ? (isFunction(a[name]) ? a[name].call(a) : a[name]) : void 0)
+    a &&
+    (name in a ? (isFunction(a[name]) ? a[name].call(a) : a[name]) : void 0),
 )
 
 /**
@@ -18,7 +21,7 @@ export const prop = curry(
  */
 export const setPropM = curry(
   (name: PropertyKey, value: any, a: GenericObject): GenericObject =>
-    isObject(a) ? ((a[name] = value), a) : a
+    isObject(a) ? ((a[name] = value), a) : a,
 )
 
 /**
@@ -26,7 +29,7 @@ export const setPropM = curry(
  */
 export const setProp = curry(
   (name: PropertyKey, value: any, a: GenericObject): GenericObject =>
-    a && name in a ? { ...a, [name]: value } : { ...a }
+    a && name in a ? { ...a, [name]: value } : { ...a },
 )
 
 /**
@@ -35,7 +38,7 @@ export const setProp = curry(
 export const set = curry(
   (key: any, value: any, a: GenericObject): GenericObject | Map<any, any> => (
     isMap(a) ? a.set(key, value) : (a[key] = value), a
-  )
+  ),
 )
 
 /**
@@ -43,14 +46,16 @@ export const set = curry(
  */
 export const update = curry(
   (key: PropertyKey | any, updater: (currentValue: any) => any, a: any) =>
-    isMap(a) ? a.set(key, updater(a.get(key))) : ((a[key] = updater(a[key])), a)
+    isMap(a)
+      ? a.set(key, updater(a.get(key)))
+      : ((a[key] = updater(a[key])), a),
 )
 
 /**
  * Props, gets an array of property names from an object, shallow
  */
 export const props = curry((names: PropertyKey[], a: GenericObject) =>
-  names.map(n => prop(n, a))
+  names.map((n) => prop(n, a)),
 )
 
 /**
@@ -60,18 +65,20 @@ export const pick = curry((names: PropertyKey[], a: GenericObject) =>
   names.reduce(
     (result: GenericObject, key) =>
       key in a ? ((result[key] = a[key]), result) : result,
-    {}
-  )
+    {},
+  ),
 )
 
 /**
  * DeepProp, get a property from any object, deep
  */
-export const deepProp = curry((path: string | PropertyKey[], a: GenericObject) => {
-  if (!Array.isArray(path)) path = path.split('.')
-  const [p, ...rest] = path
-  return !rest.length ? prop(p, a) : deepProp(rest, prop(p, a))
-})
+export const deepProp = curry(
+  (path: string | PropertyKey[], a: GenericObject) => {
+    if (!Array.isArray(path)) path = path.split('.')
+    const [p, ...rest] = path
+    return !rest.length ? prop(p, a) : deepProp(rest, prop(p, a))
+  },
+)
 
 /**
  * DeepSetProp, set a property in an object, returns a copy, deep
@@ -83,7 +90,7 @@ export const deepSetProp = curry(
     function innerDeepSetProp(
       path: PropertyKey[],
       value: any,
-      obj: GenericObject
+      obj: GenericObject,
     ): object {
       if (path.length === 1) {
         obj[path[0]] = value
@@ -105,7 +112,7 @@ export const deepSetProp = curry(
     const aux = deepCopy(a)
 
     return innerDeepSetProp(path, value, aux), aux
-  }
+  },
 )
 
 /**
@@ -115,14 +122,14 @@ export const deepUpdate = curry(
   (
     path: string | PropertyKey[],
     updater: (currentValue: any) => any,
-    a: GenericObject
+    a: GenericObject,
   ) => {
     if (!Array.isArray(path)) path = path.split('.')
 
     function innerDeepSetProp(
       path: PropertyKey[],
       updater: (currentValue: any) => any,
-      obj: GenericObject
+      obj: GenericObject,
     ): object {
       if (path.length === 1) {
         obj[path[0]] = updater(obj[path[0]])
@@ -142,14 +149,17 @@ export const deepUpdate = curry(
     }
 
     return innerDeepSetProp(path, updater, a), a
-  }
+  },
 )
 
 /**
  * DeepPick, returns an object with only deep properties paths
  */
 export const deepPick = curry((paths: PropertyKey[], a: GenericObject) =>
-  paths.reduce((result, path) => deepSetProp(path, deepProp(path)(a), result), {})
+  paths.reduce(
+    (result, path) => deepSetProp(path, deepProp(path)(a), result),
+    {},
+  ),
 )
 
 /**
@@ -163,7 +173,7 @@ function diffObjects(oldObj: GenericObject, newObj: GenericObject) {
   function innerDiffObjects(
     oldObj: GenericObject,
     newObj: GenericObject,
-    result: GenericObject
+    result: GenericObject,
   ) {
     if (oldObj === newObj) return result
 
@@ -263,7 +273,7 @@ export function merge(a: GenericObject, b: GenericObject) {
   if (!b && a) return deepCopy(a)
 
   if (isArray(a) && isArray(b)) {
-    return unique(a, b).map(value => deepCopy(value))
+    return unique(a, b).map((value) => deepCopy(value))
   }
 
   if (!isArray(a) && isArray(b)) {
@@ -365,8 +375,12 @@ const sortReducer = (accumulator: any, value: any) => {
   return accumulator
 }
 
-const collisionReducer = (accumulator: any, value: any, index: number, arr: any[]) =>
-  value === arr[index + 1] ? [...accumulator, value] : accumulator
+const collisionReducer = (
+  accumulator: any,
+  value: any,
+  index: number,
+  arr: any[],
+) => (value === arr[index + 1] ? [...accumulator, value] : accumulator)
 
 const isDescriptor = (obj: any) => obj && (obj.state || obj.methods)
 
@@ -378,7 +392,7 @@ if (typeof (Object as any).impl !== 'function') {
       (target: any) => {
         if (!Object.isExtensible(target) || Object.isSealed(target)) {
           throw new TypeError(
-            'Unable to concatenate mixins into base object. Object is either not extensible or has been sealed'
+            'Unable to concatenate mixins into base object. Object is either not extensible or has been sealed',
           )
         }
         Object.assign(target.prototype, ...mixins)
@@ -399,7 +413,7 @@ if (typeof (Object as any).mixin !== 'function') {
       detectCollision(base, ...mixins)
       if (!Object.isExtensible(base) || Object.isSealed(base)) {
         throw new TypeError(
-          'Unable to concatenate mixins into base object. Object is either not extensible or has been sealed'
+          'Unable to concatenate mixins into base object. Object is either not extensible or has been sealed',
         )
       }
       return Object.assign({ ...base }, ...mixins)
@@ -415,7 +429,7 @@ if (typeof (Object as any).mixin !== 'function') {
  */
 export function deepFreeze(obj: GenericObject) {
   if (obj && typeof obj === 'object' && !Object.isFrozen(obj)) {
-    Object.getOwnPropertyNames(obj).forEach(name => deepFreeze(obj[name]))
+    Object.getOwnPropertyNames(obj).forEach((name) => deepFreeze(obj[name]))
     Object.freeze(obj)
   }
   return obj
@@ -456,7 +470,9 @@ export function deepCopy(obj: any) {
         aux.add(val)
       }
     } else {
-      Object.getOwnPropertyNames(obj).forEach(prop => (aux[prop] = deepCopy(obj[prop])))
+      Object.getOwnPropertyNames(obj).forEach(
+        (prop) => (aux[prop] = deepCopy(obj[prop])),
+      )
     }
   }
   return aux

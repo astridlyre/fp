@@ -13,7 +13,7 @@ export const subject = () => {
       get(_, prop: PropertyKey) {
         if (['error', 'next', 'complete'].includes(prop as string)) {
           return (...args: any[]) =>
-            subs.forEach(observer => (observer as any)[prop](...args))
+            subs.forEach((observer) => (observer as any)[prop](...args))
         }
         if (prop === 'subscribe') {
           return (observer: Observer) => {
@@ -37,6 +37,6 @@ export const subject = () => {
           return () => subs.slice(subs.indexOf(observer), 1)
         })[prop]
       },
-    }
+    },
   )
 }

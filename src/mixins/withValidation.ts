@@ -15,7 +15,7 @@ export class ValidationError extends Error {
   }
 
   get messages() {
-    return this.errors.map(e => e.message)
+    return this.errors.map((e) => e.message)
   }
 }
 
@@ -35,12 +35,14 @@ export const withValidation = curry(
     validator: IValidator,
     selector: (...args: any) => any,
     onSucces: (...args: any) => any,
-    onFailure: (...args: any) => any
+    onFailure: (...args: any) => any,
   ) =>
     function validate(this: any, ...args: any[]) {
       if (!validator(selector.apply(this, args))) {
-        return onFailure(new ValidationError('Validation failed', validator.errors))
+        return onFailure(
+          new ValidationError('Validation failed', validator.errors),
+        )
       }
       return onSucces.apply(this, args)
-    }
+    },
 )

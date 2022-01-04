@@ -13,7 +13,7 @@ interface IActionCreatorObject {
  */
 export function bindActionCreators(
   actionCreators: IActionCreatorObject | IActionCreator,
-  dispatch: (action: IAction) => any
+  dispatch: (action: IAction) => any,
 ) {
   if (isFunction(actionCreators)) {
     return bindActionCreator(actionCreators as IActionCreator, dispatch)
@@ -21,7 +21,7 @@ export function bindActionCreators(
 
   if (!isObject(actionCreators)) {
     throw new Error(
-      'Expected an object or function, but got: ' + stringify(actionCreators)
+      'Expected an object or function, but got: ' + stringify(actionCreators),
     )
   }
 
@@ -40,7 +40,7 @@ export function bindActionCreators(
 
 function bindActionCreator(
   actionCreator: IActionCreator,
-  dispatch: (action: IAction) => any
+  dispatch: (action: IAction) => any,
 ) {
   return Object.assign(
     function boundCreator(this: any, ...args: any[]) {
@@ -53,6 +53,6 @@ function bindActionCreator(
       get type() {
         return actionCreator.type
       },
-    }
+    },
   ) as any as IActionCreator
 }

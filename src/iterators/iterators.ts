@@ -9,7 +9,7 @@ import { curry } from '../functions/utils'
  */
 export const mapWith = curry(function* mapWith<X>(
   fn: (element: X) => any,
-  iterable: Iterable<X>
+  iterable: Iterable<X>,
 ): Iterable<any> {
   for (const element of iterable) {
     yield fn(element)
@@ -25,7 +25,7 @@ export const mapWith = curry(function* mapWith<X>(
  */
 export const mapAllWith = curry(function* mapAllWith<X>(
   fn: (element: X) => Iterable<any>,
-  iterable: Iterable<X>
+  iterable: Iterable<X>,
 ): Iterable<any> {
   for (const element of iterable) {
     yield* fn(element)
@@ -41,7 +41,7 @@ export const mapAllWith = curry(function* mapAllWith<X>(
  */
 export const filterWith = curry(function* filterWith<X>(
   fn: (element: X) => boolean,
-  iterable: Iterable<X>
+  iterable: Iterable<X>,
 ): Iterable<X> {
   for (const element of iterable) {
     if (fn(element)) yield element
@@ -54,7 +54,9 @@ export const filterWith = curry(function* filterWith<X>(
  * @returns {function} Generator iterator function that removes nullable
  * values
  */
-export const compact = curry(function* compact<X>(iterable: Iterable<X>): Iterable<X> {
+export const compact = curry(function* compact<X>(
+  iterable: Iterable<X>,
+): Iterable<X> {
   for (const element of iterable) {
     if (element != null) yield element
   }
@@ -69,7 +71,7 @@ export const compact = curry(function* compact<X>(iterable: Iterable<X>): Iterab
  */
 export const untilWith = curry(function* untilWith<X>(
   fn: (element: X) => boolean,
-  iterable: Iterable<X>
+  iterable: Iterable<X>,
 ): Iterable<X> {
   for (const element of iterable) {
     if (fn(element)) break
@@ -105,7 +107,7 @@ export function* rest<X>(iterable: Iterable<X>): Iterable<X> {
  */
 export const take = curry(function* take<X>(
   numberToTake: number,
-  iterable: Iterable<X>
+  iterable: Iterable<X>,
 ): Iterable<X> {
   const iterator = iterable[Symbol.iterator]()
 
@@ -124,7 +126,7 @@ export const take = curry(function* take<X>(
  */
 export const drop = curry(function* drop<X>(
   numberToDrop: number,
-  iterable: Iterable<X>
+  iterable: Iterable<X>,
 ): Iterable<X> {
   if (numberToDrop >= (iterable as any).length) return
   const iterator = iterable[Symbol.iterator]()
@@ -146,13 +148,13 @@ export const drop = curry(function* drop<X>(
  * the combined values of each iterator of iterables
  */
 export function* zip<X>(...iterables: Iterable<X>[]): Iterable<X> {
-  const iterators = iterables.map(i => i[Symbol.iterator]())
+  const iterators = iterables.map((i) => i[Symbol.iterator]())
 
   while (true) {
-    const pairs = iterators.map(j => j.next())
+    const pairs = iterators.map((j) => j.next())
     const dones: (boolean | undefined)[] = []
     const values: any[] = []
-    pairs.forEach(p => (dones.push(p.done), values.push(p.value)))
+    pairs.forEach((p) => (dones.push(p.done), values.push(p.value)))
     if (dones.indexOf(true) >= 0) break
     yield values as any
   }
@@ -169,13 +171,13 @@ export function* zipWith<X>(
   zipper: (...elements: X[]) => any,
   ...iterables: Iterable<X>[]
 ): Iterable<any> {
-  const iterators = iterables.map(i => i[Symbol.iterator]())
+  const iterators = iterables.map((i) => i[Symbol.iterator]())
 
   while (true) {
-    const pairs = iterators.map(j => j.next())
+    const pairs = iterators.map((j) => j.next())
     const dones: (boolean | undefined)[] = []
     const values: any[] = []
-    pairs.forEach(p => (dones.push(p.done), values.push(p.value)))
+    pairs.forEach((p) => (dones.push(p.done), values.push(p.value)))
     if (dones.indexOf(true) >= 0) break
     yield zipper(...values)
   }
@@ -191,7 +193,7 @@ export function* zipWith<X>(
 export const reduceWith = curry(function reduceWith<X>(
   fn: (accumulator: any, element: X) => any,
   seed: any,
-  iterable: Iterable<X>
+  iterable: Iterable<X>,
 ): any {
   let accumulator = seed
   for (const element of iterable) {
@@ -206,7 +208,7 @@ export const reduceWith = curry(function reduceWith<X>(
  * @returns {function} Memoized generator function
  */
 export function memoizeIter(
-  generator: (...args: any) => Generator
+  generator: (...args: any) => Generator,
 ): (...args: any) => Generator {
   const memos = Object.create(null)
   const iters = Object.create(null)

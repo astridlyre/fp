@@ -12,8 +12,8 @@ export const pick = placeholder(
   (key: PropertyKey, stream: Observable) =>
     new Observable((observer: Observer) => {
       const subs = stream.subscribe(
-        withNext(observer)((obj: any) => observer.next(deepProp(key, obj)))
+        withNext(observer)((obj: any) => observer.next(deepProp(key, obj))),
       )
       return () => subs.unsubscribe()
-    })
+    }),
 )

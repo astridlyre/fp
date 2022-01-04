@@ -8,7 +8,7 @@ interface IDecorator {
 // Method Decorators
 // Calls fns after method invocation
 export const after = (...fns: IGenericFunction[]): IDecorator =>
-  function after(target: any, name: string, descriptor: PropertyDescriptor) {
+  function after(_target: any, _name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
     descriptor.value = function withAfter(this: any, ...args: any[]) {
@@ -22,7 +22,7 @@ export const after = (...fns: IGenericFunction[]): IDecorator =>
 
 // Calls fns before method invocation
 export const before = (...fns: IGenericFunction[]): IDecorator =>
-  function before(target: any, name: string, descriptor: PropertyDescriptor) {
+  function before(_target: any, _name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
     descriptor.value = function withBefore(this: any, ...args: any[]) {
@@ -35,7 +35,11 @@ export const before = (...fns: IGenericFunction[]): IDecorator =>
 
 // Calls method if all fns return truthy
 export const provided = (...fns: IGenericFunction[]): IDecorator =>
-  function provided(target: any, name: string, descriptor: PropertyDescriptor) {
+  function provided(
+    _target: any,
+    _name: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value
 
     descriptor.value = function withProvided(this: any, ...args: any[]) {
@@ -46,7 +50,7 @@ export const provided = (...fns: IGenericFunction[]): IDecorator =>
 
 // Does not call method if any fn returns truthy
 export const unless = (...fns: IGenericFunction[]): IDecorator =>
-  function unless(target: any, name: string, descriptor: PropertyDescriptor) {
+  function unless(_target: any, _name: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
     descriptor.value = function withUnless(this: any, ...args: any[]) {
@@ -57,7 +61,11 @@ export const unless = (...fns: IGenericFunction[]): IDecorator =>
 
 // Wrap a method with a decorator (turns ordinary decorator into ES.later)
 export const wrapWith = (decorator: IGenericFunction): IDecorator =>
-  function wrapWith(target: any, name: string, descriptor: PropertyDescriptor) {
+  function wrapWith(
+    _target: any,
+    _name: string,
+    descriptor: PropertyDescriptor,
+  ) {
     descriptor.value = decorator(descriptor.value)
   }
 

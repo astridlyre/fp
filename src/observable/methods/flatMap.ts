@@ -15,7 +15,7 @@ export const flatMap = placeholder(
       let pending = 0
       const subs: Subscription[] = []
       const initialSub = stream.subscribe({
-        next: value => {
+        next: (value) => {
           try {
             handleNext(fn(value))
           } catch (err: any) {
@@ -31,18 +31,18 @@ export const flatMap = placeholder(
         pending++
         subs.push(
           nextObs.subscribe({
-            next: value => observer.next(value),
+            next: (value) => observer.next(value),
             complete: () => {
               pending -= 1
               if (done && pending === 0) observer.complete()
             },
-          } as Observer)
+          } as Observer),
         )
       }
       return () => (
         initialSub.unsubscribe(),
-        subs.forEach(sub => sub.unsubscribe()),
+        subs.forEach((sub) => sub.unsubscribe()),
         observer.complete()
       )
-    })
+    }),
 )

@@ -12,7 +12,7 @@ export const skip = placeholder((count: number, stream: Observable) => {
         if (skipped++ >= count) {
           observer.next(value)
         }
-      })
+      }),
     )
     return () => subs.unsubscribe()
   })

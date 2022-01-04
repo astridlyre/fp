@@ -22,11 +22,13 @@ export function createClient(
   options = {
     storageKey: `${nanoid()}_client_key`,
     toJSON: true,
-  }
+  },
 ) {
   async function isError(res: Response | any) {
     if (!res.ok) {
-      throw new Error((await res.text()) || `HTTP response was not ok: ${res.status}`)
+      throw new Error(
+        (await res.text()) || `HTTP response was not ok: ${res.status}`,
+      )
     }
     return res
   }
@@ -42,7 +44,11 @@ export function createClient(
     throw new TypeError('Response is not JSON')
   }
 
-  function client(endpoint: string, method: HTTPMethod, customConfig: any = {}) {
+  function client(
+    endpoint: string,
+    method: HTTPMethod,
+    customConfig: any = {},
+  ) {
     const controller = new AbortController()
     const token = localStorage.getItem(options.storageKey)
     const headers: any = { 'Content-Type': 'application/json' }
@@ -57,7 +63,9 @@ export function createClient(
       },
     }
     return {
-      req: fetch(`${apiEndpoint}${endpoint}`, config).then(isError).then(isJson),
+      req: fetch(`${apiEndpoint}${endpoint}`, config)
+        .then(isError)
+        .then(isJson),
       abort: controller.abort.bind(controller),
     }
   }
@@ -67,13 +75,22 @@ export function createClient(
       return client(url, HTTPMethod.GET, options)
     },
     post(url: string, body: any, options: any) {
-      return client(url, HTTPMethod.POST, { ...options, body: JSON.stringify(body) })
+      return client(url, HTTPMethod.POST, {
+        ...options,
+        body: JSON.stringify(body),
+      })
     },
     put(url: string, body: any, options: any) {
-      return client(url, HTTPMethod.PUT, { ...options, body: JSON.stringify(body) })
+      return client(url, HTTPMethod.PUT, {
+        ...options,
+        body: JSON.stringify(body),
+      })
     },
     patch(url: string, body: any, options: any) {
-      return client(url, HTTPMethod.PATCH, { ...options, body: JSON.stringify(body) })
+      return client(url, HTTPMethod.PATCH, {
+        ...options,
+        body: JSON.stringify(body),
+      })
     },
     delete(url: string, options: any) {
       return client(url, HTTPMethod.DELETE, options)

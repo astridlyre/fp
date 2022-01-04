@@ -10,7 +10,9 @@ import { Observable, Observer } from '../Observable'
 export const mapTo = placeholder(
   (value: any, stream: Observable) =>
     new Observable((observer: Observer) => {
-      const subs = stream.subscribe(withNext(observer)(() => observer.next(value)))
+      const subs = stream.subscribe(
+        withNext(observer)(() => observer.next(value)),
+      )
       return () => subs.unsubscribe()
-    })
+    }),
 )

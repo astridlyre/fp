@@ -54,7 +54,7 @@ export function combineReducers(reducers: IReducerObject): IReducerFunction {
         const actionType = action && action.type
         throw new Error(
           `When called with action of type ${actionType} ` +
-            `the reducer for key ${key} returned undefined.`
+            `the reducer for key ${key} returned undefined.`,
         )
       }
 
@@ -78,7 +78,7 @@ function assertReducerShape(reducers: IReducerObject) {
       throw new Error(
         `Reducer for key ${key as string} returned undefined. ` +
           'Set null for the return value if you do not ' +
-          'want to set a value for this reducer.'
+          'want to set a value for this reducer.',
       )
     }
   }

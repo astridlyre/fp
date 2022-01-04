@@ -1,6 +1,12 @@
+/* eslint-disable no-redeclare */
 /* eslint no-unused-vars: 0 */
 import { isFunction } from '../functions/predicates'
-import { multi, method, MultiMethod, IHandler } from '../multimethod/multimethod'
+import {
+  multi,
+  method,
+  MultiMethod,
+  IHandler,
+} from '../multimethod/multimethod'
 import { combineReducers } from './combineReducers'
 import { IAction } from './createAction'
 
@@ -14,7 +20,10 @@ export interface Reducer {
 }
 
 interface IReducerBuilder {
-  case(type: string, handler: (state: any, action: IAction) => any): IReducerBuilder
+  case(
+    type: string,
+    handler: (state: any, action: IAction) => any,
+  ): IReducerBuilder
   init(initialState: any): IReducerBuilder
   build(): MultiMethod
 }
@@ -32,7 +41,10 @@ export const Reducer = {
           cases.push(method(type, handler))
         } else {
           cases.push(
-            method((state: any, action: IAction) => action.type === type, handler)
+            method(
+              (_state: any, action: IAction) => action.type === type,
+              handler,
+            ),
           )
         }
         return this

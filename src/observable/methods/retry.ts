@@ -33,7 +33,7 @@ export const retry = placeholder((config: IRetryConfig, stream: Observable) => {
   const sub: Subscription[] = []
   return new Observable((observer: Observer) => {
     retryInner(stream, observer, sub, config, 1)
-    return () => sub.map(s => s.unsubscribe())
+    return () => sub.map((s) => s.unsubscribe())
   })
 })
 
@@ -42,22 +42,24 @@ function retryInner(
   observer: Observer,
   sub: Subscription[],
   config: IRetryConfig,
-  i: number
+  i: number,
 ): void {
   sub.pop()?.unsubscribe()
   sub.push(
     stream.subscribe({
-      next: value => observer.next(value),
+      next: (value) => observer.next(value),
       error: () => {
         if (i <= config.retries) {
           return setTimeout(
             () => retryInner(stream, observer, sub, config, i + 1),
-            config.method === 'expo' ? config.delay * Math.pow(i, 2) : config.delay * i
+            config.method === 'expo'
+              ? config.delay * Math.pow(i, 2)
+              : config.delay * i,
           )
         }
         return observer.complete()
       },
       complete: () => observer.complete(),
-    })
+    }),
   )
 }

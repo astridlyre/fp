@@ -19,7 +19,7 @@ class AbortError extends Error {
 export function createAsyncThunk(
   typePrefix: string,
   payloadCreator: (...args: any[]) => any,
-  options: any
+  options: any,
 ) {
   // Create thunk states
   const pending = createPending(typePrefix)
@@ -34,7 +34,7 @@ export function createAsyncThunk(
     return function asyncThunk(
       dispatch: (action: IAction) => any,
       getState: () => any,
-      extra: any
+      extra: any,
     ) {
       const requestId = nanoid()
 
@@ -49,7 +49,7 @@ export function createAsyncThunk(
 
       const abortedPromise = new Promise((_, reject) => {
         abortController.signal.addEventListener('abort', () =>
-          reject(new AbortError(abortReason || 'Aborted'))
+          reject(new AbortError(abortReason || 'Aborted')),
         )
       })
 
@@ -73,8 +73,11 @@ export function createAsyncThunk(
             pending(
               requestId,
               arg,
-              options?.getPendingMeta?.({ requestId, arg }, { getState, extra })
-            )
+              options?.getPendingMeta?.(
+                { requestId, arg },
+                { getState, extra },
+              ),
+            ),
           )
 
           const actionPromise = Promise.resolve(
@@ -104,7 +107,7 @@ export function createAsyncThunk(
               }
 
               return fulfilled(result, requestId, arg)
-            })
+            }),
           )
 
           finalAction = await Promise.race([abortedPromise, actionPromise])
@@ -142,7 +145,12 @@ export function createAsyncThunk(
     }
   }
 
-  return Object.assign(actionCreator, { pending, rejected, fulfilled, typePrefix })
+  return Object.assign(actionCreator, {
+    pending,
+    rejected,
+    fulfilled,
+    typePrefix,
+  })
 }
 
 /**
@@ -182,7 +190,7 @@ function createFulfilled(typePrefix: string) {
         requestId,
         requestStatus: STATUS_FULFILLED,
       },
-    })
+    }),
   )
 }
 
@@ -199,15 +207,18 @@ function createPending(typePrefix: string) {
    *
    * @returns {object} Action object
    */
-  return createAction(typePrefix + '/' + STATUS_PENDING, (requestId, arg, meta) => ({
-    payload: undefined,
-    meta: {
-      ...(meta || {}),
-      arg,
-      requestId,
-      requestStatus: STATUS_PENDING,
-    },
-  }))
+  return createAction(
+    typePrefix + '/' + STATUS_PENDING,
+    (requestId, arg, meta) => ({
+      payload: undefined,
+      meta: {
+        ...(meta || {}),
+        arg,
+        requestId,
+        requestStatus: STATUS_PENDING,
+      },
+    }),
+  )
 }
 
 /**
@@ -239,6 +250,6 @@ function createRejected(typePrefix: string) {
         aborted: error?.name === 'AbortError',
         condition: error?.name === 'ConditionError',
       },
-    })
+    }),
   )
 }

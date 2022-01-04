@@ -16,7 +16,10 @@ export const DEFAULT_BUFFER_SIZE = 100
 /**
  * Share, buffers 100 events by default
  */
-export const share = (bufferSize: number = DEFAULT_BUFFER_SIZE, stream: Observable) => {
+export const share = (
+  bufferSize: number = DEFAULT_BUFFER_SIZE,
+  stream: Observable,
+) => {
   const store: IStore = {
     values: [],
     errors: [],
@@ -26,18 +29,18 @@ export const share = (bufferSize: number = DEFAULT_BUFFER_SIZE, stream: Observab
       this.observers.push(o)
     },
     removeObserver(o) {
-      this.observers = this.observers.filter(ob => ob !== o)
+      this.observers = this.observers.filter((ob) => ob !== o)
     },
   }
   const subs = stream.subscribe({
-    next: value => {
+    next: (value) => {
       if (store.values.length >= bufferSize) {
         store.values.shift()
       }
       store.values.push(value)
       queueMicrotask(() => broadcast())
     },
-    error: error => {
+    error: (error) => {
       if (store.errors.length >= bufferSize) {
         store.errors.shift()
       }
@@ -50,15 +53,15 @@ export const share = (bufferSize: number = DEFAULT_BUFFER_SIZE, stream: Observab
     const { values, errors, observers, wantsComplete } = store
 
     if (errors.length) {
-      observers.forEach(observer => {
-        errors.forEach(value => {
+      observers.forEach((observer) => {
+        errors.forEach((value) => {
           observer.error(value)
         })
       })
       errors.length = 0
     } else {
-      observers.forEach(observer => {
-        values.forEach(value => {
+      observers.forEach((observer) => {
+        values.forEach((value) => {
           observer.next(value)
         })
       })
@@ -66,7 +69,7 @@ export const share = (bufferSize: number = DEFAULT_BUFFER_SIZE, stream: Observab
     }
 
     if (wantsComplete) {
-      observers.forEach(observer => observer.complete())
+      observers.forEach((observer) => observer.complete())
       subs.unsubscribe()
     }
   }
@@ -81,6 +84,6 @@ export const share = (bufferSize: number = DEFAULT_BUFFER_SIZE, stream: Observab
           observer.complete()
           if (store.observers.length === 0) subs.unsubscribe()
         }
-      })
+      }),
   )()
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /* eslint no-unused-vars: 0, no-magic-numbers: 0 */
 import { entries } from '../functions/objects'
 import { isFunction } from '../functions/predicates'
@@ -57,7 +58,10 @@ export interface Observable {
   buffer(size: number): Observable
   skip(numberToSkip: number): Observable
   take(numberToTake: number): Observable
-  reduce(reducer: (accumulator: any, value: any) => any, initialValue: any): Observable
+  reduce(
+    reducer: (accumulator: any, value: any) => any,
+    initialValue: any,
+  ): Observable
   mapTo(value: any): Observable
   throttle(limit: number): Observable
   forEach(f: (value: any) => void): any
@@ -84,7 +88,8 @@ export interface Subscription {
 }
 
 export const $$observable = /* #__PURE__ */ (() =>
-  (typeof Symbol === 'function' && (Symbol as any).observable) || '@@observable')()
+  (typeof Symbol === 'function' && (Symbol as any).observable) ||
+  '@@observable')()
 
 const additionalProperties = {
   fromEvent: placeholder(
@@ -95,12 +100,14 @@ const additionalProperties = {
           ['error', observer.error.bind(observer)],
           ['end', observer.complete.bind(observer)],
         ])
-        entries(group as any).forEach(([event, handler]) => emitter.on(event, handler))
+        entries(group as any).forEach(([event, handler]) =>
+          emitter.on(event, handler),
+        )
         return () =>
           entries(group as any).forEach(([event, handler]) =>
-            emitter.removeListener(event, handler)
+            emitter.removeListener(event, handler),
           )
-      })
+      }),
   ),
   fromGenerator: placeholder(
     (generator: GeneratorFunction) =>
@@ -109,16 +116,16 @@ const additionalProperties = {
           .on('data', observer.next.bind(observer))
           .on('end', observer.complete.bind(observer))
           .on('error', observer.error.bind(observer))
-      })
+      }),
   ),
   fromPromise: placeholder(
     <X>(promise: Promise<X>) =>
       new Observable((observer: Observer) => {
         promise
-          .then(value => observer.next(value))
-          .catch(err => observer.error(err))
+          .then((value) => observer.next(value))
+          .catch((err) => observer.error(err))
           .finally(() => observer.complete())
-      })
+      }),
   ),
   fromStream: placeholder(
     (stream: any) =>
@@ -126,7 +133,7 @@ const additionalProperties = {
         stream.on('data', observer.next.bind(observer))
         stream.on('end', observer.complete.bind(observer))
         stream.on('error', observer.error.bind(observer))
-      })
+      }),
   ),
   combine,
   interval,
@@ -163,7 +170,10 @@ export const ReactiveExtensions = {
   take(numberToTake: number) {
     return take(numberToTake, this)
   },
-  reduce(reducer: (accumulator: any, value: any) => any, initialValue: any = {}) {
+  reduce(
+    reducer: (accumulator: any, value: any) => any,
+    initialValue: any = {},
+  ) {
     return reduce(reducer, initialValue, this)
   },
   mapTo(value: any) {

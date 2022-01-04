@@ -19,7 +19,10 @@ export const ClassMixin = (behaviour: any, sharedBehaviour: any = {}) => {
   for (const property of sharedKeys) {
     Object.defineProperty(mixin, property, {
       value: sharedBehaviour[property],
-      enumerable: Object.prototype.propertyIsEnumerable.call(sharedBehaviour, property),
+      enumerable: Object.prototype.propertyIsEnumerable.call(
+        sharedBehaviour,
+        property,
+      ),
     })
   }
   Object.defineProperty(mixin, Symbol.hasInstance, {

@@ -1,68 +1,69 @@
 {
-    "root": true,
-    "env": {
-        "es2021": true,
-        "shared-node-browser": true,
-        "node": true,
-        "browser": true,
-        "mocha": true
-    },
-    "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
+  "root": true,
+  "env": {
+    "es2021": true,
+    "shared-node-browser": true,
+    "node": true,
+    "browser": true,
+    "mocha": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": 0,
+    "no-promise-executor-return": "warn",
+    "require-atomic-updates": "error",
+    "accessor-pairs": "warn",
+    "array-callback-return": "error",
+    "complexity": "error",
+    "consistent-return": "warn",
+    "curly": [
+      "error",
+      "multi-line"
     ],
-    "parser": "@typescript-eslint/parser",
-    "plugins": [
-        "@typescript-eslint"
+    "dot-notation": "warn",
+    "eqeqeq": [
+      "error",
+      "smart"
     ],
-    "rules": {
-        "@typescript-eslint/no-explicit-any": 0,
-        "no-promise-executor-return": "warn",
-        "require-atomic-updates": "error",
-        "accessor-pairs": "warn",
-        "array-callback-return": "error",
-        "complexity": "error",
-        "consistent-return": "warn",
-        "curly": [
-            "error",
-            "multi-line"
-        ],
-        "dot-notation": "warn",
-        "eqeqeq": [
-            "error",
-            "smart"
-        ],
-        "grouped-accessor-pairs": [
-            "error",
-            "getBeforeSet"
-        ],
-        "no-unused-vars": "warn",
-        "no-param-reassign": "error",
-        "prefer-promise-reject-errors": "error",
-        "no-var": "error",
-        "prefer-const": [
-            "warn",
-            {
-                "destructuring": "any"
-            }
-        ],
-        "no-unneeded-ternary": "error",
-        "no-duplicate-imports": [
-            "error",
-            {
-                "includeExports": true
-            }
-        ],
-        "no-constant-condition": [
-            "error",
-            {
-                "checkLoops": false
-            }
-        ],
-        "func-names": [
-            "warn",
-            "always"
-        ],
-        "object-shorthand": "warn"
-    }
+    "grouped-accessor-pairs": [
+      "error",
+      "getBeforeSet"
+    ],
+    "no-unused-vars": "warn",
+    "no-param-reassign": "error",
+    "prefer-promise-reject-errors": "error",
+    "no-var": "error",
+    "prefer-const": [
+      "warn",
+      {
+        "destructuring": "any"
+      }
+    ],
+    "no-unneeded-ternary": "error",
+    "no-duplicate-imports": [
+      "error",
+      {
+        "includeExports": true
+      }
+    ],
+    "no-constant-condition": [
+      "error",
+      {
+        "checkLoops": false
+      }
+    ],
+    "func-names": [
+      "warn",
+      "always"
+    ],
+    "object-shorthand": "warn"
+  }
 }

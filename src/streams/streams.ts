@@ -1,10 +1,11 @@
+/* eslint-disable no-redeclare */
 /* eslint no-unused-vars: 0 */
 import { Transform } from 'stream'
 
 export function createFilterStream(fn: (value: any) => boolean) {
   return new Transform({
     objectMode: true,
-    transform(chunk: any, encoding: string, callback: () => void) {
+    transform(chunk: any, _encoding: string, callback: () => void) {
       if (fn(chunk)) this.push(chunk)
       callback()
     },
@@ -14,7 +15,7 @@ export function createFilterStream(fn: (value: any) => boolean) {
 export function createMapStream(fn: (value: any) => any) {
   return new Transform({
     objectMode: true,
-    transform(chunk: any, encoding: string, callback: () => void) {
+    transform(chunk: any, _encoding: string, callback: () => void) {
       this.push(fn(chunk))
       callback()
     },
@@ -23,12 +24,12 @@ export function createMapStream(fn: (value: any) => any) {
 
 export function createReduceStream(
   reducer: (accumulator: any, value: any) => any,
-  initialValue: any
+  initialValue: any,
 ) {
   let accumulator = initialValue
   return new Transform({
     objectMode: true,
-    transform(chunk: any, encoding: string, callback: () => void) {
+    transform(chunk: any, _encoding: string, callback: () => void) {
       accumulator = reducer(accumulator, chunk)
       callback()
     },
@@ -54,9 +55,9 @@ export class ParallelStream extends Transform {
       chunk: any,
       encoding: string,
       push: (value: any) => any,
-      onComplete: (err: Error) => any
+      onComplete: (err: Error) => any,
     ) => void,
-    options = {}
+    options = {},
   ) {
     super({ ...options, objectMode: true })
     this.userTransform = userTransform
@@ -64,7 +65,12 @@ export class ParallelStream extends Transform {
 
   _transform(chunk: any, encoding: string, callback: () => void) {
     this.running++
-    this.userTransform(chunk, encoding, this.push.bind(this), this._onComplete.bind(this))
+    this.userTransform(
+      chunk,
+      encoding,
+      this.push.bind(this),
+      this._onComplete.bind(this),
+    )
     callback()
   }
 
@@ -104,9 +110,9 @@ export class LimitedParallelStream extends Transform {
       chunk: any,
       encoding: string,
       push: (value: any) => any,
-      onComplete: (err: Error) => any
+      onComplete: (err: Error) => any,
     ) => void,
-    options = {}
+    options = {},
   ) {
     super({ ...options, objectMode: true })
     this.concurrency = concurrency
@@ -115,7 +121,12 @@ export class LimitedParallelStream extends Transform {
 
   _transform(chunk: any, encoding: string, callback: () => void) {
     this.running++
-    this.userTransform(chunk, encoding, this.push.bind(this), this._onComplete.bind(this))
+    this.userTransform(
+      chunk,
+      encoding,
+      this.push.bind(this),
+      this._onComplete.bind(this),
+    )
     if (this.running < this.concurrency) {
       callback()
     } else {
@@ -145,13 +156,13 @@ export class LimitedParallelStream extends Transform {
 }
 
 export function createFork(stream: any) {
-  return (...streams: any[]) => streams.forEach(s => stream.pipe(s))
+  return (...streams: any[]) => streams.forEach((s) => stream.pipe(s))
 }
 
 export function createMerge(...sources: any[]) {
   return (dest: any) => {
     let endCount = 0
-    return sources.map(source => {
+    return sources.map((source) => {
       source.on('end', () => {
         if (++endCount === sources.length) dest.end()
       })

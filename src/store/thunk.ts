@@ -9,7 +9,9 @@ import { IAction } from './createAction'
 function createThunkMiddleware(extraArgument?: any) {
   function middleware({ dispatch, getState }: IMiddlewareAPI) {
     return (next: Middleware) => (action: IAction | any) =>
-      isFunction(action) ? action(dispatch, getState, extraArgument) : next(action)
+      isFunction(action)
+        ? action(dispatch, getState, extraArgument)
+        : next(action)
   }
   middleware.withExtraArgument = createThunkMiddleware
   return middleware

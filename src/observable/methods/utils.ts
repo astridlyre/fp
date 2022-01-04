@@ -18,5 +18,5 @@ export const placeholder =
           return (...args: any[]) =>
             ((creator(...initialArgs) as any)[prop] as any)(...args)
         },
-      }
+      },
     )

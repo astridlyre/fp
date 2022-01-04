@@ -18,7 +18,10 @@ export interface IActionCreator extends Function {
 /**
  * A utility function for making an action creator for a given type
  */
-export function createAction(type: string, prepareAction: (...args: any[]) => any) {
+export function createAction(
+  type: string,
+  prepareAction: (...args: any[]) => any,
+) {
   function actionCreator(...args: any[]) {
     if (prepareAction) {
       const prepared = prepareAction(...args)

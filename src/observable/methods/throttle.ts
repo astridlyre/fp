@@ -25,7 +25,7 @@ export const throttle = placeholder((limit: number, stream: Observable) => {
             }
           }, limit - (Date.now() - lastRan))
         }
-      })
+      }),
     )
     return () => subs.unsubscribe()
   })

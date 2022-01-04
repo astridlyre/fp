@@ -10,13 +10,13 @@ import { Observable, Observer } from '../Observable'
 export const merge = placeholder((...streams: Observable[]) => {
   let done = 0
   return new Observable((observer: Observer) => {
-    const subscriptions = streams.map(stream =>
+    const subscriptions = streams.map((stream) =>
       stream.subscribe({
-        next: value => observer.next(value),
+        next: (value) => observer.next(value),
         error: observer.error.bind(observer),
         complete: () => ++done === streams.length && observer.complete(),
-      })
+      }),
     )
-    return () => subscriptions.forEach(subs => subs.unsubscribe())
+    return () => subscriptions.forEach((subs) => subs.unsubscribe())
   })
 })

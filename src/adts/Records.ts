@@ -1,5 +1,4 @@
 /* eslint no-unused-vars: 0 */
-
 export class Pair {
   #left
   #right;
@@ -99,7 +98,7 @@ export class Enum {
   [Symbol.toStringTag] = 'Enum'
 
   constructor(types: string[]) {
-    types.forEach(type => this.#types.add(type))
+    types.forEach((type) => this.#types.add(type))
   }
   has(type: string) {
     return this.#types.has(type)
