@@ -5,7 +5,7 @@ import { strict as assert } from 'assert'
 import { Readable } from 'stream'
 
 function createAsyncStream(from) {
-  return new Observable(observer => {
+  return new Observable((observer) => {
     function recur(from, i) {
       if (i < from.length) {
         return setTimeout(() => {
@@ -20,7 +20,7 @@ function createAsyncStream(from) {
 }
 
 describe('Observable', function () {
-  describe('fromGenerator', function () {
+  /* describe('fromGenerator', function () {
     it('should create an Observable from a generator', function (done) {
       const gen = function* gen() {
         yield 'hello'
@@ -29,7 +29,7 @@ describe('Observable', function () {
       const stream = Observable.fromGenerator(gen)
       const values = []
       stream.subscribe({
-        next: value => values.push(value),
+        next: (value) => values.push(value),
         complete: () => {
           try {
             assert.deepEqual(values, ['hello', 'world'])
@@ -40,7 +40,7 @@ describe('Observable', function () {
       })
       const values2 = []
       stream.subscribe({
-        next: value => {
+        next: (value) => {
           values2.push(value)
         },
         complete: () => {
@@ -54,14 +54,16 @@ describe('Observable', function () {
       })
     })
   })
-
+ */
   describe('from EventEmitter', function () {
     it('should create an Observable from an EventEmitter', function (done) {
       const emitter = new EventEmitter()
-      const stream = Observable.fromEvent(emitter, 'test', (...args) => [...args])
+      const stream = Observable.fromEvent(emitter, 'test', (...args) => [
+        ...args,
+      ])
       const values = []
       stream.subscribe({
-        next: value => values.push(value),
+        next: (value) => values.push(value),
         complete: () => {
           try {
             assert.deepEqual(values, [['cat'], ['dog']])
@@ -82,7 +84,7 @@ describe('Observable', function () {
       const stream = Observable.from([1, 2, 3])
       const values = []
       stream.throttle(50).subscribe({
-        next: value => values.push(value),
+        next: (value) => values.push(value),
         complete: () => {
           try {
             assert.deepEqual(values, [1])
@@ -98,7 +100,7 @@ describe('Observable', function () {
       const stream = createAsyncStream([1, 2, 3])
       const values = []
       stream.throttle(50).subscribe({
-        next: value => values.push(value),
+        next: (value) => values.push(value),
         complete: () => {
           try {
             assert.deepEqual(values, [1])
@@ -117,7 +119,7 @@ describe('Observable', function () {
       Observable.from([1, 2, 3])
         .debounce(10)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [3])
@@ -134,9 +136,9 @@ describe('Observable', function () {
     it('should map a stream', function (done) {
       const values = []
       Observable.from([1, 2, 3])
-        .map(x => x * x)
+        .map((x) => x * x)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete: () => {
             try {
               assert.deepEqual(values, [1, 4, 9])
@@ -150,9 +152,9 @@ describe('Observable', function () {
     it('should map a stream async', function (done) {
       const values = []
       createAsyncStream([1, 2, 3])
-        .map(x => x * x)
+        .map((x) => x * x)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete: () => {
             try {
               assert.deepEqual(values, [1, 4, 9])
@@ -169,9 +171,9 @@ describe('Observable', function () {
     it('should filter a stream', function (done) {
       const values = []
       Observable.from([1, 2, 3, 4, 5, 6])
-        .filter(x => x % 2 === 0)
+        .filter((x) => x % 2 === 0)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete: () => {
             try {
               assert.deepEqual(values, [2, 4, 6])
@@ -185,9 +187,9 @@ describe('Observable', function () {
     it('should filter a stream async', function (done) {
       const values = []
       createAsyncStream([1, 2, 3, 4, 5, 6])
-        .filter(x => x % 2 === 0)
+        .filter((x) => x % 2 === 0)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete: () => {
             try {
               assert.deepEqual(values, [2, 4, 6])
@@ -206,7 +208,7 @@ describe('Observable', function () {
       Observable.from([1, 2, 3, 4, 5, 6])
         .take(2)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete: () => {
             try {
               assert.deepEqual(values, [1, 2])
@@ -222,7 +224,7 @@ describe('Observable', function () {
       createAsyncStream([1, 2, 3, 4, 5, 6])
         .take(2)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete: () => {
             try {
               assert.deepEqual(values, [1, 2])
@@ -241,7 +243,7 @@ describe('Observable', function () {
       Observable.from(['hi', 'there', 'how', 'are', 'you'])
         .skip(2)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete: () => {
             try {
               assert.deepEqual(values, ['how', 'are', 'you'])
@@ -257,7 +259,7 @@ describe('Observable', function () {
       createAsyncStream(['hi', 'there', 'how', 'are', 'you'])
         .skip(2)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete: () => {
             try {
               assert.deepEqual(values, ['how', 'are', 'you'])
@@ -276,7 +278,7 @@ describe('Observable', function () {
       Observable.from([1, 2, 3])
         .concat(Observable.from(['a', 'b', 'c']))
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [1, 2, 3, 'a', 'b', 'c'])
@@ -289,7 +291,7 @@ describe('Observable', function () {
     })
     it('should concat streams async', function (done) {
       const values = []
-      const streamA = new Observable(observer => {
+      const streamA = new Observable((observer) => {
         let n = 0
         let to = null
         function go() {
@@ -305,10 +307,24 @@ describe('Observable', function () {
       })
       const streamB = createAsyncStream(['a', 'b', 'c'])
       streamA.concat(streamB).subscribe({
-        next: value => values.push(value),
+        next: (value) => values.push(value),
         complete() {
           try {
-            assert.deepEqual(values, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 'a', 'b', 'c'])
+            assert.deepEqual(values, [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              'a',
+              'b',
+              'c',
+            ])
             done()
           } catch (err) {
             done(err)
@@ -324,7 +340,7 @@ describe('Observable', function () {
       const streamA = Observable.from([1, 2, 3])
       const streamB = Observable.from(['a', 'b', 'c'])
       streamA.combine(streamB).subscribe({
-        next: value => values.push(value),
+        next: (value) => values.push(value),
         complete: () => {
           try {
             assert.deepEqual(values, [3, 'a'])
@@ -340,7 +356,7 @@ describe('Observable', function () {
       const streamA = createAsyncStream([1, 2, 3])
       const streamB = createAsyncStream(['a', 'b', 'c'])
       streamA.combine(streamB).subscribe({
-        next: value => values.push(value),
+        next: (value) => values.push(value),
         complete: () => {
           try {
             assert.deepEqual(values, [1, 'a', 2, 'b', 3, 'c'])
@@ -379,7 +395,7 @@ describe('Observable', function () {
       const streamA = Observable.from([1, 2, 3])
       const streamB = Observable.from(['a', 'b', 'c'])
       Observable.merge(streamA, streamB).subscribe({
-        next: value => values.push(value),
+        next: (value) => values.push(value),
         complete: () => {
           try {
             assert.deepEqual(values, [1, 2, 3, 'a', 'b', 'c'])
@@ -395,7 +411,7 @@ describe('Observable', function () {
       const streamA = createAsyncStream([1, 2, 3])
       const streamB = createAsyncStream(['a', 'b', 'c'])
       Observable.merge(streamA, streamB).subscribe({
-        next: value => values.push(value),
+        next: (value) => values.push(value),
         complete: () => {
           try {
             assert.deepEqual(values, [1, 'a', 2, 'b', 3, 'c'])
@@ -412,13 +428,13 @@ describe('Observable', function () {
     it('should merge promise-based streams', function (done) {
       const values = []
       const streamA = Observable.fromPromise(
-        new Promise(resolve => setTimeout(() => resolve('hello'), 10))
+        new Promise((resolve) => setTimeout(() => resolve('hello'), 10)),
       )
       const streamB = Observable.fromPromise(
-        new Promise(resolve => setTimeout(() => resolve('world'), 15))
+        new Promise((resolve) => setTimeout(() => resolve('world'), 15)),
       )
       Observable.merge(streamA, streamB).subscribe({
-        next: value => values.push(value),
+        next: (value) => values.push(value),
         complete() {
           try {
             assert.deepEqual(values, ['hello', 'world'])
@@ -440,7 +456,7 @@ describe('Observable', function () {
         .map(() => streamB)
         .switch()
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete: () => {
             try {
               assert.deepEqual(values, ['a', 'b', 'c'])
@@ -454,7 +470,7 @@ describe('Observable', function () {
 
     it('should switch streams async', function (done) {
       const values2 = []
-      const stream1 = new Observable(observer => {
+      const stream1 = new Observable((observer) => {
         setTimeout(() => observer.next(), 10)
         setTimeout(() => observer.complete(), 20)
       })
@@ -463,7 +479,7 @@ describe('Observable', function () {
         .map(() => stream2)
         .switch()
         .subscribe({
-          next: value => values2.push(value),
+          next: (value) => values2.push(value),
           complete: () => {
             try {
               assert.deepEqual(values2, [1, 2, 3, 4])
@@ -481,9 +497,9 @@ describe('Observable', function () {
       const values = []
       const streamA = Observable.from([1, 2, 3])
       streamA
-        .flatMap(x => Observable.from([x + x, x]))
+        .flatMap((x) => Observable.from([x + x, x]))
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete: () => {
             try {
               assert.deepEqual(values, [2, 1, 4, 2, 6, 3])
@@ -502,7 +518,7 @@ describe('Observable', function () {
       streamA
         .flatMap(() => Observable.from(['a', n++]))
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete: () => {
             try {
               assert.deepEqual(values, ['a', 1, 'a', 2, 'a', 3, 'a', 4])
@@ -519,9 +535,9 @@ describe('Observable', function () {
       Observable.interval(5)
         .take(1)
         .flatMap(() => Observable.of('hi', 'hello'))
-        .flatMap(value => Observable.of(value + 'there'))
+        .flatMap((value) => Observable.of(value + 'there'))
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete: () => {
             try {
               assert.deepEqual(values, ['hithere', 'hellothere'])
@@ -535,15 +551,19 @@ describe('Observable', function () {
 
     it('should flatMap with a promise', function (done) {
       const values = []
-      Observable.fromPromise(new Promise(resolve => setTimeout(() => resolve('hi'), 10)))
-        .flatMap(str =>
+      Observable.fromPromise(
+        new Promise((resolve) => setTimeout(() => resolve('hi'), 10)),
+      )
+        .flatMap((str) =>
           Observable.fromPromise(
-            new Promise(resolve => setTimeout(() => resolve(str + 'there'), 50))
-          )
+            new Promise((resolve) =>
+              setTimeout(() => resolve(str + 'there'), 50),
+            ),
+          ),
         )
-        .flatMap(result => Observable.of(result))
+        .flatMap((result) => Observable.of(result))
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, ['hithere'])
@@ -562,7 +582,7 @@ describe('Observable', function () {
       Observable.from([{ name: 'tim' }, { name: 'bob' }])
         .pick('name')
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, ['tim', 'bob'])
@@ -578,7 +598,7 @@ describe('Observable', function () {
       createAsyncStream([{ name: 'tim' }, { name: 'bob' }])
         .pick(['name'])
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, ['tim', 'bob'])
@@ -597,7 +617,7 @@ describe('Observable', function () {
       Observable.from([1, 2, 2, 2, 3, 4, 5, 5, 6])
         .distinct()
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [1, 2, 3, 4, 5, 6])
@@ -613,7 +633,7 @@ describe('Observable', function () {
       createAsyncStream([1, 2, 2, 2, 3, 4, 5, 5, 6])
         .distinct()
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [1, 2, 3, 4, 5, 6])
@@ -632,9 +652,9 @@ describe('Observable', function () {
         { name: 'tim', age: 3 },
         { name: 'tim', age: 2 },
       ])
-        .distinct(x => x.age)
+        .distinct((x) => x.age)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [
@@ -657,9 +677,9 @@ describe('Observable', function () {
         { name: 'tim', age: 3 },
         { name: 'tim', age: 2 },
       ])
-        .distinct(x => x.age)
+        .distinct((x) => x.age)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [
@@ -680,9 +700,9 @@ describe('Observable', function () {
     it('should stream until', function (done) {
       const values = []
       Observable.from([1, 2, 3, 4, 5])
-        .until(n => n > 3)
+        .until((n) => n > 3)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [1, 2, 3])
@@ -696,9 +716,9 @@ describe('Observable', function () {
     it('should stream until, async', function (done) {
       const values = []
       createAsyncStream([1, 2, 3, 4, 5])
-        .until(n => n > 3)
+        .until((n) => n > 3)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [1, 2, 3])
@@ -713,7 +733,7 @@ describe('Observable', function () {
 
   describe('catch', function () {
     it('should catch error', function (done) {
-      new Observable(observer => {
+      new Observable((observer) => {
         let n = 0
         if (n < 1) {
           n++
@@ -721,9 +741,9 @@ describe('Observable', function () {
         }
         observer.next(n)
       })
-        .catch(err => `Error: ${err.message}`)
+        .catch((err) => `Error: ${err.message}`)
         .subscribe({
-          next: value => {
+          next: (value) => {
             try {
               assert.equal(value, 'Error: Uh oh')
               done()
@@ -736,7 +756,7 @@ describe('Observable', function () {
 
     it('should catch error and restart', function (done) {
       let n = 0
-      new Observable(observer => {
+      new Observable((observer) => {
         if (n < 1) {
           n++
           throw new Error('Uh oh')
@@ -745,7 +765,7 @@ describe('Observable', function () {
       })
         .catch((_, source) => source)
         .subscribe({
-          next: value => {
+          next: (value) => {
             try {
               assert.equal(value, 1)
               done()
@@ -763,7 +783,7 @@ describe('Observable', function () {
       Observable.from([1, 2, 3])
         .zip(Observable.from(['a', 'b', 'c']), Observable.from([4, 5, 6]))
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [
@@ -783,7 +803,7 @@ describe('Observable', function () {
       createAsyncStream([1, 2, 3])
         .zip(createAsyncStream(['a', 'b', 'c']), createAsyncStream([4, 5, 6]))
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [
@@ -803,10 +823,10 @@ describe('Observable', function () {
       Observable.from([1, 2, 3])
         .zip(
           (...args) => args.reduce((acc, cv) => acc + cv, 0),
-          Observable.from([2, 3, 4])
+          Observable.from([2, 3, 4]),
         )
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [3, 5, 7])
@@ -822,10 +842,10 @@ describe('Observable', function () {
       createAsyncStream([1, 2, 3])
         .zip(
           (...args) => args.reduce((acc, cv) => acc + cv, 0),
-          createAsyncStream([2, 3, 4])
+          createAsyncStream([2, 3, 4]),
         )
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [3, 5, 7])
@@ -842,7 +862,7 @@ describe('Observable', function () {
     it('should retry', function (done) {
       const values = []
       let n = 0
-      new Observable(observer => {
+      new Observable((observer) => {
         if (n === 1) {
           observer.next('hello')
           observer.complete()
@@ -852,7 +872,7 @@ describe('Observable', function () {
       })
         .retry({ delay: 1 })
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, ['hello'])
@@ -867,7 +887,7 @@ describe('Observable', function () {
     it('should retry n times', function (done) {
       const values = []
       let n = 0
-      new Observable(observer => {
+      new Observable((observer) => {
         if (n === 3) {
           observer.next('hello')
           observer.complete()
@@ -877,7 +897,7 @@ describe('Observable', function () {
       })
         .retry({ delay: 1, retries: 3 })
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, ['hello'])
@@ -893,13 +913,13 @@ describe('Observable', function () {
   describe('finally', function () {
     it('should perform cleanup function with finally', function (done) {
       const values = []
-      new Observable(observer => {
+      new Observable((observer) => {
         observer.next('hi')
         throw new Error('test')
       })
         .finally(() => values.push('there'))
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, ['hi', 'there'])
@@ -918,7 +938,7 @@ describe('Observable', function () {
       Observable.from([1, 2, 3, 4])
         .buffer(2)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [
@@ -938,7 +958,7 @@ describe('Observable', function () {
       createAsyncStream([1, 2, 3, 4])
         .buffer(2)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [
@@ -962,7 +982,7 @@ describe('Observable', function () {
       const stream = createAsyncStream([1, 2, 3, 4]).share()
 
       stream.subscribe({
-        next: value => {
+        next: (value) => {
           values.push(value)
         },
         complete() {
@@ -971,7 +991,7 @@ describe('Observable', function () {
         },
       })
       stream.subscribe({
-        next: value => values2.push(value),
+        next: (value) => values2.push(value),
         complete() {
           completed++
           completed === 2 && test()
@@ -996,9 +1016,9 @@ describe('Observable', function () {
       const stream = createAsyncStream([1, 2, 3, 4]).share()
 
       stream
-        .map(x => x * x)
+        .map((x) => x * x)
         .subscribe({
-          next: value => {
+          next: (value) => {
             values.push(value)
           },
           complete() {
@@ -1007,9 +1027,9 @@ describe('Observable', function () {
           },
         })
       stream
-        .filter(n => n % 2 === 0)
+        .filter((n) => n % 2 === 0)
         .subscribe({
-          next: value => values2.push(value),
+          next: (value) => values2.push(value),
           complete() {
             completed++
             completed === 2 && test()
@@ -1034,14 +1054,14 @@ describe('Observable', function () {
       const stream = Observable.from([1, 2, 3, 4]).share()
 
       stream.subscribe({
-        next: value => values.push(value),
+        next: (value) => values.push(value),
         complete() {
           completed++
           completed === 2 && test()
         },
       })
       stream.subscribe({
-        next: value => values2.push(value),
+        next: (value) => values2.push(value),
         complete() {
           completed++
           completed === 2 && test()
@@ -1065,7 +1085,7 @@ describe('Observable', function () {
       const values = []
       const stream = Readable.from([1, 2, 3])
       Observable.fromStream(stream).subscribe({
-        next: value => values.push(value),
+        next: (value) => values.push(value),
         complete() {
           try {
             assert.deepEqual(values, [1, 2, 3])
@@ -1083,7 +1103,7 @@ describe('Observable', function () {
       const values = []
       const stream = Observable.subject()
       stream.subscribe({
-        next: value => {
+        next: (value) => {
           values.push(value)
         },
         complete() {
@@ -1105,9 +1125,9 @@ describe('Observable', function () {
       const values = []
       const stream = Observable.subject()
       stream
-        .map(x => x * x)
+        .map((x) => x * x)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [1, 4, 9])
@@ -1127,10 +1147,10 @@ describe('Observable', function () {
       const values = []
       const stream = Observable.subject()
       stream
-        .map(x => x * x)
-        .filter(x => x % 2 === 0)
+        .map((x) => x * x)
+        .filter((x) => x % 2 === 0)
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, [4, 16, 36])
@@ -1147,10 +1167,10 @@ describe('Observable', function () {
       const values = []
       const stream = Observable.subject()
       stream
-        .map(x => x.toUpperCase())
-        .flatMap(x => Observable.from([1, 2].map(n => x + n)))
+        .map((x) => x.toUpperCase())
+        .flatMap((x) => Observable.from([1, 2].map((n) => x + n)))
         .subscribe({
-          next: value => values.push(value),
+          next: (value) => values.push(value),
           complete() {
             try {
               assert.deepEqual(values, ['HELLO1', 'HELLO2', 'WORLD1', 'WORLD2'])
@@ -1168,7 +1188,7 @@ describe('Observable', function () {
     it('should wrap regular object observable', function (done) {
       const observed = Observable.wrap({ name: 'tim' })
 
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         assert.deepEqual(value, { name: 'john' })
         done()
       })
@@ -1179,7 +1199,7 @@ describe('Observable', function () {
     it('should dispatch when making new property', function (done) {
       const observed = Observable.wrap({ name: 'tim' })
 
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         assert.deepEqual(value, { name: 'tim', age: 5 })
         done()
       })
@@ -1190,7 +1210,7 @@ describe('Observable', function () {
     it('should dispatch when property deleted', function (done) {
       const observed = Observable.wrap({ name: 'tim', age: 5 })
 
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         assert.deepEqual(value, { name: 'tim' })
         done()
       })
@@ -1201,7 +1221,7 @@ describe('Observable', function () {
     it('should observe an array', function (done) {
       const observed = Observable.wrap([1, 2, 3])
 
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         assert.deepEqual(value, [1, 2, 3, 4])
         done()
       })
@@ -1216,7 +1236,7 @@ describe('Observable', function () {
         },
       })
 
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         assert.equal(value.name, 'john')
         done()
       })
@@ -1233,7 +1253,7 @@ describe('Observable', function () {
         },
       })
 
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         called++
         assert.deepEqual(value.name, 'john')
       })
@@ -1253,7 +1273,7 @@ describe('Observable', function () {
         },
       })
 
-      observed.observe(['setName', 'name']).subscribe(value => {
+      observed.observe(['setName', 'name']).subscribe((value) => {
         called++
         if (called === 1 || called === 3) {
           assert.deepEqual(value.name, 'john')
@@ -1280,7 +1300,7 @@ describe('Observable', function () {
       }
       const observed = Observable.wrap(obj)
 
-      observed.observe(['name', 'setName']).subscribe(value => {
+      observed.observe(['name', 'setName']).subscribe((value) => {
         done(new Error('Should not have been called'))
       })
 
@@ -1293,7 +1313,7 @@ describe('Observable', function () {
       let called = 0
       const obj = { name: 'tim' }
       const observed = Observable.wrap(obj)
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         called++
         done(new Error('Expected not to be called'))
       })
@@ -1313,7 +1333,7 @@ describe('Observable', function () {
         },
       }
       const observed = Observable.wrap(obj)
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         assert.notDeepEqual(value.name, 'tim')
         assert.equal(called, 1)
         done()
@@ -1327,13 +1347,13 @@ describe('Observable', function () {
         name: 'tim',
         async changeName(newName) {
           called++
-          return new Promise(resolve =>
-            setTimeout(() => resolve((this.name = newName)), 1)
+          return new Promise((resolve) =>
+            setTimeout(() => resolve((this.name = newName)), 1),
           )
         },
       }
       const observed = Observable.wrap(obj)
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         assert.deepEqual(value.name, 'john')
         assert.equal(called, 1)
         done()
@@ -1347,14 +1367,14 @@ describe('Observable', function () {
         name: 'tim',
         async *genName() {
           called++
-          const newName = await new Promise(resolve =>
-            setTimeout(() => resolve(Math.random() * 10000))
+          const newName = await new Promise((resolve) =>
+            setTimeout(() => resolve(Math.random() * 10000)),
           )
           while (true) yield (this.name = newName)
         },
       }
       const observed = Observable.wrap(obj)
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         assert.notEqual(value.name, 'tim')
         assert.equal(called, 1)
         done()
@@ -1366,12 +1386,12 @@ describe('Observable', function () {
       const obj = {
         todos: [],
         get unfinishedTodosCount() {
-          return this.todos.filter(todo => !todo.finished).length
+          return this.todos.filter((todo) => !todo.finished).length
         },
       }
       const observed = Observable.wrap(obj)
 
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         assert.deepEqual(value.todos, [{ name: 'Clean cat', finished: false }])
         assert.equal(value.unfinishedTodosCount, 1)
         done()
@@ -1389,7 +1409,7 @@ describe('Observable', function () {
       }
       const observed = Observable.wrap(obj)
 
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         assert.deepEqual(value.people, new Map([['kevin', { age: 15 }]]))
         done()
       })
@@ -1403,8 +1423,10 @@ describe('Observable', function () {
       }
       const observed = Observable.wrap(obj)
 
-      observed.observe().subscribe(value => {
-        assert.deepEqual(value, { people: [{ name: 'tim', likes: ['cats', 'dogs'] }] })
+      observed.observe().subscribe((value) => {
+        assert.deepEqual(value, {
+          people: [{ name: 'tim', likes: ['cats', 'dogs'] }],
+        })
         done()
       })
 
@@ -1417,7 +1439,7 @@ describe('Observable', function () {
         list: ['a'],
       }
       const observed = Observable.wrap(obj)
-      observed.observe().subscribe(value => {
+      observed.observe().subscribe((value) => {
         called++
         if (called === 1) {
           assert.deepEqual(value, { list: ['hello'] })

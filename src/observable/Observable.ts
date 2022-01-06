@@ -6,7 +6,7 @@ import 'core-js/features/observable/index.js'
 
 export const { Observable } = globalThis as any
 
-import { Readable } from 'stream'
+// import { Readable } from 'stream'
 import { buffer } from './methods/buffer'
 import { catchError } from './methods/catch'
 import { concat } from './methods/concat'
@@ -47,7 +47,7 @@ type GenericFunction = (...args: any[]) => any
 
 export interface Observable {
   fromEvent(emitter: any, event: string, handler: GenericFunction): Observable
-  fromGenerator(generator: GeneratorFunction): Observable
+  // fromGenerator(generator: GeneratorFunction): Observable
   fromPromise<X>(promise: Promise<X>): Observable
   fromStream(stream: any): Observable
   listen(eventName: string, element: any): Observable
@@ -109,7 +109,7 @@ const additionalProperties = {
           )
       }),
   ),
-  fromGenerator: placeholder(
+  /* fromGenerator: placeholder(
     (generator: GeneratorFunction) =>
       new Observable((observer: Observer) => {
         Readable.from(generator())
@@ -117,7 +117,7 @@ const additionalProperties = {
           .on('end', observer.complete.bind(observer))
           .on('error', observer.error.bind(observer))
       }),
-  ),
+  ), */
   fromPromise: placeholder(
     <X>(promise: Promise<X>) =>
       new Observable((observer: Observer) => {

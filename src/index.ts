@@ -216,7 +216,7 @@ export { rx }
 
 export { multi, method } from './multimethod/multimethod'
 
-export {
+/* export {
   createFilterStream,
   createFork,
   createMapStream,
@@ -224,7 +224,7 @@ export {
   createReduceStream,
   LimitedParallelStream,
   ParallelStream,
-} from './streams/streams'
+} from './streams/streams' */
 
 export { actionListener } from './store/actionListener'
 export { createAsyncThunk } from './store/asyncThunk'

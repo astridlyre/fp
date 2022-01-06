@@ -1,5 +1,4 @@
 import { EventEmitter as  } from "events";
-import { Transform as  } from "stream";
 /**
  * IsNumber, checks if x is a Number
  */
@@ -608,7 +607,6 @@ interface Observer {
 type _GenericFunction2 = (...args: any[]) => any;
 export interface Observable {
     fromEvent(emitter: any, event: string, handler: _GenericFunction2): Observable;
-    fromGenerator(generator: GeneratorFunction): Observable;
     fromPromise<X>(promise: Promise<X>): Observable;
     fromStream(stream: any): Observable;
     listen(eventName: string, element: any): Observable;
@@ -1138,39 +1136,6 @@ export function method(key: any, handler: (...args: any) => any): IHandler;
  * Returns dispatch function
  */
 export function multi(...initialMethods: IHandler[]): MultiMethod;
-export function createFilterStream(fn: (value: any) => boolean): any;
-export function createMapStream(fn: (value: any) => any): any;
-export function createReduceStream(reducer: (accumulator: any, value: any) => any, initialValue: any): any;
-export interface ParallelStream {
-    emit(event: string, ...args: any): any;
-    push(value: any): any;
-}
-export class ParallelStream extends Transform {
-    userTransform: (chunk: any, encoding: string, push: (value: any) => any, onComplete: (err: Error) => any) => void;
-    running: number;
-    terminate: (() => void) | null;
-    constructor(userTransform: (chunk: any, encoding: string, push: (value: any) => any, onComplete: (err: Error) => any) => void, options?: {});
-    _transform(chunk: any, encoding: string, callback: () => void): void;
-    _flush(callback: () => void): void;
-    _onComplete(err: Error): void;
-}
-export interface LimitedParallelStream {
-    emit(event: string, ...args: any): any;
-    push(chunk: any): any;
-}
-export class LimitedParallelStream extends Transform {
-    concurrency: number;
-    userTransform: (chunk: any, encoding: string, push: (value: any) => any, onComplete: (err: Error) => any) => void;
-    running: number;
-    continue: (() => void) | null;
-    terminate: (() => void) | null;
-    constructor(concurrency: number, userTransform: (chunk: any, encoding: string, push: (value: any) => any, onComplete: (err: Error) => any) => void, options?: {});
-    _transform(chunk: any, encoding: string, callback: () => void): void;
-    _flush(callback: () => void): void;
-    _onComplete(err: Error): void;
-}
-export function createFork(stream: any): (...streams: any[]) => void;
-export function createMerge(...sources: any[]): (dest: any) => any[];
 /**
  * Checks to see if something appears to be a plain object
  */
