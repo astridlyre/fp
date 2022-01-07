@@ -1,31 +1,31 @@
 /**
  * IsNumber, checks if x is a Number
  */
-export const isNumber: (b: any) => boolean;
+export const isNumber: (b: unknown) => b is number;
 /**
  * IsBoolean, checks if x is a Boolean
  */
-export const isBoolean: (b: any) => boolean;
+export const isBoolean: (b: unknown) => b is boolean;
 /**
  * IsNull, checks if x is null
  */
-export const isNull: (x: any) => boolean;
+export const isNull: (x: unknown) => x is null;
 /**
  * IsUndefined, checks if x is undefined
  */
-export const isUndefined: (x: any) => boolean;
+export const isUndefined: (x: unknown) => x is undefined;
 /**
  * IsString, checks if x is a String
  */
-export const isString: (b: any) => boolean;
+export const isString: (b: unknown) => b is string;
 /**
  * IsObject, checks if x is an Object
  */
-export const isObject: (x: any) => boolean;
+export const isObject: (x: unknown) => boolean;
 /**
  * IsArray, checks if x is an Array
  */
-export const isArray: (a: any) => boolean;
+export const isArray: (a: unknown) => a is [];
 /**
  * IsInstanceOf, checks if a is instanceof b
  */
@@ -33,19 +33,19 @@ export const isInstanceOf: (this: any, ...args: any[]) => any;
 /**
  * IsFunction, checks if f is a Function
  */
-export const isFunction: (f: any) => any;
+export const isFunction: (f: unknown) => boolean;
 /**
  * IsAsyncFunction, checks if f is an async function
  */
-export const isAsyncFunction: (f: any) => any;
+export const isAsyncFunction: (f: any) => boolean;
 /**
  * IsGeneratorFunction, checks if f is a generator function
  */
-export const isGeneratorFunction: (f: any) => any;
+export const isGeneratorFunction: (f: any) => boolean;
 /**
  * isAsyncGeneratorFunction, checks if f is an async generator
  */
-export const isAsyncGeneratorFunction: (f: any) => any;
+export const isAsyncGeneratorFunction: (f: any) => boolean;
 /**
  * IsSet, checks if s is a Set
  */
@@ -320,7 +320,7 @@ export function diff(a: any, b: any): any;
 /**
  * Aggregate, deep merge a and b
  */
-export function aggregate<T extends GenericObject>(a: T, b: T): T;
+export function aggregate<T extends GenericObject | []>(a: T, b: T): T;
 /**
  * AggregateOn, combine many objects into one with aggregated keys
  * TODO: Try to improve the algorithm

@@ -55,7 +55,7 @@ const $77d07aef6f69d2ce$export$43bee75e5e14138e = (a)=>Array.isArray(a)
 ;
 const $77d07aef6f69d2ce$export$49034edbe6b62415 = $a0a27525818bb962$export$c3095a23b368d1f2((a, b)=>b instanceof a
 );
-const $77d07aef6f69d2ce$export$f6e2535fb5126e54 = (f)=>f && typeof f === 'function'
+const $77d07aef6f69d2ce$export$f6e2535fb5126e54 = (f)=>!!f && typeof f === 'function'
 ;
 const $77d07aef6f69d2ce$export$cb3f0f7ea9814480 = (f)=>$77d07aef6f69d2ce$export$f6e2535fb5126e54(f) && f[Symbol.toStringTag] === 'AsyncFunction'
 ;

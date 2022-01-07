@@ -5,42 +5,46 @@ import { values } from './objects'
  * Typeof Functions
  * Provides several functions to test whether x is of type y
  */
-const isTypeOf = (a: any) => (b: any) => typeof b === a
+const isTypeOf =
+  <T>(a: string) =>
+  (b: unknown): b is T =>
+    typeof b === a
 
 /**
  * IsNumber, checks if x is a Number
  */
-export const isNumber = isTypeOf('number')
+export const isNumber = isTypeOf<number>('number')
 
 /**
  * IsBoolean, checks if x is a Boolean
  */
-export const isBoolean = isTypeOf('boolean')
+export const isBoolean = isTypeOf<boolean>('boolean')
 
 /**
  * IsNull, checks if x is null
  */
-export const isNull = (x: any) => x === null
+export const isNull = (x: unknown): x is null => x === null
 
 /**
  * IsUndefined, checks if x is undefined
  */
-export const isUndefined = (x: any) => typeof x === 'undefined'
+export const isUndefined = (x: unknown): x is undefined =>
+  typeof x === 'undefined'
 
 /**
  * IsString, checks if x is a String
  */
-export const isString = isTypeOf('string')
+export const isString = isTypeOf<string>('string')
 
 /**
  * IsObject, checks if x is an Object
  */
-export const isObject = (x: any) => x !== null && typeof x === 'object'
+export const isObject = (x: unknown) => x !== null && typeof x === 'object'
 
 /**
  * IsArray, checks if x is an Array
  */
-export const isArray = (a: any) => Array.isArray(a)
+export const isArray = (a: unknown): a is [] => Array.isArray(a)
 
 /**
  * IsInstanceOf, checks if a is instanceof b
@@ -50,7 +54,7 @@ export const isInstanceOf = curry((a: any, b: any) => b instanceof a)
 /**
  * IsFunction, checks if f is a Function
  */
-export const isFunction = (f: any) => f && typeof f === 'function'
+export const isFunction = (f: unknown) => !!f && typeof f === 'function'
 
 /**
  * IsAsyncFunction, checks if f is an async function

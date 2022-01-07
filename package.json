@@ -1,14 +1,9 @@
 {
   "name": "@ebflat9/fp",
-  "version": "1.2.61",
+  "version": "1.2.62",
   "description": "my fp utils",
   "source": "src/index.ts",
   "main": "dist/index.js",
-  "includeNodeModules": [
-    "core-js",
-    "events",
-    "stream-browserify"
-  ],
   "types": "dist/index.d.ts",
   "type": "module",
   "keywords": [

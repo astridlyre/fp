@@ -224,17 +224,17 @@ export function diff(a: any, b: any) {
 /**
  * Aggregate, deep merge a and b
  */
-export function aggregate<T extends GenericObject>(a: T, b: T): T {
+export function aggregate<T extends GenericObject | []>(a: T, b: T): T {
   if (!a && b) return b
 
   if (isArray(b)) {
-    return b.map((value: any, i: number) => aggregate(a[i], value))
+    return b.map((value: any, i: number) => aggregate(a[i], value)) as T
   }
 
   if (isObject(b)) {
     const result = deepCopy(a)
     for (const key of Reflect.ownKeys(b)) {
-      result[key] = aggregate(a[key], b[key])
+      result[key] = aggregate(a[key as any], b[key])
     }
     return result
   }
