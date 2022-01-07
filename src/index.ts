@@ -211,20 +211,9 @@ export {
 export { Lazy, Collection, Numbers, Stack } from './lazy/Lazy'
 
 export { Observable } from './observable/Observable'
-// export { EventEmitter, reactivize } from './observable/reactivize'
 export { rx }
 
 export { multi, method } from './multimethod/multimethod'
-
-/* export {
-  createFilterStream,
-  createFork,
-  createMapStream,
-  createMerge,
-  createReduceStream,
-  LimitedParallelStream,
-  ParallelStream,
-} from './streams/streams' */
 
 export { actionListener } from './store/actionListener'
 export { createAsyncThunk } from './store/asyncThunk'
@@ -234,7 +223,7 @@ export { createAction } from './store/createAction'
 export { createSelector } from './store/createSelector'
 export { isPlainObject } from './store/isPlainObject'
 export { createStore } from './store/createStore'
+export { applyMiddleware } from './store/applyMiddleware'
 export { nanoid } from './store/nanoid'
 export { thunk } from './store/thunk'
 export { Reducer } from './store/reducer'
-export { createConfiguredStore } from './store/store'

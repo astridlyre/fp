@@ -1,6 +1,6 @@
 {
   "name": "@ebflat9/fp",
-  "version": "1.2.58",
+  "version": "1.2.60",
   "description": "my fp utils",
   "source": "src/index.ts",
   "main": "dist/index.js",
@@ -38,9 +38,7 @@
   },
   "homepage": "https://github.com/astridlyre/fp#readme",
   "dependencies": {
-    "core-js": "^3.18.3",
-    "events": "^3.3.0",
-    "stream-browserify": "^3.0.0"
+    "core-js": "^3.18.3"
   },
   "devDependencies": {
     "@parcel/core": "^2.0.1",
@@ -56,8 +54,5 @@
     "parcel": "^2.0.1",
     "prettier": "^2.5.1",
     "typescript": "^4.4.4"
-  },
-  "alias": {
-    "stream": "stream-browserify"
   }
 }

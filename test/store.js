@@ -4,10 +4,13 @@ import {
   createStore,
   Reducer,
   createAction,
+  thunk,
   createAsyncThunk,
-  createConfiguredStore,
   createSelector,
+  applyMiddleware,
 } from '../dist/index.js'
+
+const createConfiguredStore = applyMiddleware(thunk)(createStore)
 
 const testReducer = Reducer.builder()
   .case('ADD', (state, action) => ({
@@ -16,7 +19,7 @@ const testReducer = Reducer.builder()
   }))
   .case('REMOVE', (state, action) => ({
     ...state,
-    values: state.values.filter(v => v !== action.payload),
+    values: state.values.filter((v) => v !== action.payload),
   }))
   .init({ values: [] })
   .build()
@@ -30,7 +33,9 @@ describe('Reducer', function () {
         .build()
 
       assert.deepEqual(reducer(undefined, { type: 'INIT' }), { test: false })
-      assert.deepEqual(reducer({ test: false }, { type: 'TEST' }), { test: true })
+      assert.deepEqual(reducer({ test: false }, { type: 'TEST' }), {
+        test: true,
+      })
     })
   })
 
@@ -57,8 +62,11 @@ describe('Reducer', function () {
       })
 
       assert.deepEqual(
-        combinedReducer({ a: { test1: false }, b: { test2: false } }, { type: 'TEST2' }),
-        { a: { test1: false }, b: { test2: true } }
+        combinedReducer(
+          { a: { test1: false }, b: { test2: false } },
+          { type: 'TEST2' },
+        ),
+        { a: { test1: false }, b: { test2: true } },
       )
     })
   })
@@ -86,9 +94,9 @@ describe('Store', function () {
     it('should allow listening for actions', function (done) {
       const store = createStore(testReducer, { values: [] })
       store
-        .observe(state => state.values)
-        .map(values => values.map(value => value.toUpperCase()))
-        .subscribe(value => {
+        .observe((state) => state.values)
+        .map((values) => values.map((value) => value.toUpperCase()))
+        .subscribe((value) => {
           assert.deepEqual(value, ['HELLO'])
           done()
         })
@@ -98,7 +106,10 @@ describe('Store', function () {
 
     it('should allow not trigger observer for actions not specified', function (done) {
       const reducer = Reducer.builder()
-        .case('CHANGE_NAME', (state, action) => ({ ...state, name: action.payload }))
+        .case('CHANGE_NAME', (state, action) => ({
+          ...state,
+          name: action.payload,
+        }))
         .case('ADD_VALUE', (state, action) => ({
           ...state,
           values: state.values.concat(action.payload),
@@ -108,9 +119,9 @@ describe('Store', function () {
 
       const store = createStore(reducer)
       store
-        .observe(state => state.values)
-        .map(values => values.map(value => value.toUpperCase()))
-        .subscribe(values => {
+        .observe((state) => state.values)
+        .map((values) => values.map((value) => value.toUpperCase()))
+        .subscribe((values) => {
           assert.deepEqual(values, ['HELLO'])
           done()
         })
@@ -124,12 +135,12 @@ describe('Store', function () {
     it('should allow subscribing to updates', function (done) {
       const store = createConfiguredStore(testReducer, { values: [] })
       store.subscribe(
-        state => 'values' in state,
+        (state) => 'values' in state,
         () => {
           const state = store.getState()
           assert.deepEqual(state, { values: ['cat', 'dog'] })
           done()
-        }
+        },
       )
       store.dispatch({ type: 'ADD', payload: ['cat', 'dog'] })
     })
@@ -142,7 +153,7 @@ describe('Store', function () {
         assert.deepEqual(state, { values: ['cat', 'dog'] })
         count++
       }
-      const unsub = store.subscribe(state => 'values' in state, handler)
+      const unsub = store.subscribe((state) => 'values' in state, handler)
       store.dispatch({ type: 'ADD', payload: ['cat', 'dog'] })
       unsub()
       store.dispatch({ type: 'ADD', payload: ['snake', 'plance'] })
@@ -161,9 +172,12 @@ describe('createAction', function () {
 
     it('should create an action with a prepareAction function', function () {
       const action = createAction('TEST', (...args) => ({
-        payload: args.map(x => x.toUpperCase()),
+        payload: args.map((x) => x.toUpperCase()),
       }))
-      assert.deepEqual(action('hello world'), { type: 'TEST', payload: ['HELLO WORLD'] })
+      assert.deepEqual(action('hello world'), {
+        type: 'TEST',
+        payload: ['HELLO WORLD'],
+      })
     })
 
     it('should let you see the action type', function () {
@@ -178,7 +192,7 @@ describe('asyncThunk', function () {
     it('should create a thunk', function (done) {
       const thunk = createAsyncThunk(
         'ADD',
-        arg => new Promise(resolve => setTimeout(() => resolve(arg), 1))
+        (arg) => new Promise((resolve) => setTimeout(() => resolve(arg), 1)),
       )
       const initialState = { values: [] }
 
@@ -195,8 +209,8 @@ describe('asyncThunk', function () {
       let pending = 0
       store.dispatch(thunk('hello'))
       store
-        .observe(state => state.values)
-        .subscribe(values => {
+        .observe((state) => state.values)
+        .subscribe((values) => {
           try {
             if (pending) {
               assert.deepEqual(values, [])
@@ -216,10 +230,10 @@ describe('asyncThunk', function () {
     it('should create a selector', function () {
       let called = 0
       const store = createConfiguredStore(testReducer)
-      const values = state => state.values
-      const s = createSelector(values, values => {
+      const values = (state) => state.values
+      const s = createSelector(values, (values) => {
         called++
-        return values.map(x => x.toUpperCase())
+        return values.map((x) => x.toUpperCase())
       })
 
       const a = store.getState()

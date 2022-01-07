@@ -1162,6 +1162,10 @@ interface IMiddlewareAPI {
     dispatch(action: IAction, ...args: any[]): any;
 }
 type Middleware = (api: IMiddlewareAPI) => any;
+/**
+ * Applies various middleware function to the store dispatch
+ */
+export function applyMiddleware(...middlewares: Middleware[]): (createStore: any) => (reducer: (state: any, action: IAction) => any, initialState: any) => any;
 type IListener = (action: IAction, middlewareAPI: IMiddlewareAPI) => any;
 export const actionListener: {
     middleware(middlewareAPI: IMiddlewareAPI): (next: (action: IAction) => any) => (action: IAction) => any;
@@ -1272,6 +1276,5 @@ export const thunk: {
     ({ dispatch, getState }: IMiddlewareAPI): (next: Middleware) => (action: IAction | any) => any;
     withExtraArgument: typeof createThunkMiddleware;
 };
-export const createConfiguredStore: (reducer: (state: any, action: import("store/createAction").IAction) => any, initialState: any) => any;
 
 //# sourceMappingURL=index.d.ts.map
