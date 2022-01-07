@@ -1,5 +1,5 @@
 /* eslint func-names: 0 */
-import { EventEmitter, Observable } from '../dist/index.js'
+import { Observable } from '../dist/index.js'
 import { describe, it } from 'mocha'
 import { strict as assert } from 'assert'
 import { Readable } from 'stream'
@@ -55,7 +55,7 @@ describe('Observable', function () {
     })
   })
  */
-  describe('from EventEmitter', function () {
+  /* describe('from EventEmitter', function () {
     it('should create an Observable from an EventEmitter', function (done) {
       const emitter = new EventEmitter()
       const stream = Observable.fromEvent(emitter, 'test', (...args) => [
@@ -78,7 +78,7 @@ describe('Observable', function () {
       emitter.emit('end')
     })
   })
-
+ */
   describe('throttle', function () {
     it('should throttle a stream', function (done) {
       const stream = Observable.from([1, 2, 3])

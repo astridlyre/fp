@@ -1,6 +1,6 @@
 {
   "name": "@ebflat9/fp",
-  "version": "1.2.57",
+  "version": "1.2.58",
   "description": "my fp utils",
   "source": "src/index.ts",
   "main": "dist/index.js",
@@ -21,7 +21,7 @@
   "scripts": {
     "test": "mocha --parallel",
     "test:build": "parcel build src/index.ts && mocha --parallel",
-    "build": "parcel build src/index.ts",
+    "build": "rm -rf dist && parcel build src/index.ts",
     "check": "tsc --noEmit",
     "check:format": "prettier -c src/**",
     "watch": "parcel watch",

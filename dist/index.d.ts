@@ -1,4 +1,3 @@
-import { EventEmitter as  } from "events";
 /**
  * IsNumber, checks if x is a Number
  */
@@ -1105,8 +1104,6 @@ export const Stack: {
  * an Array.
  */
 export function Lazy<X>(target: Iterable<X>): ICollection;
-export { EventEmitter };
-export const reactivize: (obj: any) => any;
 declare const handlersKey: unique symbol;
 declare const dispatchKey: unique symbol;
 declare const isMethodObject: unique symbol;

@@ -211,7 +211,7 @@ export {
 export { Lazy, Collection, Numbers, Stack } from './lazy/Lazy'
 
 export { Observable } from './observable/Observable'
-export { EventEmitter, reactivize } from './observable/reactivize'
+// export { EventEmitter, reactivize } from './observable/reactivize'
 export { rx }
 
 export { multi, method } from './multimethod/multimethod'
