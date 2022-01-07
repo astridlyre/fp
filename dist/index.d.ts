@@ -599,16 +599,28 @@ declare const until: (...initialArgs: any[]) => {};
 declare const _zip1: (...initialArgs: any[]) => {};
 export const Observable: any;
 interface Observer {
-    next(value: any): void;
+    next(value: unknown): void;
     error(err: Error): void;
     complete(): void;
 }
-type _GenericFunction2 = (...args: any[]) => any;
+type _GenericFunction2 = (...args: unknown[]) => unknown;
+interface IEventListener {
+    (event: CustomEvent | Error): void;
+}
+type EventListenerMethodType = (eventType: string, listener: IEventListener) => void;
+interface IEventEmitter {
+    emit(event: CustomEvent): void;
+    addListener?: EventListenerMethodType;
+    on?: EventListenerMethodType;
+    addEventListener?: EventListenerMethodType;
+    removeListener?: EventListenerMethodType;
+    off?: EventListenerMethodType;
+    removeEventListener?: EventListenerMethodType;
+}
 export interface Observable {
-    fromEvent(emitter: any, event: string, handler: _GenericFunction2): Observable;
+    fromEvent(emitter: IEventEmitter, event: string, handler: _GenericFunction2): Observable;
     fromPromise<X>(promise: Promise<X>): Observable;
-    fromStream(stream: any): Observable;
-    listen(eventName: string, element: any): Observable;
+    listen(eventName: string, element: HTMLElement): Observable;
     subject(): Observable;
     wrap(obj: any): Observable;
     _filter1(fn: (value: any) => boolean): Observable;
@@ -700,7 +712,7 @@ export const padStart: (this: any, ...args: any[]) => any;
  */
 export const padEnd: (this: any, ...args: any[]) => any;
 interface IGenericFunction {
-    (...args: any[]): any;
+    (...args: unknown[]): unknown;
 }
 interface IBehaviour {
     [propKey: PropertyKey]: IGenericFunction;

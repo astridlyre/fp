@@ -12,7 +12,9 @@ export function Define(behaviour: IBehaviour) {
         })
       } else {
         throw new Error(
-          `Illegal attempt to override ${prop as string}, which already exists.`
+          `Illegal attempt to override ${
+            prop as string
+          }, which already exists.`,
         )
       }
     }

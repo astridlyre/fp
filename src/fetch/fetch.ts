@@ -52,7 +52,9 @@ export function createClient(
     const controller = new AbortController()
     const token = localStorage.getItem(options.storageKey)
     const headers: any = { 'Content-Type': 'application/json' }
+
     if (token) headers.Authorization = `Bearer ${token}`
+
     const config = {
       signal: controller.signal,
       method,
@@ -62,6 +64,7 @@ export function createClient(
         ...customConfig.headers,
       },
     }
+
     return {
       req: fetch(`${apiEndpoint}${endpoint}`, config)
         .then(isError)

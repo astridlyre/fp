@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-redeclare */
 /* eslint no-unused-vars: 0, no-magic-numbers: 0 */
 import { entries } from '../functions/objects'
@@ -38,19 +39,45 @@ import { zip } from './methods/zip'
 import { placeholder } from './methods/utils'
 
 export interface Observer {
-  next(value: any): void
+  next(value: unknown): void
   error(err: Error): void
   complete(): void
 }
 
-type GenericFunction = (...args: any[]) => any
+type GenericFunction = (...args: unknown[]) => unknown
+
+interface IEventListener {
+  (event: CustomEvent | Error): void
+}
+
+type EventListenerMethodType = (
+  eventType: string,
+  listener: IEventListener,
+) => void
+
+interface IEventEmitter {
+  emit(event: CustomEvent): void
+  addListener?: EventListenerMethodType
+  on?: EventListenerMethodType
+  addEventListener?: EventListenerMethodType
+  removeListener?: EventListenerMethodType
+  off?: EventListenerMethodType
+  removeEventListener?: EventListenerMethodType
+}
+
+interface IStream {
+  on(event: string, handler: IEventListener): void
+}
 
 export interface Observable {
-  fromEvent(emitter: any, event: string, handler: GenericFunction): Observable
+  fromEvent(
+    emitter: IEventEmitter,
+    event: string,
+    handler: GenericFunction,
+  ): Observable
   // fromGenerator(generator: GeneratorFunction): Observable
   fromPromise<X>(promise: Promise<X>): Observable
-  fromStream(stream: any): Observable
-  listen(eventName: string, element: any): Observable
+  listen(eventName: string, element: HTMLElement): Observable
   subject(): Observable
   wrap(obj: any): Observable
   filter(fn: (value: any) => boolean): Observable
@@ -93,19 +120,33 @@ export const $$observable = /* #__PURE__ */ (() =>
 
 const additionalProperties = {
   fromEvent: placeholder(
-    (emitter: any, event: string, handler: GenericFunction) =>
+    (emitter: IEventEmitter, event: string, handler: GenericFunction) =>
       new Observable((observer: Observer) => {
         const group = new Map([
           [event, (...args: any[]) => observer.next(handler(...args))],
           ['error', observer.error.bind(observer)],
           ['end', observer.complete.bind(observer)],
         ])
-        entries(group as any).forEach(([event, handler]) =>
-          emitter.on(event, handler),
-        )
+
+        const on =
+          typeof emitter.on === 'function'
+            ? emitter.on.bind(emitter)
+            : typeof emitter.addListener === 'function'
+            ? emitter.addListener.bind(emitter)
+            : emitter.addEventListener!
+
+        const off =
+          typeof emitter.off === 'function'
+            ? emitter.off.bind(emitter)
+            : typeof emitter.removeListener === 'function'
+            ? emitter.removeListener.bind(emitter)
+            : emitter.removeEventListener!
+
+        entries(group as any).forEach(([event, handler]) => on(event, handler))
+
         return () =>
           entries(group as any).forEach(([event, handler]) =>
-            emitter.removeListener(event, handler),
+            off(event, handler),
           )
       }),
   ),
@@ -128,11 +169,11 @@ const additionalProperties = {
       }),
   ),
   fromStream: placeholder(
-    (stream: any) =>
+    (stream: IStream) =>
       new Observable((observer: Observer) => {
         stream.on('data', observer.next.bind(observer))
         stream.on('end', observer.complete.bind(observer))
-        stream.on('error', observer.error.bind(observer))
+        stream.on('error', observer.error.bind(observer) as IEventListener)
       }),
   ),
   combine,

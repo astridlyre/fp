@@ -1528,9 +1528,11 @@ const $73296c0bdeea98f6$var$additionalProperties = {
                     observer.complete.bind(observer)
                 ], 
             ]);
-            $fd9dc580cc166db4$export$3e9f948b41964866(group).forEach(([event, handler])=>emitter.on(event, handler)
+            const on = typeof emitter.on === 'function' ? emitter.on.bind(emitter) : typeof emitter.addListener === 'function' ? emitter.addListener.bind(emitter) : emitter.addEventListener;
+            const off = typeof emitter.off === 'function' ? emitter.off.bind(emitter) : typeof emitter.removeListener === 'function' ? emitter.removeListener.bind(emitter) : emitter.removeEventListener;
+            $fd9dc580cc166db4$export$3e9f948b41964866(group).forEach(([event, handler])=>on(event, handler)
             );
-            return ()=>$fd9dc580cc166db4$export$3e9f948b41964866(group).forEach(([event, handler])=>emitter.removeListener(event, handler)
+            return ()=>$fd9dc580cc166db4$export$3e9f948b41964866(group).forEach(([event, handler])=>off(event, handler)
                 )
             ;
         })

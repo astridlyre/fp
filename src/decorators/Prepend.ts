@@ -18,7 +18,9 @@ export function Prepend(behaviour: IBehaviour) {
           writable: true,
         })
       } else {
-        throw new Error(`Attempt to override non-existant method ${prop as string}`)
+        throw new Error(
+          `Attempt to override non-existant method ${prop as string}`,
+        )
       }
     }
     return clazz
