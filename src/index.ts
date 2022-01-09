@@ -165,6 +165,8 @@ export {
   toUpperCase,
 } from './functions/strings'
 
+export { invariant } from './functions/invariant'
+
 export { Append } from './decorators/Append'
 export { Prepend } from './decorators/Prepend'
 export { Define } from './decorators/Define'

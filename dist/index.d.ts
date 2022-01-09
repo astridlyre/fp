@@ -711,6 +711,7 @@ export const padStart: (this: any, ...args: any[]) => any;
  * PadEnd
  */
 export const padEnd: (this: any, ...args: any[]) => any;
+export function invariant(condition: any, message?: string | (() => string)): asserts condition;
 interface IGenericFunction {
     (...args: unknown[]): unknown;
 }
