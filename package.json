@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/astridlyre/fp#readme",
   "dependencies": {
-    "core-js": "^3.21.1"
+    "core-js": "^3.27.2"
   },
   "devDependencies": {
     "@parcel/core": "^2.0.1",
